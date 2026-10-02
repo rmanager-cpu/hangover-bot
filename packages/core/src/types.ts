@@ -137,8 +137,11 @@ export type Step =
   | { do: "notify"; finding: Finding }
   /** A soft problem, far enough from kickoff that the news may still change. */
   | { do: "wait"; finding: Finding; until: string }
-  /** A specific move for the user to approve. */
-  | { do: "propose"; finding: Finding; candidate: Candidate; source: "rules" | "ai" }
+  /**
+   * A specific move for the user to approve. `held` means it would have been automatic
+   * but a guardrail stopped it; `autoAt` is when it will be, if nothing changes.
+   */
+  | { do: "propose"; finding: Finding; candidate: Candidate; source: "rules" | "ai"; held?: { reason: string; autoAt?: string } }
   /** A judgment call the user makes, with the options laid out. No AI below ai_rescue. */
   | { do: "ask_user"; finding: Finding; candidates: Candidate[] }
   | { do: "execute"; finding: Finding; candidate: Candidate; source: "rules" | "ai" }
