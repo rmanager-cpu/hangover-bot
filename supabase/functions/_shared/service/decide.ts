@@ -70,6 +70,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
   if (!conn || conn.userId !== userId) return no("not_found", "That suggestion isn't there any more.");
 
   let wrote = false;
+  let verified: string | undefined;
   let who: Lookup = playersIn();
   try {
     const espn = await connect(deps, conn);
@@ -94,11 +95,14 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
       await failed(deps, conn, action, who, out.after, out.result, done);
       return no("not_applied", failure(action.reason, action.moves, who, out.after, action.deadline, done).body);
     }
-    await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result });
     const notice = receipt(action.reason, action.moves, who, done);
+    verified = notice.body;
+    await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result });
     await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves: action.moves });
     return { ok: true, status: "done", message: notice.body };
   } catch (e) {
+    // ESPN shows the change: it happened, whatever went wrong recording it.
+    if (verified !== undefined) return { ok: true, status: "done", message: verified };
     try {
       // Asked ESPN but could not read back: unconfirmed is failed, and never retried.
       if (wrote) await failed(deps, conn, action, who, undefined, { error: errorText(e) }, deps.now());
@@ -122,6 +126,7 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
   if (playerIdA === playerIdB) return no("same_player", "Pick two different players.");
 
   let moves: Move[] = [];
+  let verified: SwapResult | undefined;
   let who: Lookup = playersIn();
   try {
     const espn = await connect(deps, conn);
@@ -157,9 +162,12 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       return no("not_applied", notice.body);
     }
     const notice = receipt(null, moves, who, done);
+    verified = { ok: true, message: notice.body, after: summarizeRead(out.after, done) };
     await announce(deps, conn, notice, { moves, result: out.result });
-    return { ok: true, message: notice.body, after: summarizeRead(out.after, done) };
+    return verified;
   } catch (e) {
+    // ESPN shows the swap: it happened, whatever went wrong recording it.
+    if (verified) return verified;
     // Moves are set only once the write is under way, so a non-empty list means ESPN was asked.
     const wrote = moves.length > 0;
     try {

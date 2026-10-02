@@ -168,7 +168,8 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   }
   if (step.do === "ask_user") {
     const lead = f.hard ? "" : "He might play. ";
-    const rank = f.hard ? " There's no projection or replacement order to rank them." : "";
+    // Hard and still a judgment: no ranking data, or the best option has a doubt of his own.
+    const rank = f.hard ? " I'm not sure enough to pick one for you." : "";
     return {
       type: "ACTION_REQUIRED",
       title,
