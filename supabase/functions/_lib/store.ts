@@ -303,11 +303,11 @@ export function createStore(db: SupabaseClient): AppStore {
     },
 
     async storeCredential(userId, creds) {
-      const id = must<string | null>(
+      const id = must<unknown>(
         await db.rpc("store_credential", { p_user: userId, p_provider: "espn", p_secret: { swid: creds.swid, espnS2: creds.espnS2 } }),
         "store credential",
       );
-      if (!id) throw new Error("store: store credential returned no id");
+      if (typeof id !== "string" || !id) throw new Error("store: store credential returned no id");
       return id;
     },
 

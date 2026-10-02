@@ -436,6 +436,17 @@ test("a store that throws is an error outcome, not a crash", async () => {
   assert.equal(s.espn.writes.length, 0);
 });
 
+test("an automatic move that lands but cannot be receipted is never written twice", async () => {
+  const s = setup({ roster: achaneOut() });
+  s.store.addActivity = async () => {
+    throw new Error("database unavailable");
+  };
+  assert.equal((await s.run()).outcome, "error");
+  s.clock.advance(2);
+  await s.run();
+  assert.equal(s.espn.writes.length, 1);
+});
+
 test("a push that fails does not fail the check, and the activity row stands", async () => {
   const s = setup({ roster: achaneOut() });
   s.push.fail = true;

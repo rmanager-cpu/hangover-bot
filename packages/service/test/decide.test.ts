@@ -235,3 +235,18 @@ test("a D/ST keeps its negative id through a swap", async () => {
   const r = await manualSwap(s.deps, "user-1", "conn-1", "-16016", "-16020");
   assert.equal(r.ok && r.message, "Moved Dolphins D/ST from bench to D/ST. Vikings D/ST is on your bench. Done at 2:00 PM ET.");
 });
+
+test("a verified move stays done even if recording the receipt fails", async () => {
+  const s = await proposed();
+  s.store.addActivity = async () => {
+    throw new Error("database unavailable");
+  };
+  const r = await decideAction(s.deps, "user-1", s.id, "approve");
+  assert.equal(r.ok && r.status, "done");
+  assert.equal(s.store.actions[0]!.status, "done", "not marked failed: ESPN shows it");
+
+  const swap = setup({ at: SATURDAY });
+  swap.store.addActivity = s.store.addActivity;
+  const r2 = await manualSwap(swap.deps, "user-1", "conn-1", WRIGHT, WALKER);
+  assert.equal(r2.ok, true);
+});
