@@ -1,6 +1,6 @@
 # Architecture
 
-Read `PRODUCT.md` first. The one sentence that shapes everything here: **the rules engine
+Read `PRODUCT.md` and the handoff first; `DECISIONS.md` says where this departs from it. The one sentence that shapes everything here: **the rules engine
 is in charge; AI is a specialist that gets called when needed.**
 
 ## Shape
@@ -23,7 +23,7 @@ Supabase under Row Level Security, and they receive pushes.
 |---|---|---|
 | `packages/core` | Domain types and **the rules engine**. Pure functions: roster in, findings and a plan out. No I/O. | nothing |
 | `packages/football-data` | NFL facts: team abbreviations, positions, and the `GameDayFeed` interface for a future data provider. | nothing |
-| `packages/connectors` | Fantasy platforms behind one `Connector` interface. ESPN only, ported from Megacast. Translates between ESPN's numbers and core's types in both directions. | core, football-data |
+| `packages/connectors` | Providers behind one `FantasyConnector` interface with capability flags (handoff section 14). ESPN only at launch, ported from Megacast; the rest are listed as coming soon. | core |
 | `packages/ai` | The judgment call. OpenAI Responses API with a strict JSON schema. The model **chooses among candidates core supplied**; it cannot invent a move. | core |
 | `packages/ui` | Brand tokens and user-facing copy shared by web, mobile and extension. | core |
 | `packages/config` | Shared TypeScript config. | |
@@ -38,31 +38,36 @@ Supabase under Row Level Security, and they receive pushes.
 ## The engine
 
 `core.evaluate(roster, now, settings)` returns **findings**. Each finding is a problem in a
-starting slot, with its fix if one is obvious:
+starting slot, with its fix if the rules have one:
 
 | Finding | Hard or soft | Deterministic fix |
 |---|---|---|
-| `empty_slot` | hard | the best eligible bench player |
-| `starter_on_bye` | hard | the best eligible bench player |
-| `starter_out` (OUT, IR, suspended) | hard | the best eligible bench player |
+| `empty_slot` | hard | the first eligible bench player, ranked |
+| `starter_on_bye` | hard | the first eligible bench player, ranked |
+| `starter_out` (OUT, IR, suspended) | hard | the first eligible bench player, ranked |
 | `starter_doubtful` | soft | none: judgment |
 | `starter_questionable` | soft | none: judgment |
 | `starter_status_unknown` | soft | none: tell the user |
 
-"Best eligible bench player" means: on the bench, eligible for the slot, not locked, has a
-game this week that has not started, not OUT/IR/doubtful. A fix is **obvious** when there
-is exactly one such player, or when the top one's projection beats the next by the
-configured margin. Otherwise the candidates go to judgment. One bench player is never
-promised to two findings. Pinned players are never moved.
+Ranking follows handoff section 9: eligible for the slot, not locked or started, not
+OUT/IR/doubtful; clean players (active, game known) before doubtful ones; then the user's
+replacement order; then the highest projection. The rules have the answer when the top
+player is clean and is ranked by something real. With no order and no projections it
+is a judgment call. One bench player is never promised to two findings.
 
-`core.plan(finding, authority)` turns a finding into one step:
+`core.plan(finding, settings, now)` turns a finding into one step. The authority used is
+`effectiveAuthority()`: **an unclaimed account is capped at Ask Me.**
 
-| Authority | Obvious fix | Judgment needed | Nothing possible |
+| Authority | Rules have the answer | Judgment needed | Nothing possible |
 |---|---|---|---|
-| `alert` | notify | notify | notify |
-| `confirm` | propose, act on approval | ask AI, propose its pick | notify |
-| `autopilot` | **execute**, then notify | ask AI, propose its pick | notify |
-| `full` | **execute**, then notify | ask AI, **execute** if confident, else propose | notify |
+| Alerts | notify | notify | notify |
+| Ask Me | propose, act on approval | ask the user, options laid out | notify |
+| Bench Protection | **execute**, then receipt | ask the user, options laid out | notify |
+| AI Rescue | **execute**, then receipt | consult AI: execute if confident, else propose | notify |
+
+A soft problem (questionable, doubtful) is a `wait` until 100 minutes before kickoff.
+Automatic execution also needs the matching permission toggle (bench swaps today; IR,
+free-agent adds and drops arrive with Phase 2 and 6).
 
 Every step has a **deadline**: the earliest kickoff among the players it would move. A
 proposal nobody answers expires at its deadline and is logged as expired, not silently

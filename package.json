@@ -2,12 +2,21 @@
   "name": "rosterbots",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.18" },
-  "workspaces": ["packages/*", "apps/*"],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "test": "node --test \"packages/*/test/*.test.ts\" \"apps/worker/test/*.test.ts\"",
-    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/ai && tsc -p packages/ui && tsc -p apps/worker",
-    "worker": "node apps/worker/src/main.ts"
+    "test": "node --test \"packages/*/test/*.test.ts\"",
+    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p scripts",
+    "espn:check": "node scripts/espn-check.ts"
+  },
+  "dependencies": {
+    "@rosterbots/core": "0.0.0",
+    "@rosterbots/connectors": "0.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",

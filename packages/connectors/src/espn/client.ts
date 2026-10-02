@@ -5,7 +5,7 @@
 // Never log a request or its headers: they carry the member's cookies.
 
 import type { Game, Move, Player, Roster, RosterEntry, Slot } from "@rosterbots/core";
-import { AuthError, PlatformError, type Connector } from "../types.ts";
+import { AuthError, ProviderError, type ConnectorCapabilities, type FantasyConnector, type LeagueSummary } from "../types.ts";
 import { ID_BY_SLOT, positionOf, proTeamOf, slotOf, statusOf } from "./maps.ts";
 
 export interface EspnCredentials {
@@ -15,7 +15,6 @@ export interface EspnCredentials {
 }
 
 export interface EspnOptions {
-  leagueId: string;
   season: number;
   credentials: EspnCredentials;
   /** Injected for tests. */
@@ -70,7 +69,7 @@ export interface EspnSchedule {
 /** Pure: ESPN's league + schedule payloads to core's roster. Exported for tests. */
 export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined, swid: string): Roster {
   const team = (league.teams ?? []).find((t) => (t.owners ?? []).includes(swid));
-  if (!team) throw new PlatformError("these credentials manage no team in this league:", 200);
+  if (!team) throw new ProviderError("these credentials manage no team in this league", 200);
   const period = league.scoringPeriodId ?? league.status?.latestScoringPeriod ?? 0;
 
   const starterSlots: Slot[] = [];
@@ -136,24 +135,69 @@ export function toTransaction(moves: Move[], teamId: string, swid: string, perio
   };
 }
 
-export function espnConnector(opts: EspnOptions): Connector {
+const CAPS: ConnectorCapabilities = {
+  supported: ["READ_LEAGUE", "READ_ROSTER", "READ_PLAYER_AVAILABILITY", "READ_LINEUP_LOCKS", "WRITE_LINEUP", "VERIFY_TRANSACTION"],
+  // Built from what the ESPN site sends, never yet run against a real league.
+  unverified: ["WRITE_LINEUP"],
+};
+
+// ESPN's fan profile lists every game a member plays. Read the way the ESPN site
+// and community clients read it; not yet seen from this code. UNVERIFIED.
+const FAN = "https://fan.api.espn.com/apis/v2/fans/";
+interface EspnFan {
+  preferences?: {
+    metaData?: {
+      entry?: {
+        abbrev?: string;
+        gameId?: number;
+        seasonId?: number;
+        entryId?: number;
+        entryLocation?: string;
+        entryNickname?: string;
+        groups?: { groupId?: number; groupName?: string }[];
+      };
+    };
+  }[];
+}
+
+/** Pure: the fan profile to this season's football leagues. Exported for tests. */
+export function toLeagues(fan: EspnFan, season: number): LeagueSummary[] {
+  const out: LeagueSummary[] = [];
+  for (const pref of fan.preferences ?? []) {
+    const e = pref.metaData?.entry;
+    if (!e || (e.abbrev !== "FFL" && e.gameId !== 1) || e.seasonId !== season) continue;
+    const g = e.groups?.[0];
+    if (!g?.groupId) continue;
+    const teamName = `${e.entryLocation ?? ""} ${e.entryNickname ?? ""}`.trim();
+    out.push({
+      leagueId: String(g.groupId),
+      leagueName: g.groupName ?? "",
+      season,
+      ...(e.entryId !== undefined ? { teamId: String(e.entryId) } : {}),
+      ...(teamName ? { teamName } : {}),
+    });
+  }
+  return out;
+}
+
+export function espnConnector(opts: EspnOptions): FantasyConnector {
   const f = opts.fetch ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 15000;
   const { swid, espnS2 } = opts.credentials;
   const cookie = `SWID=${swid}; espn_s2=${espnS2}`;
-  const league = `${READS}${opts.season}/segments/0/leagues/${opts.leagueId}`;
-  let teamId: string | undefined;
+  const leagueUrl = (leagueId: string) => `${READS}${opts.season}/segments/0/leagues/${leagueId}`;
+  const teamIds = new Map<string, string>();
 
   async function get<T>(url: string, what: string): Promise<T> {
     const r = await f(url, { signal: AbortSignal.timeout(timeoutMs), headers: { accept: "application/json", cookie } });
     if (r.status === 401 || r.status === 403) throw new AuthError(r.status);
-    if (!r.ok) throw new PlatformError(what, r.status);
+    if (!r.ok) throw new ProviderError(what, r.status);
     return (await r.json()) as T;
   }
 
-  async function getRoster(): Promise<Roster> {
+  async function getRoster(leagueId: string): Promise<Roster> {
     const [lg, schedule] = await Promise.all([
-      get<EspnLeague>(`${league}?view=mRoster&view=mTeam&view=mSettings&view=mStatus`, "roster"),
+      get<EspnLeague>(`${leagueUrl(leagueId)}?view=mRoster&view=mTeam&view=mSettings&view=mStatus`, "roster"),
       // The schedule only adds kickoff times and byes. Without it the engine still
       // works, more cautiously, so its failure is not the roster's failure.
       get<EspnSchedule>(`${READS}${opts.season}?view=proTeamSchedules_wl`, "schedule").catch((e) => {
@@ -162,27 +206,33 @@ export function espnConnector(opts: EspnOptions): Connector {
       }),
     ]);
     const roster = toRoster(lg, schedule, swid);
-    teamId = roster.teamId;
+    teamIds.set(leagueId, roster.teamId);
     return roster;
   }
 
   return {
-    platform: "espn",
+    provider: "espn",
 
-    async identify() {
-      const lg = await get<EspnLeague>(`${league}?view=mTeam&view=mSettings`, "league");
+    capabilities: () => CAPS,
+
+    async getLeagues() {
+      return toLeagues(await get<EspnFan>(FAN + encodeURIComponent(swid), "fan profile"), opts.season);
+    },
+
+    async getMyTeam(leagueId) {
+      const lg = await get<EspnLeague>(`${leagueUrl(leagueId)}?view=mTeam&view=mSettings`, "league");
       const team = (lg.teams ?? []).find((t) => (t.owners ?? []).includes(swid));
-      if (!team) throw new PlatformError("these credentials manage no team in this league:", 200);
-      teamId = String(team.id);
+      if (!team) throw new ProviderError("these credentials manage no team in league " + leagueId, 200);
+      teamIds.set(leagueId, String(team.id));
       const teamName = (team.name ?? `${team.location ?? ""} ${team.nickname ?? ""}`).trim();
-      return { memberId: swid, teamId, teamName, leagueName: lg.settings?.name ?? "" };
+      return { teamId: String(team.id), teamName, leagueName: lg.settings?.name ?? "" };
     },
 
     getRoster,
 
-    async submitMoves(moves, period) {
-      if (!teamId) teamId = (await getRoster()).teamId;
-      const r = await f(`${WRITES}${opts.season}/segments/0/leagues/${opts.leagueId}/transactions/`, {
+    async setLineup(leagueId, moves, period) {
+      const teamId = teamIds.get(leagueId) ?? (await getRoster(leagueId)).teamId;
+      const r = await f(`${WRITES}${opts.season}/segments/0/leagues/${leagueId}/transactions/`, {
         method: "POST",
         signal: AbortSignal.timeout(timeoutMs),
         headers: { accept: "application/json", "content-type": "application/json", cookie },

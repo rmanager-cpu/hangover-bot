@@ -20,7 +20,7 @@ repository has none and must never have any.
 | Session persistence | `data/chrome-profile/`, `.env` | One operator's browser profile on disk. Not reusable for many users. Replaced by Vault-stored cookies per league connection. |
 | Player/team id normalization | `server/players.mjs`, `server/league.mjs` | Ported, with its hard-won rules (below). Position and pro-team maps moved to `packages/football-data`. |
 | Request/response fixtures | `test/fixtures/` | All four are draft-room wire captures (`init-*.txt`, `selected-snake.txt`, `timeline-snake.txt`). **None covers rosters, injuries or lineup writes**, so HangoverBot's connector tests use hand-built fixtures in ESPN's shape, labelled as such. Capturing real ones is an early task once a session can reach ESPN. |
-| Authentication refresh | `src-live.mjs:95`, `probe.mjs`, `league-info.mjs` | **There is none.** ESPN cookies cannot be refreshed by a script; a 401/403 is reported as "cookies are stale, sign in again". HangoverBot inherits that limit: a connection goes `needs_reauth`, the user is told, and the extension re-captures on their next ESPN visit. This is the single biggest operational risk in the ESPN integration (see OPEN-DECISIONS). |
+| Authentication refresh | `src-live.mjs:95`, `probe.mjs`, `league-info.mjs` | **There is none.** ESPN cookies cannot be refreshed by a script; a 401/403 is reported as "cookies are stale, sign in again". HangoverBot inherits that limit: a connection goes `needs_reauth`, the user is told, and the extension re-captures on their next ESPN visit. This is the single biggest operational risk in the ESPN integration (see DECISIONS.md). |
 
 ## Rules learned the hard way, now encoded in the connector
 

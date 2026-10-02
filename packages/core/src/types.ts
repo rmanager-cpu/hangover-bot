@@ -1,4 +1,4 @@
-// The domain, in the platform's absence. Connectors translate ESPN (and later
+// The domain, in the provider's absence. Connectors translate ESPN (and later
 // others) into these shapes; nothing in core knows what an ESPN slot id is.
 
 /** A lineup slot. Starting slots are anything but BENCH and IR. */
@@ -14,7 +14,7 @@ export const isStarting = (slot: Slot): boolean => slot !== "BENCH" && slot !== 
  */
 export type Status = "active" | "questionable" | "doubtful" | "out" | "ir" | "suspended" | "unknown";
 
-/** This week's game. `null` on a player means a bye. */
+/** This week's game. */
 export interface Game {
   /** ISO 8601, UTC. */
   kickoff: string;
@@ -28,11 +28,11 @@ export interface Player {
   proTeam: string;
   status: Status;
   eligibleSlots: Slot[];
-  /** Projected fantasy points this period, when the platform supplies one. */
+  /** Projected fantasy points this period, when the provider supplies one. */
   projection?: number;
   /** null = bye week. undefined = we do not know the schedule. */
   game: Game | null | undefined;
-  /** The platform will not let this player move (his game has started). */
+  /** The provider will not let this player move (his game has started). */
   locked: boolean;
 }
 
@@ -44,7 +44,7 @@ export interface RosterEntry {
 export interface Roster {
   teamId: string;
   teamName: string;
-  /** The platform's scoring period, a week for NFL leagues. */
+  /** The provider's scoring period, a week for NFL leagues. */
   period: number;
   /** Every starting slot the league has, one entry per instance: WR, WR, FLEX... */
   starterSlots: Slot[];
@@ -73,7 +73,9 @@ export interface Candidate {
 }
 
 export type Resolution =
-  | { type: "obvious"; candidate: Candidate; why: string }
+  /** The rules have an answer. No AI. */
+  | { type: "deterministic"; candidate: Candidate; why: string }
+  /** Real judgment is needed: a starter who may play, or no data to rank by. */
   | { type: "judgment"; candidates: Candidate[]; why: string }
   | { type: "none"; why: string };
 
@@ -91,36 +93,53 @@ export interface Finding {
 }
 
 /**
- * How much the user lets HangoverBot do. Working names; see OPEN-DECISIONS.
- *   alert      tell me, do nothing
- *   confirm    propose fixes, act only when I approve
- *   autopilot  make obvious fixes, ask me about judgment calls
- *   full       also act on confident judgment calls
+ * Handoff section 4. Stored as these ids; the consumer labels live in packages/ui
+ * because "AI Rescue" is still a working name.
+ *   alerts            watch and notify; never modifies the roster
+ *   ask_me            propose a move; act only on approval
+ *   bench_protection  repair lineup slots automatically from the roster, no AI
+ *   ai_rescue         also use AI where judgment is needed, within permissions
  */
-export type Authority = "alert" | "confirm" | "autopilot" | "full";
-export const AUTHORITIES: readonly Authority[] = ["alert", "confirm", "autopilot", "full"];
+export type Authority = "alerts" | "ask_me" | "bench_protection" | "ai_rescue";
+export const AUTHORITIES: readonly Authority[] = ["alerts", "ask_me", "bench_protection", "ai_rescue"];
+
+/** Handoff section 8. Each is off unless the user turns it on, except bench swaps. */
+export interface Permissions {
+  benchSwaps: boolean;
+  irMoves: boolean;
+  freeAgentAdds: boolean;
+  drops: boolean;
+}
 
 export interface Settings {
   authority: Authority;
-  /** Player ids never moved out of a starting slot, whatever happens. */
-  pinned: string[];
-  /** Projection points by which the best candidate must lead for a fix to be obvious. */
-  obviousMargin: number;
-  /** Minimum AI confidence for `full` to act without asking. */
+  /**
+   * Has this user claimed their account (Apple, Google, email)? Anonymous users
+   * get nothing unattended: the engine treats them as ask_me at most.
+   */
+  accountClaimed: boolean;
+  permissions: Permissions;
+  /** The user's explicit replacement order, player ids, best first. Beats projections. */
+  replacementOrder: string[];
+  /** Minimum AI confidence for ai_rescue to act without asking. Open decision; configurable. */
   minAiConfidence: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  authority: "confirm",
-  pinned: [],
-  obviousMargin: 3,
-  minAiConfidence: 0.7,
+  authority: "ask_me",
+  accountClaimed: false,
+  permissions: { benchSwaps: true, irMoves: false, freeAgentAdds: false, drops: false },
+  replacementOrder: [],
+  minAiConfidence: 0.8,
 };
 
 export type Step =
   | { do: "notify"; finding: Finding }
   /** A soft problem, far enough from kickoff that the news may still change. */
   | { do: "wait"; finding: Finding; until: string }
+  /** A specific move for the user to approve. */
   | { do: "propose"; finding: Finding; candidate: Candidate; source: "rules" | "ai" }
+  /** A judgment call the user makes, with the options laid out. No AI below ai_rescue. */
+  | { do: "ask_user"; finding: Finding; candidates: Candidate[] }
   | { do: "execute"; finding: Finding; candidate: Candidate; source: "rules" | "ai" }
-  | { do: "consult_ai"; finding: Finding; candidates: Candidate[]; then: "propose" | "execute_if_confident" };
+  | { do: "consult_ai"; finding: Finding; candidates: Candidate[] };

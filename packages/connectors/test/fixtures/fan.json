@@ -1,0 +1,8 @@
+{
+  "preferences": [
+    { "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2026, "entryId": 2, "entryLocation": "Trust The", "entryNickname": "Process",
+      "groups": [ { "groupId": 36784699, "groupName": "Live free or die hard RR4L" } ] } } },
+    { "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2025, "entryId": 4, "groups": [ { "groupId": 111, "groupName": "Last year" } ] } } },
+    { "metaData": { "entry": { "abbrev": "FBA", "gameId": 3, "seasonId": 2026, "entryId": 1, "groups": [ { "groupId": 222, "groupName": "Basketball" } ] } } }
+  ]
+}

@@ -1,5 +1,5 @@
 // NFL facts that are true whatever fantasy platform a league is on, and the seam
-// where a dedicated game-day data provider will plug in (see OPEN-DECISIONS).
+// where a dedicated game-day data provider will plug in (see docs/DECISIONS.md).
 
 export const NFL_TEAMS = [
   "ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB", "HOU", "IND", "JAX", "KC",

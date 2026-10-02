@@ -7,6 +7,7 @@
 import {
   BENCH,
   isStarting,
+  type Authority,
   type Candidate,
   type Finding,
   type FindingKind,
@@ -47,15 +48,30 @@ function classify(p: Player): FindingKind | undefined {
   return undefined;
 }
 
-function candidatesFor(slot: Slot, starter: Player | undefined, bench: RosterEntry[], now: number): Candidate[] {
+/**
+ * Handoff section 9, in order: legal slot, not locked or started, then the user's
+ * replacement order, then the highest projection. A player with anything to doubt
+ * (questionable, schedule unknown) ranks after every clean one.
+ */
+function candidatesFor(slot: Slot, starter: Player | undefined, bench: RosterEntry[], now: number, order: string[]): Candidate[] {
+  const rank = (p: Player) => {
+    const i = order.indexOf(p.id);
+    return i === -1 ? Infinity : i;
+  };
   return bench
     .filter((e) => e.player.eligibleSlots.includes(slot) && viable(e.player, now))
-    .sort((a, b) => (b.player.projection ?? -Infinity) - (a.player.projection ?? -Infinity))
-    .map((e) => ({
-      player: e.player,
+    .map((e) => e.player)
+    .sort(
+      (a, b) =>
+        Number(clean(b)) - Number(clean(a)) ||
+        rank(a) - rank(b) ||
+        (b.projection ?? -Infinity) - (a.projection ?? -Infinity),
+    )
+    .map((p) => ({
+      player: p,
       moves: [
         ...(starter ? [{ playerId: starter.id, from: slot, to: BENCH }] : []),
-        { playerId: e.player.id, from: BENCH, to: slot },
+        { playerId: p.id, from: BENCH, to: slot },
       ],
     }));
 }
@@ -65,17 +81,17 @@ function earliest(...isos: (string | undefined)[]): string | undefined {
   return ms.length ? new Date(Math.min(...ms)).toISOString() : undefined;
 }
 
-/** Is the best candidate clearly the right call, with no judgment needed? */
-function obviousPick(cands: Candidate[], margin: number): { candidate: Candidate; why: string } | undefined {
+/**
+ * The rules' answer, if they have one. They do when the top candidate is clean and
+ * is ranked by something real: the user's order, a projection, or being alone.
+ */
+function rulesPick(cands: Candidate[], order: string[]): { candidate: Candidate; why: string } | undefined {
   const [top, next] = cands;
   if (!top || !clean(top.player)) return undefined;
-  if (!next) return { candidate: top, why: `${top.player.name} is the only healthy option on the bench` };
-  const a = top.player.projection;
-  const b = next.player.projection;
-  if (a === undefined || b === undefined) return undefined;
-  if (a - b >= margin) {
-    return { candidate: top, why: `${top.player.name} projects ${(a - b).toFixed(1)} points more than the next option` };
-  }
+  const p = top.player;
+  if (!next || !clean(next.player)) return { candidate: top, why: `${p.name} is the only healthy option on the bench` };
+  if (order.includes(p.id)) return { candidate: top, why: `${p.name} is next in your replacement order` };
+  if (p.projection !== undefined) return { candidate: top, why: `${p.name} is your highest-projected eligible player` };
   return undefined;
 }
 
@@ -111,35 +127,37 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
     const key = `${roster.period}:${p.kind}:${p.starter ? p.starter.id : p.slot + "#" + p.index}`;
     const base = { key, kind: p.kind, hard, slot: p.slot, ...(p.starter ? { starter: p.starter } : {}) };
 
-    if (p.starter && settings.pinned.includes(p.starter.id)) {
-      findings.push({ ...base, resolution: { type: "none", why: `${p.starter.name} is pinned, so he stays` } });
-      continue;
-    }
     if (p.kind === "starter_status_unknown") {
       findings.push({ ...base, resolution: { type: "none", why: "his status could not be read, so we are not touching him" } });
       continue;
     }
 
-    const cands = candidatesFor(p.slot, p.starter, bench, t);
+    const cands = candidatesFor(p.slot, p.starter, bench, t, settings.replacementOrder);
     if (!cands.length) {
       const why = hard ? "nobody on the bench can fill this slot" : "nobody healthy on the bench to replace him";
       findings.push({ ...base, resolution: { type: "none", why } });
       continue;
     }
 
-    const pick = hard ? obviousPick(cands, settings.obviousMargin) : undefined;
+    const pick = hard ? rulesPick(cands, settings.replacementOrder) : undefined;
     if (pick) {
       bench = bench.filter((e) => e.player.id !== pick.candidate.player.id);
       const deadline = earliest(p.starter?.game?.kickoff, pick.candidate.player.game?.kickoff);
-      findings.push({ ...base, resolution: { type: "obvious", ...pick }, ...(deadline ? { deadline } : {}) });
+      findings.push({ ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) });
       continue;
     }
 
-    const why = hard ? "more than one reasonable replacement" : `${p.starter?.name} might play`;
+    const why = hard ? "no projection or replacement order to rank the options by" : `${p.starter?.name} might play`;
     const deadline = earliest(p.starter?.game?.kickoff, ...cands.map((c) => c.player.game?.kickoff));
     findings.push({ ...base, resolution: { type: "judgment", candidates: cands, why }, ...(deadline ? { deadline } : {}) });
   }
   return findings;
+}
+
+/** Anonymous users never get unattended writes (handoff section 18, owner-confirmed). */
+export function effectiveAuthority(settings: Settings): Authority {
+  if (settings.accountClaimed) return settings.authority;
+  return settings.authority === "alerts" ? "alerts" : "ask_me";
 }
 
 /** What to do about one finding, given what the user allows. */
@@ -154,18 +172,16 @@ export function plan(finding: Finding, settings: Settings, now: Date): Step {
     if (now < until) return { do: "wait", finding, until: until.toISOString() };
   }
 
-  if (settings.authority === "alert") return { do: "notify", finding };
+  const authority = effectiveAuthority(settings);
+  if (authority === "alerts") return { do: "notify", finding };
 
-  if (r.type === "obvious") {
-    const act = settings.authority === "confirm" ? "propose" : "execute";
-    return { do: act, finding, candidate: r.candidate, source: "rules" };
+  if (r.type === "deterministic") {
+    const auto = authority !== "ask_me" && settings.permissions.benchSwaps;
+    return { do: auto ? "execute" : "propose", finding, candidate: r.candidate, source: "rules" };
   }
-  return {
-    do: "consult_ai",
-    finding,
-    candidates: r.candidates,
-    then: settings.authority === "full" ? "execute_if_confident" : "propose",
-  };
+  // Judgment. AI is an AI Rescue feature; below it, the user makes the call.
+  if (authority === "ai_rescue") return { do: "consult_ai", finding, candidates: r.candidates };
+  return { do: "ask_user", finding, candidates: r.candidates };
 }
 
 export interface AiChoice {
@@ -177,15 +193,17 @@ export interface AiChoice {
 
 /**
  * Turn the AI's answer into a step. The AI picks from the list it was given; an
- * answer naming anyone else is discarded and the user is told instead.
+ * answer naming anyone else is discarded and the user decides instead.
  */
 export function afterAi(step: Extract<Step, { do: "consult_ai" }>, choice: AiChoice | undefined, settings: Settings): Step {
-  if (!choice || choice.playerId === null) return { do: "notify", finding: step.finding };
+  const fallback: Step = { do: "ask_user", finding: step.finding, candidates: step.candidates };
+  if (!choice) return fallback;
+  if (choice.playerId === null) return { do: "notify", finding: step.finding };
   const candidate = step.candidates.find((c) => c.player.id === choice.playerId);
-  if (!candidate) return { do: "notify", finding: step.finding };
-  const confident = choice.confidence >= settings.minAiConfidence;
-  const act = step.then === "execute_if_confident" && confident ? "execute" : "propose";
-  return { do: act, finding: step.finding, candidate, source: "ai" };
+  if (!candidate) return fallback;
+  const auto =
+    effectiveAuthority(settings) === "ai_rescue" && settings.permissions.benchSwaps && choice.confidence >= settings.minAiConfidence;
+  return { do: auto ? "execute" : "propose", finding: step.finding, candidate, source: "ai" };
 }
 
 /** Did the platform actually apply these moves? Checked against a fresh read. */
