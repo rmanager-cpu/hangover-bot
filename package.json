@@ -1,0 +1,16 @@
+{
+  "name": "rosterbots",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "test": "node --test \"packages/*/test/*.test.ts\" \"apps/worker/test/*.test.ts\"",
+    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/ai && tsc -p packages/ui && tsc -p apps/worker",
+    "worker": "node apps/worker/src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "^5.9.0"
+  }
+}

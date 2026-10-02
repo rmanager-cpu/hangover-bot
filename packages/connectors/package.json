@@ -1,0 +1,8 @@
+{
+  "name": "@rosterbots/connectors",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@rosterbots/core": "0.0.0", "@rosterbots/football-data": "0.0.0" }
+}
