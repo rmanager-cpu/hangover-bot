@@ -29,8 +29,8 @@ npx -y supabase@2 --version     # any 2.x
 The functions import `packages/*/src` through copies in `supabase/functions/_shared/`.
 
 ```sh
-node scripts/build-functions.ts --check   # exit 1 means stale
-node scripts/build-functions.ts           # rewrite them if so, then commit
+npm run functions:check   # exit 1 means stale (npm test checks this too)
+npm run functions:build   # rewrite them if so, then commit
 ```
 
 ## 2. Link the project
@@ -206,6 +206,6 @@ One user's league only: set its protection to Alerts or Ask Me in the app, or pa
 
 ## Changing things later
 
-- **Code in `packages/`:** `node scripts/build-functions.ts`, commit, redeploy the functions.
+- **Code in `packages/`:** `npm run functions:build`, commit, redeploy the functions.
 - **Schema:** a new, later-dated file in `supabase/migrations/`, then `npx supabase db push`.
   Never edit a migration that has been pushed.

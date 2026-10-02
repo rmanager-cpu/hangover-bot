@@ -23,8 +23,8 @@ test("one POST of JSON messages to Expo's push endpoint", async () => {
   assert.equal(calls[0]!.init.method, "POST");
   assert.deepEqual(calls[0]!.init.headers, { accept: "application/json", "content-type": "application/json" });
   assert.deepEqual(JSON.parse(String(calls[0]!.init.body)), [
-    { to: "ExponentPushToken[a]", title: msg.title, body: msg.body, sound: "default", priority: "high", data: { actionId: "act-1" } },
-    { to: "ExponentPushToken[b]", title: msg.title, body: msg.body, sound: "default", priority: "high", data: { actionId: "act-1" } },
+    { to: "ExponentPushToken[a]", title: msg.title, body: msg.body, sound: "default", priority: "high", channelId: "default", data: { actionId: "act-1" } },
+    { to: "ExponentPushToken[b]", title: msg.title, body: msg.body, sound: "default", priority: "high", channelId: "default", data: { actionId: "act-1" } },
   ]);
 });
 

@@ -77,6 +77,11 @@ export interface Store {
     connectionId: string,
     patch: { status?: ConnectionStatus; lastCheckedAt: string; nextCheckAt: string; lastRoster?: Roster },
   ): Promise<void>;
+  /**
+   * A read made outside a check (an approval, a test swap, the app's Read again). Keeps the
+   * roster, which the app's Home shows, and leaves the check schedule to the checker.
+   */
+  saveRoster(connectionId: string, roster: Roster, readAt: string): Promise<void>;
   actionsFor(connectionId: string, findingKey: string, period: number): Promise<ActionRow[]>;
   getAction(id: string): Promise<ActionRow | null>;
   insertAction(a: NewAction): Promise<ActionRow>;

@@ -4,7 +4,7 @@
 // Protection or a claimed account. Both still re-read ESPN first and verify after.
 
 import { IR, isStarting, type Move, type Player, type Roster, type Slot } from "@rosterbots/core";
-import { announce, connect, errorText, failed, isSignedOut, readTeam, signedOut, writeAndVerify } from "./ops.ts";
+import { announce, connect, errorText, failed, isSignedOut, keepRoster, readTeam, signedOut, writeAndVerify } from "./ops.ts";
 import { summarizeRead } from "./read.ts";
 import type { ActionStatus, DecisionResult, Deps, SwapResult } from "./types.ts";
 import { SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
@@ -84,6 +84,8 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     const bad = invalid(action.moves, fresh, at);
     if (bad) {
       await store.updateAction(action.id, { status: bad.status });
+      // The lineup moved on since the last check; Home should show it as it is.
+      await keepRoster(deps, conn, fresh, at);
       return no(bad.error, bad.message);
     }
 
@@ -91,6 +93,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     wrote = true;
     const out = await writeAndVerify(espn, conn, action.moves, fresh.period);
     const done = deps.now();
+    await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
       await failed(deps, conn, action, who, out.after, out.result, done);
       return no("not_applied", failure(action.reason, action.moves, who, out.after, action.deadline, done).body);
@@ -156,6 +159,7 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
     ];
     const out = await writeAndVerify(espn, conn, moves, roster.period);
     const done = deps.now();
+    await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
       const notice = failure(null, moves, who, out.after, null, done);
       await announce(deps, conn, notice, { moves, result: out.result });

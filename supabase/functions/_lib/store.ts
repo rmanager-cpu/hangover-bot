@@ -151,8 +151,6 @@ export interface AppStore extends Store {
     readAt: string;
     nextCheckAt: string;
   }): Promise<ConnectionRow>;
-  /** A read the user asked for: keeps the roster, leaves the check schedule alone. */
-  saveRoster(connectionId: string, roster: Roster, readAt: string): Promise<void>;
   /** Hand back connections a run took but did not get to, so the next run takes them. */
   releaseConnections(ids: string[], nowIso: string): Promise<void>;
 }

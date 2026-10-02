@@ -61,6 +61,18 @@ export async function writeAndVerify(espn: FantasyConnector, conn: ConnectionRow
   return { applied: applied(moves, after), after, result };
 }
 
+/**
+ * Keep what a fresh read showed, so Home is not a check behind after the user's own tap.
+ * Never throws: the write and its receipt stand without it, and the next check saves a newer one.
+ */
+export async function keepRoster(deps: Deps, conn: ConnectionRow, roster: Roster, at: Date): Promise<void> {
+  try {
+    await deps.store.saveRoster(conn.id, roster, at.toISOString());
+  } catch {
+    // The store is failing; the answer to the user does not depend on this.
+  }
+}
+
 export function signature(kind: ActionKind, findingKey: string, moves: Move[]): string {
   return [kind, findingKey, ...moves.map((m) => `${m.playerId}:${m.from}>${m.to}`)].join("|");
 }

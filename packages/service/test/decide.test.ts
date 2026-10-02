@@ -250,3 +250,48 @@ test("a verified move stays done even if recording the receipt fails", async () 
   const r2 = await manualSwap(swap.deps, "user-1", "conn-1", WRIGHT, WALKER);
   assert.equal(r2.ok, true);
 });
+
+// ---- Home reads the saved roster, so the user's own taps keep it current
+
+const slotIn = (r: { roster: { entries: { player: { id: string }; slot: string }[] } } | undefined, id: string) =>
+  r?.roster.entries.find((e) => e.player.id === id)?.slot;
+
+test("an approval and a test swap save the read that verified them", async () => {
+  const s = await proposed();
+  s.clock.advance(7);
+  await decideAction(s.deps, "user-1", s.id, "approve");
+  assert.equal(s.store.rosters.length, 1);
+  assert.equal(s.store.rosters[0]!.readAt, "2026-10-04T12:07:00.000Z");
+  assert.equal(slotIn(s.store.rosters[0], WRIGHT), "RB");
+  assert.equal(slotIn(s.store.rosters[0], ACHANE), "BENCH");
+
+  const swap = setup({ at: SATURDAY });
+  await manualSwap(swap.deps, "user-1", "conn-1", WRIGHT, WALKER);
+  assert.equal(slotIn(swap.store.rosters.at(-1), WRIGHT), "FLEX");
+  assert.equal(swap.store.checks.length, 0, "the check schedule is the checker's");
+});
+
+test("a write ESPN did not apply, and a stale approval, save what ESPN shows now", async () => {
+  const s = await proposed();
+  s.espn.write = "ignore";
+  await decideAction(s.deps, "user-1", s.id, "approve");
+  assert.equal(slotIn(s.store.rosters.at(-1), ACHANE), "RB");
+
+  const t = await proposed();
+  entry(t.espn.roster, ACHANE).slot = "BENCH";
+  entry(t.espn.roster, WRIGHT).slot = "RB";
+  await decideAction(t.deps, "user-1", t.id, "approve");
+  assert.equal(slotIn(t.store.rosters.at(-1), WRIGHT), "RB", "the user fixed it in the ESPN app; Home should say so");
+});
+
+test("failing to save the roster changes nothing the user is told", async () => {
+  const s = await proposed();
+  s.store.failRosters = true;
+  const r = await decideAction(s.deps, "user-1", s.id, "approve");
+  assert.equal(r.ok && r.status, "done");
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_RECOMMENDED", "ACTION_COMPLETED"]);
+
+  const swap = setup({ at: SATURDAY });
+  swap.store.failRosters = true;
+  assert.equal((await manualSwap(swap.deps, "user-1", "conn-1", WRIGHT, WALKER)).ok, true);
+});

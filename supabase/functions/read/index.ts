@@ -21,6 +21,12 @@ serve("read", async (req) => {
 
   const now = new Date();
   const roster = await makeDeps(store).connector(creds, conn.season).getRoster(conn.leagueId);
+  // ESPN answers with whichever team the cookies manage. Showing, or saving, someone
+  // else's team as this one would make the test swap and Home lie (service WrongTeamError).
+  if (conn.teamId !== null && roster.teamId !== conn.teamId) {
+    const team = conn.teamName ?? "this team";
+    throw new HttpError(409, "wrong_team", `The ESPN account you're signed in with doesn't manage ${team}. Sign in to ESPN again with the account that does.`);
+  }
   await store.saveRoster(conn.id, roster, now.toISOString());
   return json(summarizeRead(roster, now));
 });

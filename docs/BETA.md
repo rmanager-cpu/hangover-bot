@@ -98,6 +98,8 @@ export interface Store {
   credentials(credentialId: string): Promise<{ swid: string; espnS2: string } | null>;
   accountClaimed(userId: string): Promise<boolean>;
   saveCheck(connectionId: string, patch: { status?: ConnectionStatus; lastCheckedAt: string; nextCheckAt: string; lastRoster?: Roster }): Promise<void>;
+  /** A read outside a check (approve, test swap, the app's Read again): keeps last_roster, leaves the schedule alone. */
+  saveRoster(connectionId: string, roster: Roster, readAt: string): Promise<void>;
   actionsFor(connectionId: string, findingKey: string, period: number): Promise<ActionRow[]>;
   getAction(id: string): Promise<ActionRow | null>;
   insertAction(a: NewAction): Promise<ActionRow>;
@@ -131,7 +133,7 @@ export function summarizeRead(roster: Roster, now: Date): ReadSummary;
 /** Cadence: 2 min if any rostered player kicks off within 100 min; 15 min if any kicks off within 12 h; else 60 min. */
 export function nextCheckAt(roster: Roster | null, now: Date): Date;
 
-export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.host/--/api/v2/push/send
+export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.host/--/api/v2/push/send, channelId "default"
 ```
 
 `protectConnection`, in order: credentials → connector → `getRoster` (an `AuthError` marks
@@ -146,10 +148,11 @@ stops) → `rosterLooksSane` → settings (authority, `accountClaimed`, bench sw
 - `propose`: record `pending`, activity ACTION_RECOMMENDED + push ("Tap to approve", plus
   "I'll do it automatically at 11:30" when `held.autoAt`). A pending proposal past its
   deadline is marked `expired`.
-- `execute`: supersede any pending proposal for the finding, then **re-read**, re-run
-  `evaluate`/`plan`/`guard` on the fresh roster and continue only if the same moves still
-  come out as `execute`; `setLineup`; re-read; `applied` → `done` + ACTION_COMPLETED receipt,
-  else `failed` + ACTION_FAILED. Never retried.
+- `execute`: **re-read**, re-run `evaluate`/`plan`/`guard` on the fresh roster and continue
+  only if the same moves still come out as `execute`; then supersede any pending proposal for
+  the finding; `setLineup`; re-read; `applied` → `done` + ACTION_COMPLETED receipt, else
+  `failed` + ACTION_FAILED. Never retried. (Re-validating first is a correction: superseding
+  first withdrew the user's proposal even when re-validation then stopped the write.)
 
 Then `saveCheck` with the roster and `nextCheckAt`. Exceptions other than `AuthError` are
 caught per connection (outcome `error`); one bad connection never stops the others.
@@ -157,10 +160,13 @@ caught per connection (outcome `error`); one bad connection never stops the othe
 `decideAction`: the action must belong to `userId` and be `pending`. Decline → `declined`.
 Approve → fresh read; every move's player must still be at its `from` slot, unlocked, game
 not started; then write, verify, receipt. The approval **is** the user's authority, so it does
-not depend on Bench Protection or a claimed account.
+not depend on Bench Protection or a claimed account. The verifying read is kept with
+`saveRoster`, so Home is not a check behind after the user's own tap.
 
 `manualSwap` (the Saturday test swap): both players on the user's team, both unlocked,
-different slots, each eligible for the other's slot. Write both moves, verify, receipt.
+different slots, each eligible for the other's slot, neither on IR (IR is out of scope).
+Write both moves, verify, `saveRoster`, receipt. It records no `actions` row, so it never
+counts toward the daily limit.
 
 ## Database (`supabase/migrations`)
 
@@ -187,17 +193,24 @@ read by the cron SQL at run time.
 ## Edge Functions (`supabase/functions`)
 
 Deno. Shared code is copied from `packages/*/src` into `supabase/functions/_shared/` by
-`npm run functions:build` (committed; a test checks it is in sync). Each function has a
+`npm run functions:build` (committed; `npm run functions:check` and
+`scripts/build-functions.test.ts`, part of `npm test`, check it is in sync). Each function has a
 `deno.json` import map for `@rosterbots/*` and `npm:@supabase/supabase-js@2`.
 
 | Function | Auth | Request → response |
 |---|---|---|
-| `espn-connect` | user JWT | `{swid, espnS2}` → `{credentialId, leagues: LeagueSummary[], leagueLookupFailed}`; 401 `{error:"espn_rejected"}` on `AuthError` |
-| `connection-setup` | user JWT | `{credentialId, leagueId}` → `{connection, read: ReadSummary}` |
-| `read` | user JWT | `{connectionId}` → `ReadSummary` (fresh read, saves `last_roster`) |
+| `espn-connect` | user JWT | `{swid, espnS2, season?}` → `{credentialId, leagues: LeagueSummary[], leagueLookupFailed}`; 401 `{error:"espn_rejected"}` on `AuthError` |
+| `connection-setup` | user JWT | `{credentialId, leagueId, season?}` → `{connection, read: ReadSummary}` |
+| `read` | user JWT | `{connectionId}` → `ReadSummary` (fresh read, saves `last_roster`); 409 `wrong_team` if the sign-in now manages a different team |
 | `decide` | user JWT | `{actionId, decision}` → `DecisionResult` |
 | `swap` | user JWT | `{connectionId, playerIdA, playerIdB}` → `SwapResult` |
-| `check` | `x-cron-secret` (verify_jwt off) | runs `protectConnection` for up to 25 due connections |
+| `check` | `x-cron-secret` (verify_jwt off) | runs `protectConnection` for up to 25 due connections → `{checked, deferred, results: CheckSummary[]}` |
+
+Every refusal is `{error, message}`, `message` being words the app can show as they are:
+400 `bad_request`, 401 `unauthorized` (no user) or `espn_rejected`, 404 `not_found` /
+`league_not_found`, 409 `wrong_team`, 422 `not_in_league`, 502 `espn_unavailable`, 500
+`internal`. `decide` and `swap` answer 200 with `ok: false` for a refusal, since their results
+carry `ok`. `season` defaults to 2026.
 
 **Never log a request to ESPN, its headers, or a credential.** Log connection ids and outcomes only.
 
@@ -220,10 +233,57 @@ watched starters, protection level, last receipt) · Activity (receipts; proposa
 Approve / Decline) · Settings (protection, replacement order with up/down, sign in to ESPN
 again, About).
 
-Push: `expo-notifications`, token upserted into `devices`. Android push needs a Firebase
+Push: `expo-notifications`, token upserted into `devices`. The app creates the Android
+channel `default` at high importance before asking for a token, and the service names it on
+every push (`expo-notifications` plugin `defaultChannel: "default"` too). Android push needs a Firebase
 `google-services.json` (EAS file env var `GOOGLE_SERVICES_JSON`); the app must build and run
 without it.
 
 `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` come from `eas.json` build
 profiles (public values). `eas.json` profiles: `preview` (Android APK, internal) and
 `production` (iOS, store, for TestFlight).
+
+## As built (Oct 2): where the contract was silent
+
+Each of these was chosen while building and is now part of the contract.
+
+**Guardrails (`core`).** The before-T-90 hold reads "too early for an automatic move". Both
+window edges are inside it (exactly T-90 and exactly T-10 still act). `BETA_AUTOMATION` is
+frozen; a per-connection limit is a copy, and `connections.max_auto_moves_per_day` overrides
+the shared default. "Starting slots known" means `starterSlots` is non-empty and every starter
+sits in one of them, no more to a slot than the league has; a wrong rejection only turns an
+automatic move into a proposal.
+
+**Service.**
+- A decline stands for the week: that finding is never executed automatically afterwards.
+  One automatic attempt per finding per period: after a `done` or `failed` execute, a later
+  execute for it is a proposal. After a failed write, the rest of that check proposes only.
+- An automatic execute row is inserted as `approved` before the write, then set `done` or
+  `failed`, so a crash mid-write cannot lead to a second write.
+- Dedupe ignores `superseded` rows, so a withdrawn step that comes back is news again. A
+  proposal that promised "automatically at 11:30" and is still only a proposal after 11:30 is
+  re-announced once, with the reason.
+- Missing credentials, and a read whose team is not the connection's (`WrongTeamError`), are
+  treated like `AuthError`: `needs_reauth`, told once. A `needs_reauth` connection is still
+  checked, hourly and silently, and a good read makes it `active` again. `paused` is skipped.
+- On an `error` outcome the next check is at most 5 minutes away.
+- Approve also refuses a move whose destination the player cannot fill or that would overfill
+  a starting slot: a stale proposal becomes `superseded`, a locked or started one `expired`.
+- Receipts use US Eastern time, marked "ET". The app shows times in the phone's own zone.
+
+**Database and functions.**
+- `dueConnections` returns `active` and `needs_reauth` connections and leases them (sets
+  `next_check_at` 5 minutes ahead), so two overlapping cron runs cannot take the same league.
+  `check` stops starting connections after 90 s and hands the rest back.
+- `espn-connect` tries the cookies against ESPN before storing them (a bad sign-in never
+  replaces a good one), then makes that user's `needs_reauth` connections `active`. An empty
+  league list sets `leagueLookupFailed`, so the app offers league-id entry.
+- Stricter than the table: a connection's credential must belong to the same user (composite
+  foreign key); check constraints on kinds, statuses and activity types; a client may set
+  `status` only to `active` or `paused`, and cannot clear `needs_reauth` (only a new ESPN
+  sign-in does); a push token moves to whoever signs in on that phone; deleting a credential
+  deletes its Vault secret.
+
+**App.** Settings also has a pause switch and "Watch another league". The in-app ESPN sign-in
+clears the WebView's cookies before and after the handover, so the phone keeps no ESPN session
+and signing in again means typing the ESPN password again.
