@@ -14,7 +14,7 @@ is in charge; AI is a specialist that gets called when needed.**
 ```
 
 One worker does all the watching and all the acting. Clients never talk to ESPN, never
-hold an ESPN credential, and never call OpenAI. They read and write their own rows in
+hold an ESPN credential, and never call the AI. They read and write their own rows in
 Supabase under Row Level Security, and they receive pushes.
 
 ## Packages
@@ -24,13 +24,13 @@ Supabase under Row Level Security, and they receive pushes.
 | `packages/core` | Domain types and **the rules engine**. Pure functions: roster in, findings and a plan out. No I/O. | nothing |
 | `packages/football-data` | NFL facts: team abbreviations, positions, and the `GameDayFeed` interface for a future data provider. | nothing |
 | `packages/connectors` | Providers behind one `FantasyConnector` interface with capability flags (handoff section 14). ESPN only at launch, ported from Megacast; the rest are listed as coming soon. | core |
-| `packages/ai` | The judgment call. OpenAI Responses API with a strict JSON schema. The model **chooses among candidates core supplied**; it cannot invent a move. | core |
+| `packages/ai` | The judgment call. Anthropic Claude API with structured outputs (a strict JSON schema); the model tier per route is configuration. The model **chooses among candidates core supplied**; it cannot invent a move. | core |
 | `packages/ui` | Brand tokens and user-facing copy shared by web, mobile and extension. | core |
 | `packages/config` | Shared TypeScript config. | |
 
 | App | What it is |
 |---|---|
-| `apps/worker` | Long-running Node process. Schedules and runs `runConnection` for every active league connection. The only holder of the Supabase service-role key, the OpenAI key and decrypted ESPN cookies. |
+| `apps/worker` | Long-running Node process. Schedules and runs `runConnection` for every active league connection. The only holder of the Supabase service-role key, the Anthropic API key and decrypted ESPN cookies. |
 | `apps/web` | Next.js. Sign-in, connections, authority settings, the activity log. Also the endpoint the extension posts cookies to. |
 | `apps/mobile` | Expo. The same screens as web, plus push registration and approve/decline on proposals. |
 | `apps/extension` | Manifest V3. Reads the two ESPN cookies when the user clicks Connect, and sends them to the web endpoint with the user's Supabase session. |

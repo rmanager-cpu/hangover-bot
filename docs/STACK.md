@@ -9,7 +9,7 @@ Decided 2026-10-02. Anything new goes on this stack unless this file is changed 
 | Backend, database, auth | Supabase (Postgres) |
 | Background worker | Node/TypeScript, either a persistent worker or a reliable scheduled-job service |
 | Push | APNs + FCM, through Expo push to start |
-| AI | OpenAI Responses API |
+| AI | Anthropic Claude API (Messages API, structured outputs). Haiku 4.5 / Sonnet 5.5 / Opus 5.5 by tier; see the handoff, section 12 |
 | Crashes and errors | Sentry |
 | Browser extension | Manifest V3, TypeScript |
 
@@ -21,7 +21,7 @@ Decided 2026-10-02. Anything new goes on this stack unless this file is changed 
 - **Postgres is the source of truth.** Row Level Security is on for every table the
   clients can reach. Clients use the anon key; only the worker and server-side code
   hold the service-role key.
-- **AI calls happen on the server, never in a client.** The OpenAI key cannot ship in
+- **AI calls happen on the server, never in a client.** The Anthropic API key cannot ship in
   the app, the web bundle or the extension. Calls go through the worker, a Next.js
   route or a Supabase Edge Function.
 - **Push starts on Expo's service.** Store each device's Expo push token in Postgres
