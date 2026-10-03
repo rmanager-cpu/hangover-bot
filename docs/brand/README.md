@@ -20,9 +20,12 @@ The one-word product name is HangoverBot. "by TurboLabs" sits under the wordmark
   `flying-thumbs-up.png` (1254×1254) is the app icon and splash figure; `poses-sheet.png`
   and its four cut-outs (`pose-flying`, `pose-thumbs-up`, `pose-relaxing`, `pose-laptop`)
   are for empty states and the Home header.
-- **Icons** (`icons/`, derived): `icon-1024.png` is the flying robot at 1024 square;
-  `adaptive-icon-1024.png` is the same figure padded to Android's safe zone on navy
-  `#000523`. The app's `assets/icon.png` and `adaptive-icon.png` are copies of these.
+- **Icon** (`icons/`): `icon-art.png` is the owner's icon art (Oct 3): the robot carrying
+  a football, the HANGOVERBOT wordmark and ROSTER PROTECTION ribbon inside a neon frame.
+  `icon-1024.png` is it cropped 5.5% inside the drawn frame, because the phone rounds the
+  corners itself; `adaptive-icon-1024.png` pads the same crop to Android's safe zone on
+  `#010420`. The app's `assets/icon.png` and `adaptive-icon.png` are copies. The flying
+  robot (`mascot/flying-thumbs-up.png`) is the splash figure, not the icon.
 
 ## Palette (from the mockups; matches the handoff's section 24)
 
