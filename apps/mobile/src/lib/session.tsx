@@ -39,7 +39,17 @@ export function SessionProvider(props: { children: ReactNode }) {
       const { data: signedIn, error } = await supabase.auth.signInAnonymously();
       if (!live) return;
       if (error || !signedIn.user) {
-        setState({ status: "error", message: "Couldn't start HangoverBot. Check your connection and try again." });
+        // Say what the server said when it is a setup problem, not the phone's connection:
+        // on Oct 3 the real cause was anonymous sign-ins being off, and "check your
+        // connection" sent the owner looking in the wrong place.
+        const code = (error as { code?: string } | null)?.code;
+        const message =
+          code === "anonymous_provider_disabled"
+            ? "HangoverBot's server isn't accepting new sign-ins yet (anonymous sign-ins are off in Supabase). Nothing is wrong with your phone."
+            : error?.message
+              ? `Couldn't start HangoverBot: ${error.message}`
+              : "Couldn't start HangoverBot. Check your connection and try again.";
+        setState({ status: "error", message });
       } else {
         setState({ status: "ready", user: signedIn.user });
       }

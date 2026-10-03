@@ -20,6 +20,7 @@ import {
   type TextInputProps,
   type TextStyle,
   type ViewStyle,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { LOCKUP, WORDMARK } from "./brand";
@@ -79,9 +80,15 @@ export function Loading(props: { label?: string }) {
 
 // Marks.
 
-/** The official lockup, HangoverBot: Roster Protection, as wide as its box. */
-export function Lockup(props: { style?: StyleProp<ImageStyle> }) {
-  return <Image source={LOCKUP.source} style={[{ width: "100%", aspectRatio: LOCKUP.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot: Roster Protection" accessibilityIgnoresInvertColors />;
+/**
+ * The official lockup, HangoverBot: Roster Protection. Sized from the window, not from
+ * its parent: inside a centred column a percentage width has nothing to resolve against,
+ * and the image fell back to its full pixel size, three screens wide (seen Oct 3).
+ */
+export function Lockup(props: { width?: number; style?: StyleProp<ImageStyle> }) {
+  const window = useWindowDimensions();
+  const w = props.width ?? Math.min(window.width - space.xl * 2, 420);
+  return <Image source={LOCKUP.source} style={[{ width: w, height: w / LOCKUP.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot: Roster Protection" accessibilityIgnoresInvertColors />;
 }
 
 /** The wordmark with "by TurboLabs", small, for inner screens and the navigation header. */
