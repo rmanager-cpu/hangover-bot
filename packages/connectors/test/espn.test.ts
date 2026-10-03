@@ -62,6 +62,22 @@ test("without a schedule, kickoff is unknown rather than a bye", () => {
   assert.equal(r.entries.find((e) => e.player.name === "Ladd McConkey")!.player.game, undefined);
 });
 
+test("a starter ESPN sent without player data is unknown, never on bye", () => {
+  const half = structuredClone(league);
+  const team = half.teams.find((t: { owners?: string[] }) => (t.owners ?? []).includes(SWID));
+  const wr = team.roster.entries.find((e: { lineupSlotId: number }) => e.lineupSlotId === 4);
+  const noTeam = structuredClone(wr);
+  delete noTeam.playerPoolEntry.player.proTeamId;
+  noTeam.playerId = 1001;
+  const nothing = { playerId: 1002, lineupSlotId: wr.lineupSlotId };
+  team.roster.entries.push(noTeam, nothing);
+  const r = toRoster(half, schedule, SWID);
+  const by = (id: string) => r.entries.find((e) => e.player.id === id)!.player;
+  assert.equal(by("1001").game, undefined, "a missing pro team is an unknown schedule");
+  assert.equal(by("1002").game, undefined);
+  assert.equal(by("1002").status, "unknown", "no player data at all: never moved");
+});
+
 test("credentials that manage no team are refused", () => {
   assert.throws(() => toRoster(league, schedule, "{STRANGER}"), /no team/);
 });

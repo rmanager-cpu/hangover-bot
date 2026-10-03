@@ -23,6 +23,12 @@ export interface ConnectionRow {
   maxAutoMovesPerDay: number;
   lastCheckedAt: string | null;
   nextCheckAt: string | null;
+  /**
+   * When a lineup change HangoverBot asked ESPN for in this league was last seen on a fresh
+   * read (a test swap or an approval). Null until then, and again after a test swap ESPN did
+   * not apply. While ESPN's write is unproven, no automatic move happens without it.
+   */
+  writeVerifiedAt: string | null;
 }
 
 export type ActionKind = "notify" | "wait" | "propose" | "ask_user" | "execute";
@@ -85,9 +91,23 @@ export interface Store {
   actionsFor(connectionId: string, findingKey: string, period: number): Promise<ActionRow[]>;
   getAction(id: string): Promise<ActionRow | null>;
   insertAction(a: NewAction): Promise<ActionRow>;
-  updateAction(id: string, patch: { status: ActionStatus; result?: unknown; decidedAt?: string; executedAt?: string }): Promise<void>;
-  /** Count of kind 'execute' actions with status 'done' or 'failed' and executedAt >= sinceIso. */
+  /**
+   * With `onlyIf`, changes the row only while its status is still that one, so a user's
+   * decline and the checker's supersede cannot overwrite each other. Returns whether it changed.
+   */
+  updateAction(
+    id: string,
+    patch: { status: ActionStatus; result?: unknown; decidedAt?: string; executedAt?: string },
+    onlyIf?: ActionStatus,
+  ): Promise<boolean>;
+  /** Count of kind 'execute' actions with status 'approved', 'done' or 'failed' created at or after sinceIso: in flight counts too. */
   autoMovesSince(connectionId: string, sinceIso: string): Promise<number>;
+  /** This connection's actions still open, any period: proposals 'pending' and writes in flight ('approved'). Oldest first. */
+  openActions(connectionId: string): Promise<ActionRow[]>;
+  /** Writes in this period a fresh read did not confirm: kind 'execute' or 'propose' with status 'failed'. */
+  failedWrites(connectionId: string, period: number): Promise<number>;
+  /** A lineup change was seen on a fresh read (`at`), or a test swap was not (null). */
+  setWriteVerified(connectionId: string, at: string | null): Promise<void>;
   addActivity(e: ActivityEntry): Promise<void>;
   pushTokens(userId: string): Promise<string[]>;
 }
@@ -102,6 +122,8 @@ export interface Deps {
   connector: ConnectorFactory;
   now: () => Date;
   policy: AutomationPolicy;
+  /** Waits before a second look at ESPN. Defaults to a timer; tests pass one that returns at once. */
+  pause?: (ms: number) => Promise<void>;
 }
 
 export interface CheckSummary {

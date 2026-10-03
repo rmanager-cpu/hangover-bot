@@ -11,6 +11,8 @@ export const KICKOFF = "2026-10-04T17:00:00.000Z"; // Sunday 1:00 PM ET
 export const LATE = "2026-10-04T20:25:00.000Z"; // Sunday 4:25 PM ET
 export const T = Date.parse(KICKOFF);
 export const SUNDAY_8AM = "2026-10-04T12:00:00.000Z";
+/** When the owner's Saturday test swap went through. */
+export const TEST_SWAP_DONE = "2026-10-03T18:05:00.000Z";
 
 export const HURTS = "4040715";
 export const ACHANE = "4429160";
@@ -75,8 +77,9 @@ export class FakeEspn implements FantasyConnector {
   constructor(roster: Roster) {
     this.roster = roster;
   }
+  // As the real ESPN connector declares it: the write is unproven until a league has seen one land.
   capabilities() {
-    return { supported: [], unverified: [] };
+    return { supported: ["READ_ROSTER" as const, "WRITE_LINEUP" as const], unverified: ["WRITE_LINEUP" as const] };
   }
   async getLeagues() {
     return [];
@@ -154,13 +157,28 @@ export class MemoryStore implements Store {
     this.actions.push(row);
     return { ...row };
   }
-  async updateAction(id: string, patch: Parameters<Store["updateAction"]>[1]) {
-    Object.assign(this.actions.find((a) => a.id === id)!, patch);
+  async updateAction(id: string, patch: Parameters<Store["updateAction"]>[1], onlyIf?: Parameters<Store["updateAction"]>[2]) {
+    const a = this.actions.find((x) => x.id === id);
+    if (!a || (onlyIf !== undefined && a.status !== onlyIf)) return false;
+    Object.assign(a, patch);
+    return true;
   }
   async autoMovesSince(connectionId: string, sinceIso: string) {
     return this.actions.filter(
-      (a) => a.connectionId === connectionId && a.kind === "execute" && (a.status === "done" || a.status === "failed") && a.executedAt !== null && a.executedAt >= sinceIso,
+      (a) => a.connectionId === connectionId && a.kind === "execute" && ["approved", "done", "failed"].includes(a.status) && a.createdAt >= sinceIso,
     ).length;
+  }
+  async openActions(connectionId: string) {
+    return this.actions.filter((a) => a.connectionId === connectionId && (a.status === "pending" || a.status === "approved")).map((a) => ({ ...a }));
+  }
+  async failedWrites(connectionId: string, period: number) {
+    return this.actions.filter((a) => a.connectionId === connectionId && a.period === period && a.status === "failed" && (a.kind === "execute" || a.kind === "propose")).length;
+  }
+  verified: { connectionId: string; at: string | null }[] = [];
+  async setWriteVerified(connectionId: string, at: string | null) {
+    this.verified.push({ connectionId, at });
+    const c = this.connections.get(connectionId);
+    if (c) c.writeVerifiedAt = at;
   }
   async addActivity(e: ActivityEntry) {
     this.activity.push(e);
@@ -220,15 +238,19 @@ export function setup(opts: SetupOptions = {}) {
     id: "conn-1", userId: "user-1", credentialId: "cred-1", leagueId: "36784699", season: 2026,
     teamId: "2", teamName: "Trust The Process", leagueName: "Live free or die hard RR4L",
     status: "active", authority: opts.authority ?? "bench_protection", benchSwaps: true, replacementOrder: [],
-    maxAutoMovesPerDay: 3, lastCheckedAt: null, nextCheckAt: null, ...opts.conn,
+    maxAutoMovesPerDay: 3, lastCheckedAt: null, nextCheckAt: null, writeVerifiedAt: TEST_SWAP_DONE, ...opts.conn,
   };
   store.connections.set(conn.id, conn);
   store.creds.set(conn.credentialId, { swid: "{TEST-SWID}", espnS2: "test-espn-s2" });
   if (opts.claimed ?? true) store.claimed.add(conn.userId);
   store.tokens.set(conn.userId, ["ExponentPushToken[pixel-8]"]);
   const opened: { creds: { swid: string; espnS2: string }; season: number }[] = [];
+  const pauses: number[] = [];
   const deps: Deps = {
     store, push, now: clock.now, policy: BETA_AUTOMATION,
+    pause: async (ms) => {
+      pauses.push(ms);
+    },
     connector: (creds, season) => {
       opened.push({ creds, season });
       return espn;
@@ -236,5 +258,5 @@ export function setup(opts: SetupOptions = {}) {
   };
   // The row as the store has it now, the way the cron would hand it over.
   const run = () => protectConnection(deps, { ...store.connections.get(conn.id)! });
-  return { clock, store, espn, push, conn, deps, run, opened };
+  return { clock, store, espn, push, conn, deps, run, opened, pauses };
 }

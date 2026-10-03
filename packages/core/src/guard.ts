@@ -14,7 +14,8 @@ export interface AutomationPolicy {
 }
 
 // Frozen because it is shared: a per-connection limit is a copy, never an edit to this.
-export const BETA_AUTOMATION: AutomationPolicy = Object.freeze({ autoFromMinutes: 90, autoUntilMinutes: 10, maxAutoMovesPerDay: 3 });
+// The window ends at T-4 (owner, Oct 3), so a late scratch ESPN shows after T-10 can still be fixed.
+export const BETA_AUTOMATION: AutomationPolicy = Object.freeze({ autoFromMinutes: 90, autoUntilMinutes: 4, maxAutoMovesPerDay: 3 });
 
 export interface GuardContext {
   now: Date;
@@ -44,7 +45,7 @@ export function guard(step: Step, ctx: GuardContext): Step {
   const deadline = step.finding.deadline ? Date.parse(step.finding.deadline) : NaN;
   if (Number.isNaN(deadline)) return hold("kickoff unknown");
 
-  // Both edges are inside the window: exactly T-90 and exactly T-10 still act.
+  // Both edges are inside the window: exactly T-90 and exactly T-4 still act.
   const from = deadline - policy.autoFromMinutes * 60_000;
   const until = deadline - policy.autoUntilMinutes * 60_000;
   const now = ctx.now.getTime();

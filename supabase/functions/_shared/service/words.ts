@@ -115,11 +115,15 @@ export function changeOf(f: Finding, c: Candidate): string {
   return f.starter ? `${start} instead of ${f.starter.name}` : start;
 }
 
-// The held reasons the service adds on top of core.guard's own.
+// The held reasons the service adds on top of core.guard's own. The first four are about
+// one finding; the last three hold every automatic move on the connection.
 export const HELD_DECLINED = "declined earlier";
 export const HELD_TRIED = "already tried automatically";
-export const HELD_FAILED = "an earlier automatic move failed";
-export const HELD_FAILED_NOW = "an automatic move failed this check";
+export const HELD_APPROVED = "already changed with the user's approval";
+export const HELD_FAILED = "an earlier change for this failed";
+export const HELD_FAILED_NOW = "a change failed this check";
+export const HELD_FAILED_WEEK = "a change failed this week";
+export const HELD_UNPROVEN = "ESPN changes not proven yet";
 
 /** Why a move that could have been automatic is waiting for a tap. */
 export function heldText(held: { reason: string; autoAt?: string }, now: Date): string {
@@ -137,10 +141,16 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
       return "You turned down a change here earlier, so I won't do it on my own.";
     case HELD_TRIED:
       return "I already made an automatic move for this, so this one is yours to approve.";
+    case HELD_APPROVED:
+      return "You approved a change for this earlier, so I won't change it again on my own.";
     case HELD_FAILED:
-      return "My earlier automatic move here didn't go through, so this one is yours to approve.";
+      return "An earlier change here didn't go through, so this one is yours to approve.";
     case HELD_FAILED_NOW:
-      return "An automatic move just failed, so this one is yours to approve.";
+      return "A lineup change just didn't go through on ESPN, so for the rest of the week I'll ask before every move.";
+    case HELD_FAILED_WEEK:
+      return "A lineup change didn't go through on ESPN earlier this week, so for the rest of the week I'll ask before every move.";
+    case HELD_UNPROVEN:
+      return "I haven't yet seen a change from HangoverBot go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, and then I can make moves like this on my own.";
     default:
       return "I won't do this one on my own.";
   }
@@ -240,6 +250,20 @@ export function signIn(teamName: string | null, wrongTeam: boolean): Notice {
 }
 
 export const SIGN_IN_AGAIN = "ESPN signed HangoverBot out. Sign in to ESPN again, then try once more.";
+
+/** A proposal whose problem ESPN no longer shows. */
+export const NOT_NEEDED = "This isn't needed any more: ESPN no longer shows the problem it was for. Nothing was changed.";
+/** A proposal whose problem is still there but whose fix has changed. */
+export const OUT_OF_DATE = "Things have changed since I suggested this, so it's out of date. Nothing was changed. I'll look again on the next check.";
+
+/** Said once, when a pending proposal is withdrawn because ESPN no longer shows its problem. */
+export function withdrawn(summary: string): Notice {
+  return {
+    type: "STATUS_CHANGED",
+    title: "No change needed",
+    body: `I've dropped "${summary}". ESPN no longer shows the problem it was for, so nothing needs changing.`,
+  };
+}
 
 /** Why an action can no longer be approved or declined. */
 export function notPending(status: ActionStatus): string {

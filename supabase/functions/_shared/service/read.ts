@@ -7,7 +7,11 @@ import { list, shortName, slotName } from "./words.ts";
 
 const MIN = 60_000;
 
-/** Cadence: 2 min if any rostered player kicks off within 100 min; 15 min if any kicks off within 12 h; else 60 min. */
+/**
+ * Cadence: 1 min if any rostered player kicks off within 10 min (the window now runs to T-4,
+ * so a late scratch ESPN shows then still gets a look); 2 min within 100 min; 15 min within
+ * 12 h; else 60 min.
+ */
 export function nextCheckAt(roster: Roster | null, now: Date): Date {
   const t = now.getTime();
   let soonest = Infinity;
@@ -16,7 +20,7 @@ export function nextCheckAt(roster: Roster | null, now: Date): Date {
     const until = e.player.game ? Date.parse(e.player.game.kickoff) - t : NaN;
     if (until >= 0 && until < soonest) soonest = until;
   }
-  const minutes = soonest <= 100 * MIN ? 2 : soonest <= 12 * 60 * MIN ? 15 : 60;
+  const minutes = soonest <= 10 * MIN ? 1 : soonest <= 100 * MIN ? 2 : soonest <= 12 * 60 * MIN ? 15 : 60;
   return new Date(t + minutes * MIN);
 }
 

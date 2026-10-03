@@ -14,10 +14,16 @@ test("no roster: hourly", () => {
   assert.equal(gap(null, T), 60);
 });
 
+test("a kickoff within 10 minutes: every minute, edge included, so T-4 gets a look", () => {
+  assert.equal(gap(team(), T - 10 * MIN), 1);
+  assert.equal(gap(team(), T - 4 * MIN), 1);
+  assert.equal(gap(team(), T), 1, "a kickoff right now still counts");
+});
+
 test("a kickoff within 100 minutes: every 2 minutes, edge included", () => {
+  assert.equal(gap(team(), T - 10 * MIN - 1), 2);
   assert.equal(gap(team(), T - 99 * MIN), 2);
   assert.equal(gap(team(), T - 100 * MIN), 2);
-  assert.equal(gap(team(), T), 2, "a kickoff right now still counts");
 });
 
 test("a kickoff within 12 hours: every 15 minutes, edge included", () => {

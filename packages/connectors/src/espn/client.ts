@@ -82,7 +82,9 @@ export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined,
   const proTeams = schedule?.settings?.proTeams;
   const gameOf = (proTeamId: number | undefined): Game | null | undefined => {
     if (!proTeams) return undefined; // schedule unknown
-    if (!proTeamId) return null; // a free agent has no game
+    // A missing team is a half-read, not a bye: a bye would bench a healthy starter.
+    if (proTeamId === undefined) return undefined;
+    if (proTeamId === 0) return null; // a free agent has no game
     const pt = proTeams.find((t) => t.id === proTeamId);
     if (!pt) return undefined;
     const g = pt.proGamesByScoringPeriod?.[String(period)]?.[0];
@@ -104,7 +106,8 @@ export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined,
       name: p?.fullName ?? String(e.playerId),
       position: positionOf(p?.defaultPositionId),
       proTeam: proTeamOf(p?.proTeamId),
-      status: statusOf(p?.injuryStatus, p?.injured),
+      // No player data at all: nothing is known about him, so nothing moves him.
+      status: p ? statusOf(p.injuryStatus, p.injured) : "unknown",
       eligibleSlots: (p?.eligibleSlots ?? []).map(slotOf).filter((s): s is Slot => s !== undefined),
       game: gameOf(p?.proTeamId),
       locked: Boolean(e.playerPoolEntry?.lineupLocked),

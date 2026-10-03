@@ -3,11 +3,24 @@
 // test swap. The user's tap is the authority here, so neither depends on Bench
 // Protection or a claimed account. Both still re-read ESPN first and verify after.
 
-import { IR, isStarting, type Move, type Player, type Roster, type Slot } from "@rosterbots/core";
-import { announce, connect, errorText, failed, isSignedOut, keepRoster, readTeam, signedOut, writeAndVerify } from "./ops.ts";
+import { evaluate, IR, isStarting, type Move, type Player, type Roster, type Settings, type Slot } from "@rosterbots/core";
+import {
+  announce,
+  connect,
+  errorText,
+  failed,
+  isSignedOut,
+  keepRoster,
+  noteWrite,
+  readTeamPatiently,
+  settingsFor,
+  signature,
+  signedOut,
+  writeAndVerify,
+} from "./ops.ts";
 import { summarizeRead } from "./read.ts";
-import type { ActionStatus, DecisionResult, Deps, SwapResult } from "./types.ts";
-import { SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
+import type { ActionRow, ActionStatus, DecisionResult, Deps, Store, SwapResult } from "./types.ts";
+import { NOT_NEEDED, OUT_OF_DATE, SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
 
 const no = (error: string, message: string) => ({ ok: false as const, error, message });
 
@@ -30,8 +43,10 @@ function overfills(roster: Roster, moves: Move[]): boolean {
   return false;
 }
 
+type Refusal = { status: ActionStatus; error: string; message: string };
+
 /** Why a stored proposal can no longer be made on this roster, if it cannot. */
-function invalid(moves: Move[], roster: Roster, now: Date): { status: ActionStatus; error: string; message: string } | undefined {
+function invalid(moves: Move[], roster: Roster, now: Date): Refusal | undefined {
   const at = new Map(roster.entries.map((e) => [e.player.id, e]));
   for (const m of moves) {
     const e = at.get(m.playerId);
@@ -48,6 +63,28 @@ function invalid(moves: Move[], roster: Roster, now: Date): { status: ActionStat
   return undefined;
 }
 
+/**
+ * Is the reason for this proposal still there? Its finding must still exist on the fresh
+ * read and still have these exact moves as one of its fixes. Otherwise approving it could
+ * bench a starter who has since been cleared, or start one who has since been ruled out.
+ */
+function stillNeeded(action: ActionRow, roster: Roster, now: Date, settings: Settings): Refusal | undefined {
+  const f = evaluate(roster, now, settings).find((x) => x.key === action.findingKey);
+  if (!f) return { status: "superseded", error: "not_needed", message: NOT_NEEDED };
+  const r = f.resolution;
+  const fixes = r.type === "deterministic" ? [r.candidate] : r.type === "judgment" ? r.candidates : [];
+  const sig = signature("propose", f.key, action.moves);
+  if (!fixes.some((x) => signature("propose", f.key, x.moves) === sig)) return { status: "superseded", error: "stale", message: OUT_OF_DATE };
+  return undefined;
+}
+
+/** Changes a pending action, or says why it cannot: someone answered it first. */
+async function fromPending(store: Store, id: string, patch: Parameters<Store["updateAction"]>[1]): Promise<DecisionResult | undefined> {
+  if (await store.updateAction(id, patch, "pending")) return undefined;
+  const now = await store.getAction(id);
+  return no("not_pending", notPending(now?.status ?? "superseded"));
+}
+
 export async function decideAction(deps: Deps, userId: string, actionId: string, decision: "approve" | "decline"): Promise<DecisionResult> {
   const { store } = deps;
   const now = deps.now();
@@ -57,13 +94,13 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
   if (action.status !== "pending") return no("not_pending", notPending(action.status));
 
   if (decision === "decline") {
-    await store.updateAction(action.id, { status: "declined", decidedAt: now.toISOString() });
-    return { ok: true, status: "declined", message: "Okay. I'll leave your lineup as it is." };
+    const lost = await fromPending(store, action.id, { status: "declined", decidedAt: now.toISOString() });
+    return lost ?? { ok: true, status: "declined", message: "Okay. I'll leave your lineup as it is." };
   }
 
   if (action.kind !== "propose" || !action.moves.length) return no("not_approvable", "There's no change to approve here.");
   if (action.deadline !== null && Date.parse(action.deadline) <= now.getTime()) {
-    await store.updateAction(action.id, { status: "expired" });
+    await store.updateAction(action.id, { status: "expired" }, "pending");
     return no("expired", `Too late: this one expired at ${clock(action.deadline, now)}.`);
   }
   const conn = await store.getConnection(action.connectionId);
@@ -78,18 +115,20 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
       await signedOut(deps, conn, now, null);
       return no("needs_reauth", SIGN_IN_AGAIN);
     }
-    const fresh = await readTeam(espn, conn);
+    const fresh = await readTeamPatiently(deps, espn, conn);
     who = playersIn(fresh);
     const at = deps.now();
-    const bad = invalid(action.moves, fresh, at);
-    if (bad) {
-      await store.updateAction(action.id, { status: bad.status });
+    const refused = invalid(action.moves, fresh, at) ?? stillNeeded(action, fresh, at, await settingsFor(deps, conn));
+    if (refused) {
+      const lost = await fromPending(store, action.id, { status: refused.status });
       // The lineup moved on since the last check; Home should show it as it is.
       await keepRoster(deps, conn, fresh, at);
-      return no(bad.error, bad.message);
+      return lost ?? no(refused.error, refused.message);
     }
 
-    await store.updateAction(action.id, { status: "approved", decidedAt: at.toISOString() });
+    // The checker may have acted on this proposal while ESPN was read: only one of us writes.
+    const lost = await fromPending(store, action.id, { status: "approved", decidedAt: at.toISOString() });
+    if (lost) return lost;
     wrote = true;
     const out = await writeAndVerify(espn, conn, action.moves, fresh.period);
     const done = deps.now();
@@ -100,7 +139,9 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     }
     const notice = receipt(action.reason, action.moves, who, done);
     verified = notice.body;
-    await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result });
+    // A change ESPN shows is the proof Bench Protection waits for.
+    await noteWrite(deps, conn, done);
+    await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result }, "approved");
     await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves: action.moves });
     return { ok: true, status: "done", message: notice.body };
   } catch (e) {
@@ -137,7 +178,7 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       await signedOut(deps, conn, deps.now(), null);
       return no("needs_reauth", SIGN_IN_AGAIN);
     }
-    const roster = await readTeam(espn, conn);
+    const roster = await readTeamPatiently(deps, espn, conn);
     who = playersIn(roster);
     const now = deps.now();
     const a = roster.entries.find((e) => e.player.id === playerIdA);
@@ -161,12 +202,16 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
     const done = deps.now();
     await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
+      // ESPN's write did not work here, so Bench Protection waits for one that does.
+      await noteWrite(deps, conn, null);
       const notice = failure(null, moves, who, out.after, null, done);
       await announce(deps, conn, notice, { moves, result: out.result });
       return no("not_applied", notice.body);
     }
     const notice = receipt(null, moves, who, done);
     verified = { ok: true, message: notice.body, after: summarizeRead(out.after, done) };
+    // The proof Bench Protection waits for before any automatic move.
+    await noteWrite(deps, conn, done);
     await announce(deps, conn, notice, { moves, result: out.result });
     return verified;
   } catch (e) {

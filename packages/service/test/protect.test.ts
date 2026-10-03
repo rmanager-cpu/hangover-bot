@@ -15,7 +15,7 @@ const SWAP = [
 
 // ---- the automatic move
 
-test("a starter ruled OUT inside T-90..T-10 is replaced automatically, verified and receipted", async () => {
+test("a starter ruled OUT inside T-90..T-4 is replaced automatically, verified and receipted", async () => {
   const s = setup({ roster: achaneOut(), at: T - 45 * MIN });
   const sum = await s.run();
 
@@ -79,8 +79,13 @@ test("hours before kickoff it is a proposal that says when; at T-90 a later chec
   assert.match(s.store.activity[1]!.body, /Done at 11:30 AM ET\.$/);
 });
 
-test("after T-10 it is a proposal only, with no promise", async () => {
+test("T-9 is still automatic: the window runs to T-4", async () => {
   const s = setup({ roster: achaneOut(), at: T - 9 * MIN });
+  assert.equal((await s.run()).executed, 1);
+});
+
+test("after T-4 it is a proposal only, with no promise", async () => {
+  const s = setup({ roster: achaneOut(), at: T - 3 * MIN });
   await s.run();
   assert.equal(s.espn.writes.length, 0);
   assert.equal(s.store.actions[0]!.autoAt, null);
@@ -362,7 +367,7 @@ test("after a failed write, the next automatic move in the same check waits for 
   await s.run();
   assert.equal(s.espn.writes.length, 1);
   assert.deepEqual(s.store.actions.map((a) => [a.kind, a.status]), [["execute", "failed"], ["propose", "pending"]]);
-  assert.match(s.store.activity.at(-1)!.body, /An automatic move just failed, so this one is yours to approve\./);
+  assert.match(s.store.activity.at(-1)!.body, /A lineup change just didn't go through on ESPN, so for the rest of the week I'll ask before every move\./);
 });
 
 // ---- signed out, and other failures
@@ -382,7 +387,7 @@ test("an AuthError marks the connection needs_reauth, says so once, and stops", 
 
   s.clock.advance(60);
   await s.run();
-  assert.equal(s.store.activity.length, 1, "not said again on the hourly retry");
+  assert.equal(s.store.activity.length, 1, "not said again on the retries");
 
   s.espn.read = "ok";
   s.clock.advance(60);
