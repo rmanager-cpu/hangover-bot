@@ -12,9 +12,12 @@ The one-word product name is HangoverBot. "by TurboLabs" sits under the wordmark
 - **Mascot:** a white and purple robot with a round dark visor, two orange
   upturned-crescent eyes (a smile), an orange ball antenna, and orange speed streaks.
   It is the app icon.
-- **Source files still needed from the owner:** wordmark and robot as SVG or PNG with
-  transparent backgrounds. `mockups/` are flattened screens; cropping a logo out of
-  them gives a soft edge and a dark fringe.
+- **Source files** (`logos/`, owner-supplied Oct 3, PNG 2172×724, transparent):
+  `hangoverbot.png` (wordmark + robot), `hangoverbot-by-turbolabs.png`,
+  `hangoverbot-roster-protection.png` (the official lockup; its right edge is cropped
+  to the canvas, so re-export with padding when possible), `turbolabs.png`.
+- **Still needed:** the robot alone, transparent, for the app icon. In the wordmark the
+  robot overlaps the letters, so it cannot be cropped out cleanly.
 
 ## Palette (from the mockups; matches the handoff's section 24)
 
