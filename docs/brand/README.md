@@ -33,6 +33,22 @@ Buttons are orange, pill-shaped, full width, white bold label with a trailing ar
 Selected options get an orange outline. Cards are white with large radii on dark. Type is
 big and bold (SF/Inter-style), white headlines, muted lavender body text.
 
+## Lead reference: `mockups/00-sheet-lead.png`
+
+The six-screen sheet (Oct 3) is the tightest version and the one to match: the
+"ROSTER PROTECTION" ribbon under the wordmark, bigger cards, tighter spacing, the robot
+peeking in from the right on Home, pill status chips.
+
+Two deliberate departures from the sheet:
+
+- **Spelling.** The sheet reads "HANGOVER BOTS" (plural). The owner's official line is
+  **HangoverBot: Roster Protection**, singular. The app uses the singular until the
+  owner says otherwise.
+- **No third-party logos.** The sheet shows the ESPN, Yahoo, Sleeper and MFL marks on the
+  provider rows. Those are their trademarks; Apple 4.1(c)/5.2.1, Google's impersonation
+  rule and Disney §2.B.vii all bite on them (see `docs/research/TERMS-AND-CONSENT-2026-10-03.md`).
+  Provider rows are name-only with our own small icons, as in the first mockup set.
+
 ## Screens (`mockups/`)
 
 | File | Screen | Notes against the beta contract (`docs/BETA.md`) |
