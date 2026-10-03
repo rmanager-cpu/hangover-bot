@@ -16,8 +16,13 @@ The one-word product name is HangoverBot. "by TurboLabs" sits under the wordmark
   `hangoverbot.png` (wordmark + robot), `hangoverbot-by-turbolabs.png`,
   `hangoverbot-roster-protection.png` (the official lockup; its right edge is cropped
   to the canvas, so re-export with padding when possible), `turbolabs.png`.
-- **Still needed:** the robot alone, transparent, for the app icon. In the wordmark the
-  robot overlaps the letters, so it cannot be cropped out cleanly.
+- **Mascot** (`mascot/`, owner-supplied Oct 3, on the brand navy, not transparent):
+  `flying-thumbs-up.png` (1254×1254) is the app icon and splash figure; `poses-sheet.png`
+  and its four cut-outs (`pose-flying`, `pose-thumbs-up`, `pose-relaxing`, `pose-laptop`)
+  are for empty states and the Home header.
+- **Icons** (`icons/`, derived): `icon-1024.png` is the flying robot at 1024 square;
+  `adaptive-icon-1024.png` is the same figure padded to Android's safe zone on navy
+  `#000523`. The app's `assets/icon.png` and `adaptive-icon.png` are copies of these.
 
 ## Palette (from the mockups; matches the handoff's section 24)
 
