@@ -20,7 +20,7 @@ import {
 } from "./ops.ts";
 import { summarizeRead } from "./read.ts";
 import type { ActionRow, ActionStatus, DecisionResult, Deps, Store, SwapResult } from "./types.ts";
-import { NOT_NEEDED, OUT_OF_DATE, SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
+import { NOT_NEEDED, OUT_OF_DATE, PROVED, SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
 
 const no = (error: string, message: string) => ({ ok: false as const, error, message });
 
@@ -137,9 +137,9 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
       await failed(deps, conn, action, who, out.after, out.result, done);
       return no("not_applied", failure(action.reason, action.moves, who, out.after, action.deadline, done).body);
     }
-    const notice = receipt(action.reason, action.moves, who, done);
+    // A change ESPN shows is the proof Bench Protection waits for; the first one says so.
+    const notice = receipt(action.reason, action.moves, who, done, conn.writeVerifiedAt ? undefined : PROVED);
     verified = notice.body;
-    // A change ESPN shows is the proof Bench Protection waits for.
     await noteWrite(deps, conn, done);
     await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result }, "approved");
     await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves: action.moves });
@@ -208,9 +208,9 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       await announce(deps, conn, notice, { moves, result: out.result });
       return no("not_applied", notice.body);
     }
-    const notice = receipt(null, moves, who, done);
+    // The proof Bench Protection waits for before its first automatic move here; the first one says so.
+    const notice = receipt(null, moves, who, done, conn.writeVerifiedAt ? undefined : PROVED);
     verified = { ok: true, message: notice.body, after: summarizeRead(out.after, done) };
-    // The proof Bench Protection waits for before any automatic move.
     await noteWrite(deps, conn, done);
     await announce(deps, conn, notice, { moves, result: out.result });
     return verified;

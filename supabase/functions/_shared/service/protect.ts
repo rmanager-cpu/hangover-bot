@@ -73,7 +73,7 @@ interface Check {
   /** A write failed in this check, or earlier this period: nothing more is automatic this week. */
   failedNow: boolean;
   failedEarlier: boolean;
-  /** No change from HangoverBot has been seen landing in this league yet. */
+  /** No change the user made through HangoverBot has been seen landing in this league yet. */
   unproven: boolean;
   tally: { executed: number; proposed: number; notified: number };
 }
@@ -122,7 +122,7 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
       autoToday: 0,
       failedNow: false,
       failedEarlier: false,
-      unproven: writeUnproven(espn, conn),
+      unproven: writeUnproven(conn),
       tally,
     };
     // Settled first, so the week's failures and the day's count below include them.
@@ -351,7 +351,7 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   // Never twice: the same move made, failed or in flight is not made again.
   if (rows.some((a) => a.signature === sig)) return;
   // One automatic attempt per finding a week, a decline stands, and a write that did not
-  // land, or a write path never seen working, stops automatic moves for the connection.
+  // land, or a league where no change of the user's has landed yet, stops automatic moves.
   const hold = findingHold(rows) ?? connectionHold(c);
   if (hold) return propose(c, { do: "propose", finding: f, candidate: step.candidate, source: step.source, held: { reason: hold } }, period, now);
 
@@ -368,7 +368,7 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   const latest = await c.deps.store.actionsFor(c.conn.id, f.key, period);
   if (findingHold(latest) || latest.some((a) => a.signature === sig)) return;
   const live = await c.deps.store.getConnection(c.conn.id);
-  if (!live || !automatic(live) || writeUnproven(c.espn, live)) return;
+  if (!live || !automatic(live) || writeUnproven(live)) return;
   if (!(await supersede(c, latest))) return;
 
   // Recorded before the write, so a crash mid-write cannot lead to a second one.

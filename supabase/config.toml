@@ -24,28 +24,42 @@ otp_expiry = 3600
 subject = "Your HangoverBot code"
 content_path = "./supabase/templates/email_change.html"
 
+# Signing back in to a claimed account (a new phone, a reinstall) uses
+# signInWithOtp({ shouldCreateUser: false }) then verifyOtp({ type: "email" }), which sends
+# the magic-link message. It must carry the code too.
+[auth.email.template.magic_link]
+subject = "Your HangoverBot sign-in code"
+content_path = "./supabase/templates/magic_link.html"
+
+# verify_jwt is off for every function, on purpose. The gateway's check knows only the
+# legacy JWT secret; this project uses the newer API keys (sb_publishable_ / sb_secret_)
+# and may sign sessions with the newer keys too, and then the gateway would refuse valid
+# sessions with "Invalid JWT" before the function ever ran. Each user function checks the
+# caller itself (_lib/auth.ts requireUser: auth.getUser on the bearer token, 401
+# unauthorized otherwise), and check takes x-cron-secret, so nothing is lost by turning
+# the gateway check off and a whole class of Saturday failures is avoided.
 # Each function reads its own deno.json, written by scripts/build-functions.ts.
 [functions.espn-connect]
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/espn-connect/deno.json"
 
 [functions.connection-setup]
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/connection-setup/deno.json"
 
 [functions.read]
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/read/deno.json"
 
 [functions.decide]
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/decide/deno.json"
 
 [functions.swap]
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/swap/deno.json"
 
-# Called by pg_cron, which has no user JWT. It checks x-cron-secret itself.
+# Called by pg_cron, which has no user JWT at all. It checks x-cron-secret itself.
 [functions.check]
 verify_jwt = false
 import_map = "./functions/check/deno.json"

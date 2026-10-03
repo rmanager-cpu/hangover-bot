@@ -27,7 +27,8 @@ const LEVELS: { id: Authority; details: string[] }[] = [
     details: [
       "Only for starters ruled OUT, on IR, suspended or on bye, and empty slots.",
       "I start the first eligible player in your replacement order, or else ESPN's highest projection.",
-      "Only between 90 and 10 minutes before that game kicks off. Before that, I tell you what I'll do and when.",
+      "Only between 90 and 4 minutes before that game kicks off. Before that, I tell you what I'll do and when.",
+      "The first move in a league waits until one change you made through HangoverBot, like the test swap, has shown up on ESPN.",
       "Questionable and doubtful players are always your call.",
       "Every move is checked against ESPN before and after, with a receipt. If one doesn't go through, I tell you and don't retry.",
     ],

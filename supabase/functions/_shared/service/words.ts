@@ -150,7 +150,7 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
     case HELD_FAILED_WEEK:
       return "A lineup change didn't go through on ESPN earlier this week, so for the rest of the week I'll ask before every move.";
     case HELD_UNPROVEN:
-      return "I haven't yet seen a change from HangoverBot go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, and then I can make moves like this on my own.";
+      return "I haven't yet seen a change from HangoverBot go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, or approve this one, and then I can make moves like this on my own.";
     default:
       return "I won't do this one on my own.";
   }
@@ -219,10 +219,16 @@ function lead(moves: Move[]): Move | undefined {
   return moves.find((m) => isStarting(m.to));
 }
 
-export function receipt(reason: string | null, moves: Move[], who: Lookup, now: Date): Notice {
+/**
+ * The line on the receipt for the change that unlocks automatic moves in a league: the
+ * first one the user made through HangoverBot that ESPN then showed.
+ */
+export const PROVED = "That's the first change from HangoverBot that ESPN has shown in this league, so Bench Protection may now make moves here on its own.";
+
+export function receipt(reason: string | null, moves: Move[], who: Lookup, now: Date, proof?: string): Notice {
   const m = lead(moves);
   const title = m ? `${who(m.playerId)?.name ?? "A player"} is in at ${slotName(m.to)}` : "Lineup updated";
-  const body = [reason ? reason + "." : "", movesText(moves, who), `Done at ${clock(now, now)}.`].filter(Boolean).join(" ");
+  const body = [reason ? reason + "." : "", movesText(moves, who), `Done at ${clock(now, now)}.`, proof ?? ""].filter(Boolean).join(" ");
   return { type: "ACTION_COMPLETED", title, body };
 }
 

@@ -72,11 +72,12 @@ export async function settingsFor(deps: Deps, conn: ConnectionRow): Promise<Sett
 }
 
 /**
- * ESPN's lineup write is built from what the ESPN site sends and declared unverified by the
- * connector. Until this league has seen one HangoverBot change land, nothing is automatic.
+ * The first automatic move in a league waits for one change the user made through
+ * HangoverBot (the test swap, or an approval) to show on a fresh read (owner, Oct 3). Per
+ * connection and for good, whatever the connector declares about its write: a league the
+ * Saturday test swap never touched gets proposals, not moves.
  */
-export const writeUnproven = (espn: FantasyConnector, conn: ConnectionRow): boolean =>
-  espn.capabilities().unverified.includes("WRITE_LINEUP") && !conn.writeVerifiedAt;
+export const writeUnproven = (conn: ConnectionRow): boolean => !conn.writeVerifiedAt;
 
 /** Record whether the user's own change landed. Never throws: the user's answer does not depend on it. */
 export async function noteWrite(deps: Deps, conn: ConnectionRow, at: Date | null): Promise<void> {

@@ -22,7 +22,10 @@ const FALLBACK_URL = "https://fantasy.espn.com/football/";
 const POLL_MS = 2000;
 
 // Runs inside ESPN's page. If page JavaScript can see both cookies (espn_s2 may be
-// HttpOnly, and then only the native store has it), it posts just those two, once.
+// HttpOnly, and then only the native store has it), it posts just those two, once, and
+// only after two looks have seen the same pair: ESPN sets a SWID for signed-out visitors
+// and writes the account's SWID and espn_s2 as separate steps, so a single look can land
+// between them and hand over the visitor's SWID.
 const FALLBACK_JS = `(function () {
   if (window.__hangoverbot) return;
   function pick(name) {
@@ -33,9 +36,12 @@ const FALLBACK_JS = `(function () {
     }
     return "";
   }
+  var last = "";
   function look() {
     var swid = pick("SWID"), espnS2 = pick("espn_s2");
-    if (!swid || !espnS2) return;
+    if (!swid || !espnS2) { last = ""; return; }
+    var pair = swid + "|" + espnS2;
+    if (pair !== last) { last = pair; return; }
     clearInterval(window.__hangoverbot);
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: "espn-session", swid: swid, espnS2: espnS2 }));
   }
@@ -43,6 +49,8 @@ const FALLBACK_JS = `(function () {
   look();
 })();
 true;`;
+
+const samePair = (a: EspnSession | null, b: EspnSession): boolean => a !== null && a.swid === b.swid && a.espnS2 === b.espnS2;
 
 const fromEspn = (url: string): boolean => {
   try {
@@ -74,8 +82,13 @@ export default function EspnSignIn() {
   const busy = useRef(false);
 
   // Start signed out, so an expired session left on the phone is never handed over as new.
+  // And leave signed out: a handover that failed for a passing reason keeps ESPN's session
+  // in the store while this screen is up, so going back must not leave it on the phone.
   useEffect(() => {
     forgetEspnSession().finally(() => setPhase({ kind: "signing-in" }));
+    return () => {
+      forgetEspnSession().catch(() => {});
+    };
   }, []);
 
   // Android's back button walks back through ESPN's pages before leaving the screen.
@@ -127,16 +140,23 @@ export default function EspnSignIn() {
     [reauth, data, flow, startOver],
   );
 
-  // The main path: look in the native cookie store every two seconds until espn_s2 is there.
+  // The main path: look in the native cookie store every two seconds until espn_s2 is there,
+  // and hand over once two looks in a row have seen the same pair (see FALLBACK_JS for why).
   useEffect(() => {
     if (phase.kind !== "signing-in") return;
     let reading = false;
+    let seen: EspnSession | null = null;
     const timer = setInterval(() => {
       if (reading || busy.current) return;
       reading = true;
       readEspnSession()
         .then((s) => {
-          if (s) return handOver(s);
+          if (!s) {
+            seen = null;
+            return;
+          }
+          if (samePair(seen, s)) return handOver(s);
+          seen = s;
         })
         .catch(() => {
           // The store couldn't be read; the page script below still can.

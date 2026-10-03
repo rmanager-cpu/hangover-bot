@@ -25,9 +25,9 @@ export interface ConnectionRow {
   lastCheckedAt: string | null;
   nextCheckAt: string | null;
   /**
-   * When a lineup change HangoverBot asked ESPN for in this league was last seen on a fresh
-   * read (a test swap or an approval). Null until then, and again after a test swap ESPN did
-   * not apply. While ESPN's write is unproven, no automatic move happens without it.
+   * When a change the user made through HangoverBot in this league (the test swap, or an
+   * approval) was last seen on a fresh read. Null until then, and again after a test swap
+   * ESPN did not apply. The first automatic move in a league waits for it (owner, Oct 3).
    */
   writeVerifiedAt: string | null;
 }
