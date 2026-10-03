@@ -14,7 +14,8 @@
     "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/service && tsc -p scripts && npm run typecheck --workspace apps/mobile",
     "functions:build": "node scripts/build-functions.ts",
     "functions:check": "node scripts/build-functions.ts --check",
-    "espn:check": "node scripts/espn-check.ts"
+    "espn:check": "node scripts/espn-check.ts",
+    "functions:bundle": "node scripts/bundle-functions.ts"
   },
   "dependencies": {
     "@rosterbots/core": "0.0.0",

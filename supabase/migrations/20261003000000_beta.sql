@@ -133,7 +133,8 @@ grant all on public.credentials, public.connections, public.actions, public.acti
 -- select('*') is refused because of this. Deleting the row is the app's "Forget my ESPN
 -- sign-in": it takes the leagues with it (cascade) and the cookies out of Vault
 -- (credentials_drop_secret below), so nothing keeps reading ESPN as that user.
-grant select (id, user_id, provider, status, created_at, updated_at), delete on public.credentials to authenticated;
+grant select (id, user_id, provider, status, created_at, updated_at) on public.credentials to authenticated;
+grant delete on public.credentials to authenticated;
 create policy credentials_select_own on public.credentials
   for select to authenticated using (user_id = (select auth.uid()));
 create policy credentials_delete_own on public.credentials

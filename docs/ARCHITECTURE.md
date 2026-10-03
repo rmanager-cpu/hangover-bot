@@ -76,7 +76,8 @@ dropped.
 ## The worker's loop, for one connection
 
 1. Load the connection, its authority settings and its decrypted cookies.
-2. `connector.getRoster()`. A 401/403 marks the connection `needs_reauth` and pushes.
+2. `connector.getRoster()`. A 401/403 is read again after a short pause; a second one
+   marks the connection `needs_reauth` and pushes, once.
 3. `evaluate`, then `plan` each finding.
 4. For judgment steps, call `ai.judge` with the candidates. Its answer is validated
    against them; anything else is discarded and the step falls back to notify.
@@ -89,8 +90,8 @@ Findings are keyed by `(connection, period, kind, player)` so a re-run is idempo
 same problem is not re-announced every five minutes.
 
 Cadence is per connection and tightens toward kickoff: hourly midweek, every 15 minutes on
-game days, every 2 minutes in the 95 minutes before each kickoff window (the inactives
-window).
+game days, every 2 minutes in the 100 minutes before each kickoff (the inactives window),
+every minute in the last 10 (the automation window ends at T-4).
 
 ## Data (Supabase)
 

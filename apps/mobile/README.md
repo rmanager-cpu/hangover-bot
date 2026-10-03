@@ -26,8 +26,24 @@ reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functi
 6. Protection: Alerts, Ask Me, Bench Protection (needs a claimed account), AI Rescue "Coming soon".
 7. Claim: email, then the 6-digit code (`updateUser({ email })`, then
    `verifyOtp({ type: "email_change" })`). Skippable unless Bench Protection was chosen.
+   If the email already belongs to an account, the screen offers to sign in to it instead.
 8. Home (YOU'RE COVERED or ACTION NEEDED), Activity (receipts; proposals with big Approve and
-   Decline), Settings (protection, replacement order, pause, sign in to ESPN again, About).
+   Decline), Settings (protection, replacement order, pause, sign in to ESPN again, **Forget
+   my ESPN sign-in**, About).
+
+Two more routes, for the second phone or the reinstall:
+
+- **Sign in** (`app/signin.tsx`, from Welcome, Settings, or the claim screen): email, then
+  the 6-digit code from the "Magic Link" email (`signInWithOtp({ shouldCreateUser: false })`,
+  then `verifyOtp({ type: "email" })`). The anonymous account this phone started with is
+  left behind; its ESPN sign-in, if any, is deleted first so nothing keeps running as it.
+- **Forget my ESPN sign-in** (Settings): deletes the user's `credentials` row under RLS.
+  The database cascades to the leagues, their actions and activity, and a trigger removes
+  the cookies from Vault. The app returns to Welcome.
+
+The Protection screen's promise is the code's: automatic moves only between 90 and 4
+minutes before kickoff, and the first one in a league only after a change the user made
+through the app (the test swap) has shown up on ESPN.
 
 ## Build
 
@@ -51,11 +67,14 @@ id the app still builds and runs, but cannot sign up for push.
 
 ### Without a computer
 
-EAS builds in the cloud, so a laptop is only needed to start a build, and even that has a
-phone-friendly route: link the GitHub repo to the project on expo.dev (base directory
-`apps/mobile`), set the environment variables below on expo.dev, and start builds from the
-website. The Android build page has an install link that opens on the phone (allow your
-browser to install apps when Android asks). Not yet tried end to end.
+EAS builds in the cloud, so a laptop is only needed to start a build, and even that has two
+phone-friendly routes. The planned one: a cloud session with the **Expo MCP connector**
+(`build_run` for Android, `preview` profile; `build_info` for the status and the APK link;
+`build_logs` if it fails), see `docs/DEPLOY.md` step 8. The other: link the GitHub repo to
+the project on expo.dev (base directory `apps/mobile`), set the environment variables below
+on expo.dev, and start builds from the website. Either way the Android build page has an
+install link that opens on the phone (allow your browser to install apps when Android asks).
+Not yet tried end to end.
 
 ## Environment
 

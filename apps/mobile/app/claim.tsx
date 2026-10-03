@@ -58,10 +58,14 @@ export default function Claim() {
     const to = email.trim().toLowerCase();
     setBusy(true);
     setError(null);
+    setTaken(false);
     setNote(null);
     const { error: e } = await supabase.auth.updateUser({ email: to });
     setBusy(false);
-    if (e) return setError(authMessage(e, "email"));
+    if (e) {
+      setTaken(isTaken(e));
+      return setError(authMessage(e, "email"));
+    }
     setSentTo(to);
     setCode("");
     setNote(`Code sent to ${to}. It can take a minute; check spam too.`);
@@ -105,7 +109,13 @@ export default function Claim() {
       </Body>
       <Muted style={{ marginTop: space.sm, marginBottom: space.xl }}>No password. We email you a 6-digit code.</Muted>
 
-      {error ? <Banner tone="warn" body={error} /> : null}
+      {error ? (
+        <Banner
+          tone="warn"
+          body={error}
+          action={taken ? { title: "Sign in to that account", onPress: () => router.push({ pathname: "/signin", params: { email: email.trim().toLowerCase() } }) } : undefined}
+        />
+      ) : null}
       {note && !error ? <Banner body={note} /> : null}
 
       {!sentTo ? (

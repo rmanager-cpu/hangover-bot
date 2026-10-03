@@ -1,7 +1,13 @@
+// The front door, as the brand sheet draws it: the lockup, the line, the robot, and one
+// orange button. The three promises sit behind "How it works" so the screen stays short.
+
 import { router } from "expo-router";
-import { Image, StyleSheet, View } from "react-native";
-import { color, space } from "../src/theme";
-import { Body, Button, Hero, Muted, Screen } from "../src/ui";
+import { useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { ROBOT_FLYING } from "../src/brand";
+import { CheckDisc } from "../src/icons";
+import { color, font, space } from "../src/theme";
+import { Body, Button, Card, Divider, Label, Lockup, Muted, Screen, Title } from "../src/ui";
 
 const POINTS = [
   "Watches your starters all game day, every few minutes near kickoff.",
@@ -9,30 +15,63 @@ const POINTS = [
   "Tells you every time, with a receipt.",
 ];
 
+// Names only: the other hosts' marks are theirs (docs/brand/README.md). ESPN is the beta.
+const SUPPORTS = ["ESPN", "Yahoo", "Sleeper", "MyFantasyLeague"];
+
 export default function Welcome() {
+  const [how, setHow] = useState(false);
   return (
-    <Screen edges={["top", "bottom", "left", "right"]} footer={<Button title="Sync a League" large onPress={() => router.push("/connect/provider")} />}>
-      <View style={s.top}>
-        <Image source={require("../assets/splash-icon.png")} style={s.mark} accessibilityIgnoresInvertColors />
-        <Hero>HangoverBot</Hero>
-        <Body style={s.tagline}>Fantasy help for real life.</Body>
-      </View>
-      {POINTS.map((p) => (
-        <View key={p} style={s.point}>
-          <View style={s.dot} />
-          <Body style={{ flex: 1 }}>{p}</Body>
+    <Screen edges={["top", "bottom", "left", "right"]}>
+      <Lockup style={s.lockup} />
+      <Title style={s.headline}>Fantasy help for real life.</Title>
+      <Body style={s.tagline}>We watch your lineup and let you know when players are ruled out, so you can make moves before it's too late.</Body>
+      <Image source={ROBOT_FLYING.source} style={s.robot} resizeMode="contain" accessibilityIgnoresInvertColors />
+
+      <Card>
+        <Button title="Sync a League" arrow large onPress={() => router.push("/connect/provider")} />
+        <View style={s.supports}>
+          <Divider style={{ flex: 1 }} />
+          <Label style={s.supportsLabel}>Supports</Label>
+          <Divider style={{ flex: 1 }} />
         </View>
-      ))}
-      <Muted style={{ marginTop: space.xl }}>Works with ESPN fantasy football. You sign in to ESPN inside the app; nothing to copy, no computer needed.</Muted>
-      <Button title="Already claimed an account? Sign in" variant="quiet" onPress={() => router.push("/signin")} style={{ marginTop: space.lg, alignSelf: "flex-start" }} />
+        <View style={s.names}>
+          {SUPPORTS.map((n, i) => (
+            <View key={n} style={s.nameCell}>
+              {i > 0 ? <View style={s.bar} /> : null}
+              <Text style={s.name}>{n}</Text>
+            </View>
+          ))}
+        </View>
+        <Muted style={s.note}>ESPN in this beta; the rest are coming soon. You sign in to ESPN inside the app, nothing to copy, no computer needed.</Muted>
+      </Card>
+
+      <Button title="How it works" variant="quiet" arrow={!how} onPress={() => setHow(!how)} style={{ alignSelf: "center" }} />
+      {how ? (
+        <Card tone="dark">
+          {POINTS.map((p, i) => (
+            <View key={p} style={[s.point, i === POINTS.length - 1 && { marginBottom: 0 }]}>
+              <CheckDisc size={22} />
+              <Body style={{ flex: 1 }}>{p}</Body>
+            </View>
+          ))}
+        </Card>
+      ) : null}
+      <Button title="Already claimed an account? Sign in" variant="quiet" onPress={() => router.push("/signin")} style={{ alignSelf: "center", marginTop: space.sm }} />
     </Screen>
   );
 }
 
 const s = StyleSheet.create({
-  top: { alignItems: "flex-start", paddingTop: space.xxl, paddingBottom: space.xl },
-  mark: { width: 96, height: 96, marginBottom: space.xl, marginLeft: -8 },
-  tagline: { fontSize: 20, color: color.muted, marginTop: space.sm },
-  point: { flexDirection: "row", alignItems: "flex-start", marginBottom: space.lg },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.electric, marginTop: 8, marginRight: space.md },
+  lockup: { marginTop: space.lg, marginBottom: space.xl },
+  headline: { textAlign: "center", fontSize: 30 },
+  tagline: { textAlign: "center", color: color.muted, fontSize: 17, lineHeight: 24, marginTop: space.sm, paddingHorizontal: space.sm },
+  robot: { width: "100%", height: 180, marginVertical: space.lg },
+  supports: { flexDirection: "row", alignItems: "center", marginTop: space.xl },
+  supportsLabel: { marginBottom: 0, marginHorizontal: space.md },
+  names: { flexDirection: "row", justifyContent: "center", flexWrap: "wrap", marginTop: space.md },
+  nameCell: { flexDirection: "row", alignItems: "center" },
+  bar: { width: 1, height: 14, backgroundColor: color.inkLine, marginHorizontal: space.md },
+  name: { color: color.ink, fontSize: font.small, fontWeight: "700" },
+  note: { textAlign: "center", marginTop: space.lg },
+  point: { flexDirection: "row", alignItems: "flex-start", gap: space.md, marginBottom: space.md },
 });

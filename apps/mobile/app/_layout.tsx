@@ -10,13 +10,13 @@ import { PushProvider, takeResponse } from "../src/lib/push";
 import { SessionProvider, useSession } from "../src/lib/session";
 import { configured } from "../src/lib/supabase";
 import { color } from "../src/theme";
-import { Body, Button, Centered, Gap, Loading, Muted, Title } from "../src/ui";
+import { Body, Button, Centered, Gap, Loading, Lockup, Muted, navHeader } from "../src/ui";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const theme = {
   ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: color.midnight, card: color.midnight, text: color.text, border: color.line, primary: color.electric, notification: color.orange },
+  colors: { ...DarkTheme.colors, background: color.midnight, card: color.midnight, text: color.text, border: color.line, primary: color.orange, notification: color.orange },
 };
 
 export default function RootLayout() {
@@ -53,23 +53,24 @@ function Gate() {
   if (state.status === "error") {
     return (
       <Centered>
-        <Title style={{ textAlign: "center" }}>HangoverBot</Title>
+        <Lockup />
         <Gap />
         <Body style={{ textAlign: "center" }}>{state.message}</Body>
         <Gap />
-        <Button title="Try again" onPress={retry} />
+        <Button title="Try again" arrow onPress={retry} />
       </Centered>
     );
   }
+  // Every inner screen wears the wordmark where a title would go, as the mockups do, with
+  // just a chevron to go back; the screen's own headline sits in its content. The titles
+  // stay for screen readers and the back-button label.
   return (
     <>
       {ready ? <NotificationRouting /> : null}
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: color.midnight },
-          headerTintColor: color.paper,
-          headerTitleStyle: { fontWeight: "800" },
-          headerShadowVisible: false,
+          ...navHeader,
+          headerBackButtonDisplayMode: "minimal",
           contentStyle: { backgroundColor: color.midnight },
         }}
       >
@@ -82,6 +83,7 @@ function Gate() {
         <Stack.Screen name="read/[id]" options={{ title: "What we read from ESPN" }} />
         <Stack.Screen name="protection" options={{ title: "Protection" }} />
         <Stack.Screen name="claim" options={{ title: "Claim your account" }} />
+        <Stack.Screen name="signin" options={{ title: "Sign in" }} />
         <Stack.Screen name="order" options={{ title: "Replacement order" }} />
       </Stack>
     </>
@@ -116,7 +118,7 @@ function NotConfigured() {
   }, []);
   return (
     <Centered>
-      <Title style={{ textAlign: "center" }}>HangoverBot</Title>
+      <Lockup />
       <Gap />
       <Body style={{ textAlign: "center" }}>This build isn't connected to a HangoverBot server yet.</Body>
       <Gap size={8} />

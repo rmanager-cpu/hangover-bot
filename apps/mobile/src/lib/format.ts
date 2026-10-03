@@ -50,31 +50,51 @@ export function slotLabel(slot: string): string {
 }
 
 /** ESPN's injury tag ("O", "Q", ...) and the word for it. Active has no tag, as on ESPN. */
-export function statusTag(status: string): { tag: string; word: string; warn: boolean } | null {
+export function statusTag(status: string): { tag: string; word: string; tone: "warn" | "out" } | null {
   switch (status) {
     case "active":
       return null;
     case "questionable":
-      return { tag: "Q", word: "Questionable", warn: true };
+      return { tag: "Q", word: "Questionable", tone: "warn" };
     case "doubtful":
-      return { tag: "D", word: "Doubtful", warn: true };
+      return { tag: "D", word: "Doubtful", tone: "warn" };
     case "out":
-      return { tag: "O", word: "Out", warn: true };
+      return { tag: "O", word: "Out", tone: "out" };
     case "ir":
-      return { tag: "IR", word: "Injured reserve", warn: true };
+      return { tag: "IR", word: "Injured reserve", tone: "out" };
     case "suspended":
-      return { tag: "SSPD", word: "Suspended", warn: true };
+      return { tag: "SSPD", word: "Suspended", tone: "out" };
     default:
-      return { tag: "?", word: "Status not recognized", warn: true };
+      return { tag: "?", word: "Status not recognized", tone: "warn" };
   }
 }
 
-export const AUTHORITY: Record<Authority, { name: string; short: string }> = {
-  alerts: { name: "Alerts", short: "I watch and tell you. I never touch your lineup." },
-  ask_me: { name: "Ask Me", short: "I find the fix and ask you. One tap to approve." },
-  bench_protection: { name: "Bench Protection", short: "I fix lineup holes myself, from your bench." },
-  ai_rescue: { name: "AI Rescue", short: "Coming soon." },
+/** The status chip beside a watched starter: green Healthy, amber Questionable, red Out. */
+export function statusPill(status: string, bye: boolean): { text: string; tone: "healthy" | "warn" | "out" | "plain" } {
+  if (bye) return { text: "Bye", tone: "plain" };
+  const tag = statusTag(status);
+  if (!tag) return { text: "Healthy", tone: "healthy" };
+  if (status === "ir") return { text: "IR", tone: "out" };
+  if (status === "unknown") return { text: "Check status", tone: "warn" };
+  return { text: tag.word, tone: tag.tone };
+}
+
+/** Each level's name (the contract's), the question the Protection screen asks, and what it promises. */
+export const AUTHORITY: Record<Authority, { name: string; ask: string; askDetail: string; short: string }> = {
+  alerts: { name: "Alerts", ask: "Tell me", askDetail: "Push alert only", short: "I watch and tell you. I never touch your lineup." },
+  ask_me: { name: "Ask Me", ask: "Ask me first", askDetail: "Send a suggested swap for approval", short: "I find the fix and ask you. One tap to approve." },
+  bench_protection: { name: "Bench Protection", ask: "Fix it automatically", askDetail: "Make the best legal replacement", short: "I fix lineup holes myself, from your bench." },
+  ai_rescue: { name: "AI Rescue", ask: "AI Rescue", askDetail: "Coming soon", short: "Coming soon." },
 };
+
+/** Home's one line under the headline: "Protection: ON · Bench only". */
+export function protectionLine(authority: Authority, claimed: boolean, status: string): string {
+  if (status === "paused") return "Protection: PAUSED";
+  const level = authority === "ai_rescue" ? "bench_protection" : authority;
+  if (level === "alerts") return "Protection: Alerts only";
+  if (level === "ask_me") return "Protection: Ask me first · Bench only";
+  return claimed ? "Protection: ON · Bench only" : "Protection: Ask me first until you claim your account";
+}
 
 export const ACTIVITY_LABEL: Record<ActivityType, string> = {
   STATUS_CHANGED: "Update",

@@ -1,11 +1,12 @@
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Switch, View } from "react-native";
-import { useData } from "../../src/lib/data";
+import { Alert, StyleSheet, Switch, View } from "react-native";
+import { dbMessage, useData } from "../../src/lib/data";
 import { agoText, AUTHORITY } from "../../src/lib/format";
 import { usePush } from "../../src/lib/push";
 import { useSession } from "../../src/lib/session";
+import { supabase } from "../../src/lib/supabase";
 import { color, space } from "../../src/theme";
 import { Banner, Body, Card, H2, Label, Loading, Muted, Row, Screen } from "../../src/ui";
 
@@ -18,6 +19,32 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
 
   if (!conn) return <Loading />;
+
+  // Deleting the credentials row takes every league with it (cascade) and the ESPN cookies
+  // out of Vault (a database trigger), so nothing keeps reading ESPN as this user.
+  const forgetEspn = () => {
+    const leagues = data.connections.length === 1 ? "your league" : `your ${data.connections.length} leagues`;
+    Alert.alert(
+      "Forget your ESPN sign-in?",
+      `HangoverBot stops watching ${leagues}, deletes the ESPN sign-in it kept, and forgets your lineup history. Your ESPN account itself is not touched. You can sign in to ESPN again any time.`,
+      [
+        { text: "Keep it", style: "cancel" },
+        {
+          text: "Forget it",
+          style: "destructive",
+          onPress: async () => {
+            setSaving(true);
+            setError(null);
+            const { error: e } = await supabase.from("credentials").delete().eq("provider", "espn");
+            setSaving(false);
+            if (e) return setError(dbMessage(e));
+            await data.refresh().catch(() => {});
+            router.replace("/welcome");
+          },
+        },
+      ],
+    );
+  };
 
   const authority = AUTHORITY[conn.authority === "ai_rescue" ? "bench_protection" : conn.authority].name;
   const watching = conn.status === "active";
@@ -110,7 +137,8 @@ export default function Settings() {
           tone={conn.status === "needs_reauth" ? "warn" : undefined}
           onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })}
         />
-        <Row title="Watch another league" onPress={() => router.push("/connect/leagues")} last />
+        <Row title="Watch another league" onPress={() => router.push("/connect/leagues")} />
+        <Row title="Forget my ESPN sign-in" detail="Stops watching every league and deletes the sign-in HangoverBot kept" tone="warn" onPress={saving ? undefined : forgetEspn} last />
       </Card>
 
       <Label>Account</Label>
@@ -118,7 +146,10 @@ export default function Settings() {
         {claimed ? (
           <Row title="Claimed" value={user?.email ?? undefined} last />
         ) : (
-          <Row title="Claim your account" detail="Needed for Bench Protection to act on its own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} last />
+          <>
+            <Row title="Claim your account" detail="Needed for Bench Protection to act on its own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} />
+            <Row title="Sign in to an account you claimed before" detail="New phone, or a reinstall" onPress={() => router.push("/signin")} last />
+          </>
         )}
       </Card>
 

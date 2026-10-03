@@ -6,7 +6,7 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Platform } from "react-native";
 import { color } from "../theme";
 import { useSession } from "./session";
@@ -100,6 +100,12 @@ export function PushProvider(props: { children: ReactNode }) {
   const { user } = useSession();
   const [state, setState] = useState<PushState>({ status: "unknown" });
   const busy = useRef(false);
+
+  // A different user on this phone (signing in to a claimed account) registers the token
+  // again, so alerts reach the account that is actually signed in. Home does the asking.
+  useEffect(() => {
+    setState({ status: "unknown" });
+  }, [user?.id]);
 
   const enable = useCallback(
     async (ask: boolean) => {

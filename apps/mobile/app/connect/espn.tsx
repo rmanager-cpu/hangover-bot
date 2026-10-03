@@ -14,7 +14,7 @@ import { useData } from "../../src/lib/data";
 import { forgetEspnSession, readEspnSession, type EspnSession } from "../../src/lib/espnSession";
 import { useFlow } from "../../src/lib/flow";
 import { color, space } from "../../src/theme";
-import { Body, Button, Loading, Muted } from "../../src/ui";
+import { Body, Button, Card, Loading, Muted } from "../../src/ui";
 
 const LOGIN_URL = "https://www.espn.com/login";
 // ESPN's own fantasy page has a Log In button, if the login page itself won't load.
@@ -230,16 +230,18 @@ export default function EspnSignIn() {
         ) : null}
         {phase.kind === "failed" ? (
           <View style={s.sheet}>
-            <Body style={{ marginBottom: space.md }}>{phase.message}</Body>
-            <Button
-              title={phase.fresh ? "Sign in again" : "Try again"}
-              variant="decisive"
-              onPress={() => {
-                // A reload runs the page script again, for phones where only it can see the session.
-                if (!phase.fresh) web.current?.reload();
-                setPhase({ kind: "signing-in" });
-              }}
-            />
+            <Card tone="warn" style={{ marginBottom: 0 }}>
+              <Body style={{ marginBottom: space.md }}>{phase.message}</Body>
+              <Button
+                title={phase.fresh ? "Sign in again" : "Try again"}
+                arrow
+                onPress={() => {
+                  // A reload runs the page script again, for phones where only it can see the session.
+                  if (!phase.fresh) web.current?.reload();
+                  setPhase({ kind: "signing-in" });
+                }}
+              />
+            </Card>
           </View>
         ) : null}
       </View>
@@ -249,18 +251,9 @@ export default function EspnSignIn() {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.midnight },
-  intro: { paddingHorizontal: space.lg, paddingBottom: space.md, gap: space.xs },
-  link: { color: color.electric, textDecorationLine: "underline", marginTop: space.xs },
+  intro: { paddingHorizontal: space.lg, paddingTop: space.xs, paddingBottom: space.md, gap: space.xs },
+  link: { color: color.orange, textDecorationLine: "underline", marginTop: space.xs },
   web: { flex: 1, backgroundColor: color.paper },
   cover: { ...StyleSheet.absoluteFill, backgroundColor: color.midnight },
-  sheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: space.lg,
-    backgroundColor: color.navy,
-    borderTopWidth: 2,
-    borderTopColor: color.orange,
-  },
+  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, padding: space.md },
 });
