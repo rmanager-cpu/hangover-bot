@@ -44,6 +44,9 @@ create table public.connections (
   next_check_at timestamptz not null default now(),
   last_roster jsonb,
   last_roster_at timestamptz,
+  -- When a change the user made through HangoverBot (the test swap, or an approval) was
+  -- last seen on a fresh read. The first automatic move in a league waits for it.
+  write_verified_at timestamptz,
   created_at timestamptz not null default now(),
   unique (user_id, league_id, season),
   foreign key (credential_id, user_id) references public.credentials (id, user_id) on delete cascade
@@ -103,8 +106,10 @@ create index connections_credential on public.connections (credential_id, user_i
 -- Dedupe reads every action for one finding in one period.
 create index actions_finding on public.actions (connection_id, finding_key, period);
 create index actions_user on public.actions (user_id, created_at desc);
--- The daily automatic-move count.
-create index actions_auto_moves on public.actions (connection_id, executed_at) where kind = 'execute';
+-- The daily automatic-move count, by when the write was started: one still in flight counts.
+create index actions_auto_moves on public.actions (connection_id, created_at) where kind = 'execute';
+-- Proposals waiting and writes in flight, settled and withdrawn at every check.
+create index actions_open on public.actions (connection_id, created_at) where status in ('pending', 'approved');
 
 create index activity_user on public.activity (user_id, created_at desc);
 create index activity_connection on public.activity (connection_id);

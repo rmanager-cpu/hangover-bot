@@ -1,7 +1,7 @@
-// The service's Store over Postgres, through supabase-js with the service role (which
-// bypasses RLS: every user check is the caller's job). Rows are snake_case; the
-// service's types are camelCase. Timestamps come back as ISO in UTC whatever
-// Postgres's own format is, because the service compares them as instants.
+// The service's Store over Postgres, through supabase-js with a key that bypasses RLS
+// (every user check is the caller's job). Rows are snake_case; the service's types are
+// camelCase. Timestamps come back as ISO in UTC whatever Postgres's own format is,
+// because the service compares them as instants.
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Authority, Move, Roster } from "@rosterbots/core";
@@ -15,22 +15,26 @@ import type {
   NewAction,
   Store,
 } from "@rosterbots/service";
+import { SERVICE_KEY_NAMES, serviceKey } from "./keys.ts";
 
 let client: SupabaseClient | undefined;
 
-/** Service role. Never hand this client, or anything it read, to a caller unchecked. */
+/** Full database rights. Never hand this client, or anything it read, to a caller unchecked. */
 export function adminClient(): SupabaseClient {
   if (client) return client;
   const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !key) throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set");
-  client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+  // A secret key (sb_secret_...) or the legacy service_role JWT, whichever the runtime
+  // provides (keys.ts). The name is logged once; the key never is.
+  const key = serviceKey((name) => Deno.env.get(name));
+  if (!url || !key) throw new Error(`SUPABASE_URL and one of ${SERVICE_KEY_NAMES.join(", ")} must be set`);
+  console.log(`store: database key from ${key.from}`);
+  client = createClient(url, key.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
   return client;
 }
 
 // last_roster is left out: it is large and the service never needs the old one.
 const CONNECTION_COLUMNS =
-  "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at";
+  "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,write_verified_at";
 
 /**
  * How long a run holds the connections it took. Longer than any one run can last, so
@@ -39,8 +43,8 @@ const CONNECTION_COLUMNS =
  */
 const LEASE_MS = 5 * 60_000;
 
-// A paused league is never checked. One waiting for a fresh sign-in still is, hourly
-// and silently (service ops.signedOut), in case ESPN's refusal was a passing one.
+// A paused league is never checked. One waiting for a fresh sign-in still is, every few
+// minutes and silently (service ops.signedOut), in case ESPN's refusal was a passing one.
 const WATCHED: ConnectionStatus[] = ["active", "needs_reauth"];
 
 interface ConnectionDb {
@@ -59,6 +63,7 @@ interface ConnectionDb {
   max_auto_moves_per_day: number;
   last_checked_at: string | null;
   next_check_at: string | null;
+  write_verified_at: string | null;
 }
 
 interface ActionDb {
@@ -100,6 +105,7 @@ function toConnection(r: ConnectionDb): ConnectionRow {
     maxAutoMovesPerDay: r.max_auto_moves_per_day,
     lastCheckedAt: iso(r.last_checked_at),
     nextCheckAt: iso(r.next_check_at),
+    writeVerifiedAt: iso(r.write_verified_at),
   };
 }
 
@@ -131,12 +137,19 @@ function must<T>(res: { data: T | null; error: { code?: string } | null }, what:
   return res.data as T;
 }
 
+function count(res: { count: number | null; error: { code?: string } | null }, what: string): number {
+  if (res.error) throw new Error(`store: ${what} failed (${res.error.code ?? "no code"})`);
+  return res.count ?? 0;
+}
+
 /** What the Edge Functions need beyond the service's Store. */
 export interface AppStore extends Store {
   /** The credential's owner, or null if there is no such credential. */
   credentialOwner(credentialId: string): Promise<string | null>;
   /** Vault: create or replace this user's ESPN credential. Returns its id. */
   storeCredential(userId: string, creds: { swid: string; espnS2: string }): Promise<string>;
+  /** The leagues this user watches, oldest first: a new sign-in is checked against one of them. */
+  watchedLeagues(userId: string): Promise<{ leagueId: string; season: number }[]>;
   /** After a fresh sign-in, leagues that were waiting for one are watched again from now. */
   resumeAfterSignIn(credentialId: string, nowIso: string): Promise<void>;
   upsertConnection(c: {
@@ -206,6 +219,10 @@ export function createStore(db: SupabaseClient): AppStore {
       must(await db.from("connections").update(row).eq("id", connectionId), "save check");
     },
 
+    async saveRoster(connectionId, roster, readAt) {
+      must(await db.from("connections").update({ last_roster: roster, last_roster_at: readAt }).eq("id", connectionId), "save roster");
+    },
+
     async actionsFor(connectionId, findingKey, period) {
       const rows = must<ActionDb[]>(
         await db
@@ -250,24 +267,56 @@ export function createStore(db: SupabaseClient): AppStore {
       return toAction(r);
     },
 
-    async updateAction(id, patch) {
+    async updateAction(id, patch, onlyIf) {
       const row: Record<string, unknown> = { status: patch.status };
       if (patch.result !== undefined) row.result = patch.result;
       if (patch.decidedAt !== undefined) row.decided_at = patch.decidedAt;
       if (patch.executedAt !== undefined) row.executed_at = patch.executedAt;
-      must(await db.from("actions").update(row).eq("id", id), "update action");
+      // One UPDATE ... WHERE id AND status = onlyIf, so two sides racing for a row (the
+      // user's decline, the checker's supersede) cannot both win it.
+      let q = db.from("actions").update(row).eq("id", id);
+      if (onlyIf !== undefined) q = q.eq("status", onlyIf);
+      const changed = must<{ id: string }[]>(await q.select("id"), "update action");
+      return changed.length > 0;
     },
 
     async autoMovesSince(connectionId, sinceIso) {
-      const { count, error } = await db
-        .from("actions")
-        .select("id", { count: "exact", head: true })
-        .eq("connection_id", connectionId)
-        .eq("kind", "execute")
-        .in("status", ["done", "failed"])
-        .gte("executed_at", sinceIso);
-      if (error) throw new Error(`store: auto moves failed (${error.code ?? "no code"})`);
-      return count ?? 0;
+      // 'approved' is a write in flight: it counts, or a run that dies mid-write would not.
+      return count(
+        await db
+          .from("actions")
+          .select("id", { count: "exact", head: true })
+          .eq("connection_id", connectionId)
+          .eq("kind", "execute")
+          .in("status", ["approved", "done", "failed"])
+          .gte("created_at", sinceIso),
+        "auto moves",
+      );
+    },
+
+    async openActions(connectionId) {
+      const rows = must<ActionDb[]>(
+        await db.from("actions").select("*").eq("connection_id", connectionId).in("status", ["pending", "approved"]).order("created_at"),
+        "open actions",
+      );
+      return rows.map(toAction);
+    },
+
+    async failedWrites(connectionId, period) {
+      return count(
+        await db
+          .from("actions")
+          .select("id", { count: "exact", head: true })
+          .eq("connection_id", connectionId)
+          .eq("period", period)
+          .eq("status", "failed")
+          .in("kind", ["execute", "propose"]),
+        "failed writes",
+      );
+    },
+
+    async setWriteVerified(connectionId, at) {
+      must(await db.from("connections").update({ write_verified_at: at }).eq("id", connectionId), "set write verified");
     },
 
     async addActivity(e: ActivityEntry) {
@@ -309,6 +358,14 @@ export function createStore(db: SupabaseClient): AppStore {
       return id;
     },
 
+    async watchedLeagues(userId) {
+      const rows = must<{ league_id: string; season: number }[]>(
+        await db.from("connections").select("league_id,season").eq("user_id", userId).order("created_at"),
+        "watched leagues",
+      );
+      return rows.map((r) => ({ leagueId: r.league_id, season: r.season }));
+    },
+
     async resumeAfterSignIn(credentialId, nowIso) {
       must(
         await db
@@ -321,7 +378,9 @@ export function createStore(db: SupabaseClient): AppStore {
     },
 
     async upsertConnection(c) {
-      // Only what ESPN told us. The user's settings on an existing connection are kept.
+      // Only what ESPN told us. The user's settings on an existing connection are kept, its
+      // status among them: a pause is the user's off switch and setting the league up again
+      // must not flip it. Only a league waiting for a sign-in resumes, since this read is one.
       const r = must<ConnectionDb>(
         await db
           .from("connections")
@@ -335,7 +394,6 @@ export function createStore(db: SupabaseClient): AppStore {
               team_id: c.teamId,
               team_name: c.teamName,
               league_name: c.leagueName,
-              status: "active",
               last_roster: c.roster,
               last_roster_at: c.readAt,
               next_check_at: c.nextCheckAt,
@@ -346,11 +404,15 @@ export function createStore(db: SupabaseClient): AppStore {
           .single(),
         "upsert connection",
       );
-      return toConnection(r);
-    },
-
-    async saveRoster(connectionId, roster, readAt) {
-      must(await db.from("connections").update({ last_roster: roster, last_roster_at: readAt }).eq("id", connectionId), "save roster");
+      const row = toConnection(r);
+      if (row.status === "needs_reauth") {
+        const resumed = must<{ id: string }[]>(
+          await db.from("connections").update({ status: "active" }).eq("id", row.id).eq("status", "needs_reauth").select("id"),
+          "resume connection",
+        );
+        if (resumed.length) row.status = "active";
+      }
+      return row;
     },
 
     async releaseConnections(ids, nowIso) {

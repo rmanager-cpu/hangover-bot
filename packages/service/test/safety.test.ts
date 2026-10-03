@@ -4,6 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { decideAction, manualSwap, signature } from "../src/index.ts";
 import type { ActionRow } from "../src/index.ts";
+import { PROVED } from "../src/words.ts";
 import { ACHANE, KICKOFF, MIN, SHAHEED, SUNDAY_8AM, T, WALKER, WRIGHT, achaneOut, entry, setup, team } from "./fakes.ts";
 
 const SWAP = [
@@ -163,9 +164,16 @@ test("before any change has been seen landing on ESPN, nothing is automatic and 
 
 test("a test swap that lands unlocks automatic moves, and one ESPN ignores locks them again", async () => {
   const s = setup({ roster: achaneOut(), at: SATURDAY, conn: { writeVerifiedAt: null } });
-  assert.equal((await manualSwap(s.deps, "user-1", "conn-1", SHAHEED, WALKER)).ok, true);
+  const first = await manualSwap(s.deps, "user-1", "conn-1", SHAHEED, WALKER);
+  assert.equal(first.ok, true);
+  assert.equal(
+    first.ok && first.message,
+    "Moved Rashid Shaheed from bench to FLEX. Walker is on your bench. Done at 2:00 PM ET. " + PROVED,
+    "the receipt says this is the change that unlocks automatic moves",
+  );
   assert.equal(s.store.connections.get("conn-1")!.writeVerifiedAt, SATURDAY);
-  await manualSwap(s.deps, "user-1", "conn-1", SHAHEED, WALKER); // and back
+  const back = await manualSwap(s.deps, "user-1", "conn-1", SHAHEED, WALKER); // and back
+  assert.equal(back.ok && back.message.includes(PROVED), false, "said once");
   s.clock.set(T - 45 * MIN);
   assert.equal((await s.run()).executed, 1);
 
@@ -180,12 +188,26 @@ test("a test swap that lands unlocks automatic moves, and one ESPN ignores locks
   assert.match(t.store.activity.at(-1)!.body, /Do the test swap/);
 });
 
-test("an approval ESPN shows is proof too", async () => {
+test("an approval ESPN shows is proof too, and its receipt says so", async () => {
   const s = setup({ roster: achaneOut(), authority: "ask_me", at: SUNDAY_8AM, conn: { writeVerifiedAt: null } });
   await s.run();
   s.clock.advance(5);
-  await decideAction(s.deps, "user-1", s.store.actions[0]!.id, "approve");
+  const r = await decideAction(s.deps, "user-1", s.store.actions[0]!.id, "approve");
+  assert.equal(r.ok && r.message, "Achane was ruled OUT. Moved Jaylen Wright from bench to RB. Achane is on your bench. Done at 8:05 AM ET. " + PROVED);
+  assert.equal(s.store.activity.at(-1)!.body, r.ok && r.message, "the activity receipt carries the same line");
   assert.equal(s.store.connections.get("conn-1")!.writeVerifiedAt, "2026-10-04T12:05:00.000Z");
+});
+
+test("the gate is per league, not the connector's word: a write the connector calls verified still waits for the user's first change", async () => {
+  const s = setup({ roster: achaneOut(), conn: { writeVerifiedAt: null } });
+  s.espn.unverified = [];
+  await s.run();
+  assert.equal(s.espn.writes.length, 0);
+  assert.match(s.store.activity[0]!.body, /Do the test swap/);
+
+  const t = setup({ roster: achaneOut() }); // the Saturday test swap landed here
+  t.espn.unverified = ["WRITE_LINEUP"];
+  assert.equal((await t.run()).executed, 1);
 });
 
 // ---- a write a dead run left in flight

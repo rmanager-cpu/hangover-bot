@@ -24,10 +24,12 @@ function sameSecret(given: string, expected: string): boolean {
 }
 
 serve("check", async (req) => {
+  // No MCP tool sets a function secret, so this is the one value the owner adds by hand
+  // (docs/DEPLOY.md). Until then every call is refused, cron's included, and the log says why.
   const secret = Deno.env.get("CRON_SECRET") ?? "";
   if (!secret) {
-    console.error("check: CRON_SECRET is not set");
-    return json({ error: "not_configured", message: "CRON_SECRET is not set." }, 503);
+    console.error("check: CRON_SECRET is not set. Add it in the dashboard under Edge Functions, Secrets, equal to the Vault secret cron_secret. No connection was checked.");
+    return json({ error: "not_configured", message: "CRON_SECRET is not set on the check function." }, 503);
   }
   if (!sameSecret(req.headers.get("x-cron-secret") ?? "", secret)) {
     return json({ error: "unauthorized", message: "Bad or missing x-cron-secret." }, 401);

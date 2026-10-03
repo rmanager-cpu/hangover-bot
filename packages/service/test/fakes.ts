@@ -77,9 +77,10 @@ export class FakeEspn implements FantasyConnector {
   constructor(roster: Roster) {
     this.roster = roster;
   }
-  // As the real ESPN connector declares it: the write is unproven until a league has seen one land.
+  /** What the connector declares about its write. The service's proof gate is per connection and never reads it. */
+  unverified: ("WRITE_LINEUP" | "READ_ROSTER")[] = ["WRITE_LINEUP"];
   capabilities() {
-    return { supported: ["READ_ROSTER" as const, "WRITE_LINEUP" as const], unverified: ["WRITE_LINEUP" as const] };
+    return { supported: ["READ_ROSTER" as const, "WRITE_LINEUP" as const], unverified: this.unverified };
   }
   async getLeagues() {
     return [];
