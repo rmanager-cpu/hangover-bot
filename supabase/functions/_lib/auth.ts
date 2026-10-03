@@ -22,6 +22,12 @@ export async function requireUser(req: Request, db: SupabaseClient): Promise<Cal
   // keys the project uses. The publishable or anon key is a valid JWT too, but it has no
   // user behind it, so it is refused here as well.
   const { data, error } = await db.auth.getUser(token);
-  if (error || !data.user) throw signIn();
+  if (error || !data.user) {
+    // The status and the error's name only, never the token. A 401 here on every call with a
+    // fresh session means the Auth server refused the function's own key (the legacy keys
+    // disabled, say), not the user's token: docs/DEPLOY.md step 6.
+    console.error(`auth: getUser refused (${error ? `${error.status ?? "no status"} ${error.name}` : "no user"})`);
+    throw signIn();
+  }
   return { id: data.user.id, isAnonymous: data.user.is_anonymous ?? false };
 }

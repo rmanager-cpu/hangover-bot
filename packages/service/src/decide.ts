@@ -129,7 +129,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     const lost = await fromPending(store, action.id, { status: "approved", decidedAt: at.toISOString() });
     if (lost) return lost;
     wrote = true;
-    const out = await writeAndVerify(espn, conn, action.moves, fresh.period);
+    const out = await writeAndVerify(deps, espn, conn, action.moves, fresh.period);
     const done = deps.now();
     await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
@@ -197,7 +197,7 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       { playerId: a.player.id, from: a.slot, to: b.slot },
       { playerId: b.player.id, from: b.slot, to: a.slot },
     ];
-    const out = await writeAndVerify(espn, conn, moves, roster.period);
+    const out = await writeAndVerify(deps, espn, conn, moves, roster.period);
     const done = deps.now();
     await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {

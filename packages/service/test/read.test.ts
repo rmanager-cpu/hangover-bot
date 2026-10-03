@@ -8,7 +8,8 @@ import type { Roster } from "@rosterbots/core";
 // ---- cadence
 
 const at = (ms: number) => new Date(ms);
-const gap = (r: Roster | null, now: number) => (nextCheckAt(r, at(now)).getTime() - now) / MIN;
+/** The band, in minutes from the minute the check is in (the next check is always on a boundary). */
+const gap = (r: Roster | null, now: number) => (nextCheckAt(r, at(now)).getTime() - Math.floor(now / MIN) * MIN) / MIN;
 
 test("no roster: hourly", () => {
   assert.equal(gap(null, T), 60);
@@ -41,6 +42,15 @@ test("a game already under way does not count; the next one does", () => {
   assert.equal(gap(team(), T + 30 * MIN), 15);
   assert.equal(gap(team(), Date.parse("2026-10-04T19:00:00Z")), 2, "4:25 is 85 minutes out at 3:00");
   assert.equal(gap(team(), Date.parse("2026-10-04T21:00:00Z")), 60, "all of this team's games have started");
+});
+
+test("the next check is on a minute boundary, so the cron tick that follows takes it", () => {
+  // A check that started 800 ms after the 12:52 tick, 8 minutes before kickoff: due at 12:53:00.000,
+  // not 12:53:00.800, which the 12:53 tick's clock (read a few hundred ms after the tick) would miss.
+  const now = Date.parse("2026-10-04T16:52:00.800Z");
+  assert.equal(nextCheckAt(team(), at(now)).toISOString(), "2026-10-04T16:53:00.000Z");
+  assert.equal(nextCheckAt(null, at(now)).toISOString(), "2026-10-04T17:52:00.000Z");
+  assert.equal(nextCheckAt(team(), at(T - 45 * MIN + 59_999)).toISOString(), new Date(T - 43 * MIN).toISOString(), "the last ms of a minute is still that minute");
 });
 
 test("byes and unknown schedules have no kickoff to count", () => {

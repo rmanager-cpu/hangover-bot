@@ -17,6 +17,7 @@ import {
 } from "@rosterbots/core";
 import type { FantasyConnector } from "@rosterbots/connectors";
 import {
+  IncompleteReadError,
   announce,
   connect,
   errorText,
@@ -30,7 +31,7 @@ import {
   writeAndVerify,
   writeUnproven,
 } from "./ops.ts";
-import { nextCheckAt } from "./read.ts";
+import { inMinutes, nextCheckAt, scheduleMissing } from "./read.ts";
 import type { ActionRow, CheckSummary, ConnectionRow, Deps, NewAction } from "./types.ts";
 import {
   HELD_APPROVED,
@@ -41,6 +42,7 @@ import {
   HELD_TRIED,
   HELD_UNPROVEN,
   changeOf,
+  incompleteRead,
   inform,
   playersIn,
   problemOf,
@@ -84,6 +86,48 @@ function policyFor(deps: Deps, conn: ConnectionRow): AutomationPolicy {
   return { ...deps.policy, maxAutoMovesPerDay: max };
 }
 
+/** Why this read is not one to judge a lineup by, if it is not. */
+function incompleteness(roster: Roster): string | undefined {
+  if (!rosterLooksSane(roster)) return "the roster did not look right";
+  if (scheduleMissing(roster)) return "no kickoff times came through";
+  return undefined;
+}
+
+/** How many incomplete reads in a row before the user hears about it: one is ESPN's half payload. */
+const INCOMPLETE_READS_BEFORE_TELLING = 3;
+
+const incompleteKey = (period: number): string => `${period}:incomplete_read`;
+
+/**
+ * Counts an incomplete read, as a row of a finding of its own, and on the third in a row
+ * tells the user, once a period: nothing is judged or automatic until a read looks right.
+ */
+async function unreadable(deps: Deps, conn: ConnectionRow, period: number, why: string): Promise<boolean> {
+  const key = incompleteKey(period);
+  const told = signature("notify", key, []);
+  const rows = await deps.store.actionsFor(conn.id, key, period);
+  if (rows.some((a) => a.signature === told)) return false;
+  // Rows a whole read superseded were an earlier run; the ones still 'done' are this one.
+  const run = rows.filter((a) => a.status === "done").length + 1;
+  const sig = run < INCOMPLETE_READS_BEFORE_TELLING ? `${told}|#${run}` : told;
+  const row = await deps.store.insertAction({
+    connectionId: conn.id, userId: conn.userId, findingKey: key, period, kind: "notify", status: "done", moves: [],
+    summary: "ESPN's data looked incomplete", reason: why, deadline: null, autoAt: null, signature: sig,
+  });
+  if (sig !== told) return false;
+  await announce(deps, conn, incompleteRead(), { actionId: row.id, findingKey: key });
+  return true;
+}
+
+/** A whole read ends a run of incomplete ones: the count starts again; the once-a-period notice stands. */
+async function readable(deps: Deps, conn: ConnectionRow, period: number): Promise<void> {
+  const key = incompleteKey(period);
+  const told = signature("notify", key, []);
+  for (const a of await deps.store.actionsFor(conn.id, key, period)) {
+    if (a.status === "done" && a.signature !== told) await deps.store.updateAction(a.id, { status: "superseded" }, "done");
+  }
+}
+
 export async function protectConnection(deps: Deps, conn: ConnectionRow): Promise<CheckSummary> {
   const now = deps.now();
   const tally = { executed: 0, proposed: 0, notified: 0 };
@@ -113,7 +157,14 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
       return summary("needs_reauth", out.nextCheckAt);
     }
     first = await readTeamPatiently(deps, espn, conn);
-    const sane = rosterLooksSane(first);
+    // Half a payload, or no kickoff times: not a lineup to judge, and not kept as the last
+    // roster. A failed read instead, tried again within five minutes, said once if it goes on.
+    const incomplete = incompleteness(first);
+    if (incomplete) {
+      if (await unreadable(deps, conn, first.period, incomplete)) tally.notified++;
+      throw new IncompleteReadError(incomplete);
+    }
+    await readable(deps, conn, first.period);
     const settings = await settingsFor(deps, conn);
     check = {
       deps, conn, espn, settings,
@@ -133,11 +184,11 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
     const found = evaluate(first, now, settings);
     findings = found.length;
     for (const f of found) {
-      const step = guard(plan(f, settings, now), { now, autoMovesToday: check.autoToday, readLooksSane: sane, policy: check.policy });
+      const step = guard(plan(f, settings, now), { now, autoMovesToday: check.autoToday, readLooksSane: true, policy: check.policy });
       await act(check, step, first.period, now);
     }
-    // A bad read can miss a problem that is still there, so only a sane one withdraws proposals.
-    if (sane) await withdraw(check, new Set(found.map((f) => f.key)), first.period, now);
+    // This read is whole (an incomplete one never gets here), so a problem it no longer shows is gone.
+    await withdraw(check, new Set(found.map((f) => f.key)), first.period, now);
 
     const next = nextCheckAt(check.latest, now).toISOString();
     await deps.store.saveCheck(conn.id, {
@@ -158,13 +209,15 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
       }
       // Try again soon, but not every minute: within 5 minutes, sooner if a kickoff is close.
       const latest = check?.latest ?? first ?? null;
-      const soon = new Date(now.getTime() + 5 * MIN);
+      const soon = inMinutes(now, 5);
       const cadence = nextCheckAt(latest, now);
       const next = (cadence < soon ? cadence : soon).toISOString();
-      await deps.store.saveCheck(conn.id, { lastCheckedAt: now.toISOString(), nextCheckAt: next, ...(latest ? { lastRoster: latest } : {}) });
+      // An incomplete read is not kept: Home judges the lineup by the last roster saved.
+      const keep = latest && !(e instanceof IncompleteReadError) ? { lastRoster: latest } : {};
+      await deps.store.saveCheck(conn.id, { lastCheckedAt: now.toISOString(), nextCheckAt: next, ...keep });
       return summary("error", next, errorText(e));
     } catch (inner) {
-      return summary("error", new Date(now.getTime() + 5 * MIN), errorText(e) + "; then " + errorText(inner));
+      return summary("error", inMinutes(now, 5), errorText(e) + "; then " + errorText(inner));
     }
   }
 }
@@ -265,14 +318,18 @@ async function tell(c: Check, step: Inform, period: number, now: Date): Promise<
   const f = step.finding;
   const sig = signature(step.do, f.key, []);
   const rows = await history(c, f, period, now);
-  // The engine no longer has one clear move for this, so a proposal for it is out of date.
+  const candidates = step.do === "ask_user" ? step.candidates : f.resolution.type === "judgment" ? f.resolution.candidates : [];
+  // A pending proposal whose moves are still among the options is still the right question,
+  // and the user has it: a downgrade from one clear move to a choice is no reason to withdraw
+  // it, or to ask twice. One whose fix the engine no longer offers is out of date.
+  const fixes = new Set(candidates.map((x) => signature("propose", f.key, x.moves)));
+  if (rows.some((a) => a.kind === "propose" && a.status === "pending" && fixes.has(a.signature))) return;
   if (!(await supersede(c, rows))) return;
   if (announced(rows, sig)) return;
   const notice = inform(step, now);
   const row = await c.deps.store.insertAction(
     action(c, f, period, { kind: step.do, status: "done", moves: [], summary: notice.title, reason: problemOf(f), autoAt: null, signature: sig }),
   );
-  const candidates = step.do === "ask_user" ? step.candidates : f.resolution.type === "judgment" ? f.resolution.candidates : [];
   const options = candidates.map((x) => ({ playerId: x.player.id, name: x.player.name, moves: x.moves }));
   await announce(c.deps, c.conn, notice, { actionId: row.id, findingKey: f.key, ...(options.length ? { candidates: options } : {}) });
   c.tally.notified++;
@@ -348,8 +405,10 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   const sig = signature("execute", f.key, moves);
   const rows = await history(c, f, period, now);
 
-  // Never twice: the same move made, failed or in flight is not made again.
-  if (rows.some((a) => a.signature === sig)) return;
+  // Never twice: a write for it still in flight is the next check's to settle. One already
+  // made or failed is a hold below, so the problem coming back (the user undid the move in
+  // the ESPN app, say) is a proposal the user hears about, not silence until kickoff.
+  if (rows.some((a) => a.signature === sig && a.status === "approved")) return;
   // One automatic attempt per finding a week, a decline stands, and a write that did not
   // land, or a league where no change of the user's has landed yet, stops automatic moves.
   const hold = findingHold(rows) ?? connectionHold(c);
@@ -380,7 +439,7 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
 
   let out: Awaited<ReturnType<typeof writeAndVerify>>;
   try {
-    out = await writeAndVerify(c.espn, c.conn, moves, fresh.period);
+    out = await writeAndVerify(c.deps, c.espn, c.conn, moves, fresh.period);
   } catch (e) {
     // The read back failed, so nothing is confirmed.
     c.failedNow = true;

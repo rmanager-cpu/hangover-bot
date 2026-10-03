@@ -177,8 +177,14 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   }
   if (step.do === "ask_user") {
     const lead = f.hard ? "" : "He might play. ";
-    // Hard and still a judgment: no ranking data, or the best option has a doubt of his own.
-    const rank = f.hard ? " I'm not sure enough to pick one for you." : "";
+    // Hard and still a judgment: no ranking data, the best option has a doubt of his own, or
+    // his kickoff could not be read, which is worth saying, since it is ESPN's gap, not his.
+    const top = step.candidates[0];
+    const rank = !f.hard
+      ? ""
+      : top && top.player.game === undefined
+        ? ` I couldn't read ${shortName(top.player.name)}'s kickoff time, so I'm not sure enough to pick one for you.`
+        : " I'm not sure enough to pick one for you.";
     return {
       type: "ACTION_REQUIRED",
       title,
@@ -267,6 +273,17 @@ export function withdrawn(summary: string): Notice {
     type: "STATUS_CHANGED",
     title: "No change needed",
     body: `I've dropped "${summary}". ESPN no longer shows the problem it was for, so nothing needs changing.`,
+  };
+}
+
+/** Said once a period, on the third incomplete read in a row from ESPN. */
+export function incompleteRead(): Notice {
+  return {
+    type: "STATUS_CHANGED",
+    title: "ESPN's data looks incomplete",
+    body:
+      "The last few reads of your team from ESPN came back incomplete, so I'm not judging your lineup by them " +
+      "and won't make a move on my own until a read looks right. Check your lineup in the ESPN app for now.",
   };
 }
 

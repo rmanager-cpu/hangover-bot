@@ -14,6 +14,12 @@ const MAX_CONNECTIONS = 25;
 // the free plan). The ones not reached are handed back and the next run takes them.
 const BUDGET_MS = 90_000;
 
+// A connection due this soon is due now. next_check_at sits on a minute boundary (the
+// service's nextCheckAt), and this clock is read a moment after the cron tick, on another
+// host than the database's: without slack, a row could be missed by milliseconds and wait a
+// whole tick, which inside T-10 is the difference between every minute and every two.
+const DUE_SLACK_MS = 30_000;
+
 // Compared without stopping at the first difference, so timing does not leak it.
 function sameSecret(given: string, expected: string): boolean {
   const a = new TextEncoder().encode(given);
@@ -39,7 +45,7 @@ serve("check", async (req) => {
   const store = createStore(adminClient());
   const deps = makeDeps(store);
   const nowIso = deps.now().toISOString();
-  const due = await store.dueConnections(nowIso, MAX_CONNECTIONS);
+  const due = await store.dueConnections(new Date(Date.parse(nowIso) + DUE_SLACK_MS).toISOString(), MAX_CONNECTIONS);
 
   const results: CheckSummary[] = [];
   const deferred: string[] = [];

@@ -171,15 +171,19 @@ test("the connection's own daily limit is the one used, and zero means never", a
   assert.match(s.store.activity[0]!.body, /today's limit/);
 });
 
-test("a read that does not look sane is never acted on", async () => {
+test("a read that does not look sane is a failed read: nothing is judged by it, and it is not kept", async () => {
   const r = achaneOut();
   // A starter in a slot this league does not have: a bad read, not a bad lineup.
   r.entries.push({ slot: "TE", player: { ...entry(r, SHAHEED).player, id: "9999" } });
   const s = setup({ roster: r });
-  await s.run();
+  const sum = await s.run();
+  assert.equal(sum.outcome, "error");
+  assert.match(sum.error ?? "", /looked incomplete: the roster did not look right/);
   assert.equal(s.espn.writes.length, 0);
   assert.equal(s.espn.reads, 1);
-  assert.equal(s.store.activity[0]!.body, "Start Jaylen Wright at RB instead? Tap to approve. Something in ESPN's data looked off, so I won't do it on my own.");
+  assert.equal(s.store.activity.length, 0, "no proposal from a read that may be fiction");
+  assert.equal(s.store.checks.at(-1)!.patch.lastRoster, undefined, "Home keeps the last whole read");
+  assert.equal(sum.nextCheckAt, new Date(T - 43 * MIN).toISOString(), "its kickoffs still set the cadence: 2 minutes, not 5");
 });
 
 test("a fresh read that no longer gives the same move stops the write: the user fixed it first", async () => {
@@ -205,17 +209,30 @@ test("a fresh read that turns odd before the write stops it", async () => {
   assert.equal(s.espn.writes.length, 0);
 });
 
-test("with no schedule from ESPN nothing moves on its own: the user decides", async () => {
+test("with no kickoff for the replacement nothing moves on its own: the user decides, and hears why", async () => {
   const r = achaneOut();
-  for (const e of r.entries) e.player.game = undefined;
+  entry(r, WRIGHT).player.game = undefined; // ESPN's schedule has no entry for his team
   const s = setup({ roster: r });
   await s.run();
   assert.equal(s.espn.writes.length, 0);
   assert.deepEqual(s.store.actions.map((a) => a.kind), ["ask_user"]);
   assert.equal(
     s.store.activity[0]!.body,
-    "Bench options at RB: Jaylen Wright. I'm not sure enough to pick one for you. Your call: swap in the app or in ESPN.",
+    "Bench options at RB: Jaylen Wright. I couldn't read Wright's kickoff time, so I'm not sure enough to pick one for you. Your call before 1:00 PM ET: swap in the app or in ESPN.",
   );
+});
+
+test("with no schedule at all the read is incomplete: nothing is judged by it, and it is tried again within 5 minutes", async () => {
+  const r = achaneOut();
+  for (const e of r.entries) e.player.game = undefined;
+  const s = setup({ roster: r });
+  const sum = await s.run();
+  assert.equal(sum.outcome, "error");
+  assert.match(sum.error ?? "", /no kickoff times came through/);
+  assert.equal(s.espn.writes.length, 0);
+  assert.equal(s.store.activity.length, 0);
+  assert.equal(s.store.checks.at(-1)!.patch.lastRoster, undefined);
+  assert.equal(sum.nextCheckAt, new Date(T - 40 * MIN).toISOString());
 });
 
 // ---- said once
@@ -332,12 +349,16 @@ test("a write ESPN does not apply is failed, told as ACTION_FAILED, and never re
   );
   assert.equal(s.push.sent.length, 1);
 
+  // The problem is still there, so the next check offers the fix for a tap, once: the
+  // failure is told once and the user is not left in silence until kickoff.
   s.clock.advance(2);
   await s.run();
   s.clock.advance(2);
   await s.run();
   assert.equal(s.espn.writes.length, 1, "never retried");
-  assert.equal(s.store.activity.length, 1, "and not re-announced");
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_FAILED", "ACTION_RECOMMENDED"]);
+  assert.equal(s.store.activity[1]!.body, "Start Jaylen Wright at RB instead? Tap to approve. An earlier change here didn't go through, so this one is yours to approve.");
+  assert.deepEqual(s.store.actions.map((x) => [x.kind, x.status]), [["execute", "failed"], ["propose", "pending"]]);
   assert.equal(await s.store.autoMovesSince("conn-1", "2026-10-04T00:00:00.000Z"), 1, "a failed move counts against the day");
 });
 
@@ -353,7 +374,8 @@ test("a write that throws is still checked by a read, and failed when the read s
   const s = setup({ roster: achaneOut() });
   s.espn.write = "throw";
   await s.run();
-  assert.equal(s.espn.reads, 3);
+  assert.equal(s.espn.reads, 4, "the read that verifies it, then a second look before the write is called unconfirmed");
+  assert.deepEqual(s.pauses, [3000]);
   assert.equal(s.store.actions[0]!.status, "failed");
   assert.deepEqual(s.store.actions[0]!.result, { httpStatus: 500, detail: "", error: "transaction (HTTP 500)" });
 });

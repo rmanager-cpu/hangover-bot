@@ -30,7 +30,11 @@ Built, and passing here with no network:
   week, an approval re-checks the reason, stale proposals are withdrawn, a write a dead run
   left in flight is settled, status changes are conditional, one ESPN refusal is re-read
   before anyone is told to sign in, and **the first automatic move in a league waits for the
-  user's own proof** (`write_verified_at`: the test swap or an approval seen on ESPN).
+  user's own proof** (`write_verified_at`: the test swap or an approval seen on ESPN). The
+  second Oct 3 review's fixes are there too: an incomplete read (half a payload, or no
+  kickoffs) is a failed read that is never judged, the read that verifies a write is
+  patient, an automatic move the user undoes comes back as a proposal rather than silence,
+  and every next check sits on the minute boundary the cron tick lands on.
 - `supabase/`: the migration (five tables, RLS, Vault, pg_cron every minute,
   `write_verified_at`, credential delete for "Forget my ESPN sign-in"), six Edge Functions
   (`espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`) and `config.toml`
@@ -46,7 +50,7 @@ Built, and passing here with no network:
 - `scripts/espn-check.ts`: the cookie-based ESPN read. For the beta the app's "What we read"
   screen and test swap replace it (no desktop, so no cookies to copy).
 
-The checks, all passing on Oct 3: `npm test` (175 tests, including the `_shared` sync check
+The checks, all passing on Oct 3: `npm test` (187 tests, including the `_shared` sync check
 and the bundle check), `npm run typecheck` (core, football-data, connectors, service,
 scripts, mobile), `npm run functions:check`, `npx -y deno@2 check index.ts` in each
 `supabase/functions/<fn>` and in each `supabase/.bundle/<fn>`, and in `apps/mobile`
@@ -79,9 +83,11 @@ unreachable from the build and fix sessions.
 
 1. Backend, from a cloud session with the Supabase MCP connector: `docs/DEPLOY.md` steps
    1 to 7. The owner's part is the four dashboard settings it lists, on the phone.
-2. App, from the same session with the Expo MCP connector: `build_run` for Android
-   (`preview`), then the APK from the build page onto the phone. `eas.json` already carries
-   the Supabase URL and publishable key.
+2. App, from the same session with the Expo MCP connector: the owner links the GitHub repo
+   to the EAS project on expo.dev (base directory `apps/mobile`), the branch is pushed, then
+   `build_run` for Android (`preview`) builds that commit from GitHub, and the APK goes from
+   the build page onto the phone. `eas.json` already carries the Supabase URL and
+   publishable key.
 3. On the phone, Saturday: sign in to ESPN in the app, compare "What we read" line by line
    with the ESPN app, one test swap, swap back. The first swap's receipt says it unlocked
    automatic moves. Only then claim the account and turn on Bench Protection.

@@ -31,8 +31,12 @@ first-weekend guardrails (`core.guard`):
    only. The checker looks every minute once any rostered player is within 10 minutes of
    kickoff, so the end of the window gets a look.
 2. At most `maxAutoMovesPerDay` (default 3) automatic moves per connection per UTC day.
-3. If the ESPN read does not look sane (`core.rosterLooksSane`), no automatic move: proposal.
-4. Kickoff unknown: proposal.
+3. If the ESPN read does not look sane (`core.rosterLooksSane`), or shows no kickoff for
+   anyone who could play, it is not a lineup to judge (Oct 3, second review): the check
+   fails, nothing is proposed or announced from it, the read is not kept as the last
+   roster, and it is read again within 5 minutes. `guard` still turns an execute into a
+   proposal when the fresh read taken just before a write looks off.
+4. Kickoff unknown for the players a move touches: proposal.
 5. **The first automatic move in a league waits for the user's own proof** (owner, Oct 3):
    one change made through HangoverBot (the Saturday test swap, or an approved proposal)
    must have shown on a fresh read in that league (`connections.write_verified_at`). Until
@@ -42,9 +46,13 @@ first-weekend guardrails (`core.guard`):
    automatic writes are not held behind a proven connector.
 
 Every automatic move is re-validated against a fresh read immediately before the write,
-verified by another fresh read after it (`core.applied`), and receipted. A failed or partial
-write is never retried automatically: the user gets an ACTION_FAILED push, and for the rest
-of that week every automatic move on that connection is a proposal.
+verified by another fresh read after it (`core.applied`), and receipted. The verifying read
+is patient (Oct 3, second review): one more try after a 3 s pause on any failure but the
+wrong team, and a second look after a pause when the first read does not show the change,
+because that verdict is never retried and holds the week; the write itself is never sent
+twice. A failed or partial write is never retried automatically: the user gets an
+ACTION_FAILED push, and for the rest of that week every automatic move on that connection
+is a proposal.
 
 ## Core additions (`packages/core`)
 
@@ -154,7 +162,7 @@ export interface ReadSummary {
 }
 export function summarizeRead(roster: Roster, now: Date): ReadSummary;
 
-/** Cadence: 1 min if any rostered player kicks off within 10 min (the window runs to T-4); 2 min within 100 min; 15 min within 12 h; else 60 min. */
+/** Cadence: 1 min if any rostered player kicks off within 10 min (the window runs to T-4); 2 min within 100 min; 15 min within 12 h; else 60 min. Counted from the minute boundary `now` is in, so the cron tick that follows takes it. */
 export function nextCheckAt(roster: Roster | null, now: Date): Date;
 
 export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.host/--/api/v2/push/send, channelId "default"
@@ -162,15 +170,20 @@ export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.ho
 
 `protectConnection`, in order: credentials → connector → `getRoster` (one refusal is read
 again after a 3 s pause; a second `AuthError` marks the connection `needs_reauth`, writes
-ACTION_REQUIRED "Sign in to ESPN again", pushes, and stops) → settle writes a dead run left
-in flight → `rosterLooksSane` → settings (authority, `accountClaimed`, bench swaps, order;
+ACTION_REQUIRED "Sign in to ESPN again", pushes, and stops) → incomplete? (`rosterLooksSane`
+false, or no kickoff for anyone who could play: outcome `error`, the roster not saved, the
+next check within 5 minutes, and on the third in a row the user told once a period) → settle
+writes a dead run left in flight → settings (authority, `accountClaimed`, bench swaps, order;
 `ai_rescue` treated as `bench_protection`) → `evaluate` → `plan` → `guard` → per step, then
-withdraw proposals for problems a sane read no longer shows:
+withdraw proposals for problems the read no longer shows:
 
 - **Dedupe** by `signature` against `actionsFor(connection, findingKey, period)`. The same
   step is never announced twice. A pending proposal for the same finding with **different**
   moves is marked `superseded` before the new one is created.
-- `notify` / `ask_user` / `wait`: record (status `done`), activity + push once.
+- `notify` / `ask_user` / `wait`: record (status `done`), activity + push once. A pending
+  proposal whose moves are still among the finding's candidates is kept, and nothing new is
+  said: the user already has the question. One whose fix the engine no longer offers is
+  `superseded` first.
 - `propose`: record `pending`, activity ACTION_RECOMMENDED + push ("Tap to approve", plus
   "I'll do it automatically at 11:30" when `held.autoAt`). A pending proposal past its
   deadline is marked `expired`.
@@ -300,7 +313,11 @@ automatic move into a proposal.
 **Service.**
 - A decline stands for the week: that finding is never executed automatically afterwards.
   One automatic attempt per finding per period: after a `done` or `failed` execute, a later
-  execute for it is a proposal. After a failed write, the rest of that check proposes only.
+  execute for it is a proposal, the **same** moves included (Oct 3, second review: the user
+  undoing the move in the ESPN app, or ESPN reverting it, used to be met with silence until
+  kickoff), said once with "already tried automatically" or "an earlier change for this
+  failed"; only a write still in flight (`approved`) keeps the checker silent. After a
+  failed write, the rest of that check proposes only.
 - An automatic execute row is inserted as `approved` before the write, then set `done` or
   `failed`, so a crash mid-write cannot lead to a second write.
 - Dedupe ignores `superseded` rows, so a withdrawn step that comes back is news again. A
@@ -318,8 +335,15 @@ automatic move into a proposal.
   UPDATE each, and the connection's status and protection are read again just before a write.
 - (Oct 3) After any failed write in a period, every automatic move on that connection is a
   proposal for the rest of the period, including findings that first appear later.
-- (Oct 3) Pending proposals whose problem a sane read no longer shows are withdrawn and said
+- (Oct 3) Pending proposals whose problem a whole read no longer shows are withdrawn and said
   once ("No change needed"); ones past their deadline or with a locked player expire quietly.
+- (Oct 3, second review) An incomplete read is counted as `notify` rows (status `done`) of a
+  finding of its own, `<period>:incomplete_read`; a whole read marks the count's rows
+  `superseded` so a run starts again, and the third in a row inserts the told row and says
+  STATUS_CHANGED "ESPN's data looks incomplete" once a period. `inform()` names an
+  unreadable kickoff when that is why a hard finding is the user's call.
+- (Oct 3, second review) Every next check (`nextCheckAt`, the error retry, the sign-out
+  retry) is on a minute boundary, so the cron tick that follows takes it.
 - Approve also refuses a move whose destination the player cannot fill or that would overfill
   a starting slot: a stale proposal becomes `superseded`, a locked or started one `expired`.
 - Receipts use US Eastern time, marked "ET". The app shows times in the phone's own zone.
@@ -327,7 +351,9 @@ automatic move into a proposal.
 **Database and functions.**
 - `dueConnections` returns `active` and `needs_reauth` connections and leases them (sets
   `next_check_at` 5 minutes ahead), so two overlapping cron runs cannot take the same league.
-  `check` stops starting connections after 90 s and hands the rest back.
+  `check` passes it a clock 30 s ahead, so a row due on the minute boundary is not missed by
+  the milliseconds between the tick and the function's own clock. It stops starting
+  connections after 90 s and hands the rest back.
 - `espn-connect` tries the cookies against a league the user already watches before storing
   them (a bad sign-in never replaces a good one; a first sign-in is stored as it is, and
   `connection-setup` is its proof), then makes that user's `needs_reauth` connections

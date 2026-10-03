@@ -7,10 +7,9 @@
 
 import { applied, DEFAULT_SETTINGS, type Move, type Roster, type Settings } from "@rosterbots/core";
 import { AuthError, ProviderError, type FantasyConnector } from "@rosterbots/connectors";
+import { inMinutes } from "./read.ts";
 import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps } from "./types.ts";
 import { failure, signIn, type Lookup } from "./words.ts";
-
-const MIN = 60_000;
 
 /** How long before a second look when ESPN refuses a read: a WAF's passing block clears in seconds. */
 export const RETRY_PAUSE_MS = 3_000;
@@ -27,10 +26,26 @@ export class WrongTeamError extends Error {
   }
 }
 
+/**
+ * A read the checker must not judge a lineup by: half a payload, or one with no kickoff
+ * times. Evaluating one says "nobody is starting" once per slot, or asks the user to pick
+ * what the rules would have picked. It is a failed read: the next check, within minutes,
+ * gets a whole one.
+ */
+export class IncompleteReadError extends Error {
+  constructor(what: string) {
+    super("ESPN's read looked incomplete: " + what);
+  }
+}
+
 /** Only the user can fix these: sign in to ESPN again. */
 export const isSignedOut = (e: unknown): boolean => e instanceof AuthError || e instanceof WrongTeamError;
 
 export const errorText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
+
+/** Waits before a second look at ESPN. Tests pass a `pause` that returns at once. */
+export const pause = (deps: Deps, ms: number): Promise<void> =>
+  (deps.pause ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms))))(ms);
 
 /** Null when the credential is gone, which only signing in again can fix. */
 export async function connect(deps: Deps, conn: ConnectionRow): Promise<FantasyConnector | null> {
@@ -54,7 +69,23 @@ export async function readTeamPatiently(deps: Deps, espn: FantasyConnector, conn
     return await readTeam(espn, conn);
   } catch (e) {
     if (!(e instanceof AuthError)) throw e;
-    await (deps.pause ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms))))(RETRY_PAUSE_MS);
+    await pause(deps, RETRY_PAUSE_MS);
+    return readTeam(espn, conn);
+  }
+}
+
+/**
+ * The read that checks a write. One more try after a pause on any failure: a passing
+ * refusal, a timeout or a 5xx here is not news about the write, and calling the write
+ * unconfirmed on its account holds every automatic move for the rest of the week. A wrong
+ * team is not passing, so it is not tried again.
+ */
+async function readBack(deps: Deps, espn: FantasyConnector, conn: ConnectionRow): Promise<Roster> {
+  try {
+    return await readTeam(espn, conn);
+  } catch (e) {
+    if (e instanceof WrongTeamError) throw e;
+    await pause(deps, RETRY_PAUSE_MS);
     return readTeam(espn, conn);
   }
 }
@@ -96,9 +127,10 @@ export interface WriteResult {
 
 /**
  * Ask ESPN for the moves, then read the team back. Whatever ESPN answered, only
- * the fresh read says whether it happened. Throws only if that read fails.
+ * the fresh read says whether it happened. Throws only if that read fails twice.
+ * The write itself is never sent twice.
  */
-export async function writeAndVerify(espn: FantasyConnector, conn: ConnectionRow, moves: Move[], period: number) {
+export async function writeAndVerify(deps: Deps, espn: FantasyConnector, conn: ConnectionRow, moves: Move[], period: number) {
   let result: WriteResult;
   try {
     const tx = await espn.setLineup(conn.leagueId, moves, period);
@@ -107,7 +139,13 @@ export async function writeAndVerify(espn: FantasyConnector, conn: ConnectionRow
     const httpStatus = e instanceof AuthError || e instanceof ProviderError ? e.httpStatus : null;
     result = { httpStatus, detail: "", error: errorText(e) };
   }
-  const after = await readTeam(espn, conn);
+  let after = await readBack(deps, espn, conn);
+  if (!applied(moves, after)) {
+    // ESPN's read host can lag its write host by a moment. A second look before the write
+    // is called unconfirmed, since that verdict is never retried and holds the week.
+    await pause(deps, RETRY_PAUSE_MS);
+    after = await readBack(deps, espn, conn);
+  }
   return { applied: applied(moves, after), after, result };
 }
 
@@ -154,7 +192,7 @@ export async function announce(
  * retried every few minutes, silently, and a good read makes it active again.
  */
 export async function signedOut(deps: Deps, conn: ConnectionRow, now: Date, cause: unknown): Promise<{ told: boolean; nextCheckAt: string }> {
-  const nextCheckAt = new Date(now.getTime() + REAUTH_RETRY_MIN * MIN).toISOString();
+  const nextCheckAt = inMinutes(now, REAUTH_RETRY_MIN).toISOString();
   await deps.store.saveCheck(conn.id, { status: "needs_reauth", lastCheckedAt: now.toISOString(), nextCheckAt });
   if (conn.status === "needs_reauth") return { told: false, nextCheckAt };
   await announce(deps, conn, signIn(conn.teamName, cause instanceof WrongTeamError), { reason: cause instanceof WrongTeamError ? "wrong_team" : "signed_out" });

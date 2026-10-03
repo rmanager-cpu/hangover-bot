@@ -49,7 +49,9 @@ test("a move held because a write just failed is not made automatically at the n
   }
   assert.equal(s.espn.writes.length, 1);
   assert.equal(failures(s), 1);
-  assert.equal(s.store.activity.length, 2, "nothing new to say");
+  // The one new thing: Achane is still OUT at RB, so the fix that failed is offered for a tap, once.
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_FAILED", "ACTION_RECOMMENDED", "ACTION_RECOMMENDED"]);
+  assert.match(s.store.activity[2]!.body, /An earlier change here didn't go through, so this one is yours to approve\.$/);
 });
 
 test("an approval ESPN did not apply is never made again automatically at T-90", async () => {
@@ -229,8 +231,10 @@ test("a write a dead run left in flight is failed and told, if ESPN does not sho
   await s.run();
   assert.equal(s.store.actions[0]!.status, "failed");
   assert.equal(s.espn.writes.length, 0, "never retried");
-  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_FAILED"]);
+  // Then, with Achane still OUT at RB, the same fix is a proposal (an attempt was made for it this week).
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_FAILED", "ACTION_RECOMMENDED"]);
   assert.match(s.store.activity[0]!.body, /ESPN now shows Achane at RB and Wright on your bench\./);
+  assert.match(s.store.activity[1]!.body, /An earlier change here didn't go through/);
 });
 
 test("a write a dead run left in flight gets its receipt, if ESPN shows it", async () => {
@@ -331,4 +335,194 @@ test("a league waiting for a new sign-in is tried again within 5 minutes, not an
   assert.equal(sum.nextCheckAt, new Date(T - 40 * MIN).toISOString());
   assert.equal(s.store.checks.at(-1)!.patch.nextCheckAt, sum.nextCheckAt);
   assert.equal(s.espn.reads, 2, "the refusal was looked at twice");
+});
+
+// ---- the Oct 3 second review: incomplete reads, the verifying read, undone moves, the cadence
+
+/** Every player's kickoff gone, the way a failed schedule request leaves a read. The fake's roster is live, so this sticks. */
+function noSchedule(r: ReturnType<typeof team>): void {
+  for (const e of r.entries) e.player.game = undefined;
+}
+
+/** The kickoffs back, as a whole read has them. */
+function withSchedule(r: ReturnType<typeof team>): void {
+  const fresh = team();
+  for (const e of r.entries) e.player.game = entry(fresh, e.player.id).player.game;
+}
+
+test("a schedule that drops out for one check neither withdraws a scheduled move, re-announces it, nor asks the user to pick", async () => {
+  const s = setup({ roster: achaneOut(), at: SUNDAY_8AM });
+  await s.run();
+  const id = s.store.actions[0]!.id;
+  // Three drop-outs between 8 and 11, each followed by a whole read.
+  s.espn.onRead = (n, r) => (n % 2 === 0 ? noSchedule(r) : withSchedule(r));
+  const outcomes: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    s.clock.advance(15);
+    outcomes.push((await s.run()).outcome);
+  }
+  assert.deepEqual(outcomes, ["error", "ok", "error", "ok", "error", "ok"]);
+  assert.equal(s.store.actions.find((a) => a.id === id)!.status, "pending", "the scheduled move stands");
+  assert.deepEqual(s.store.actions.filter((a) => a.kind === "propose").length, 1, "and was not re-inserted");
+  assert.equal(s.store.activity.length, 1, "said once, with no withdrawal and no 'not sure enough to pick one' in between");
+  assert.equal(s.push.sent.length, 1);
+  assert.equal(s.espn.writes.length, 0);
+});
+
+test("a pending proposal is kept when the engine downgrades its finding to a choice that still includes it", async () => {
+  const s = setup({ roster: achaneOut(), authority: "ask_me", at: SUNDAY_8AM });
+  await s.run();
+  entry(s.espn.roster, WRIGHT).player.game = undefined; // only his kickoff is missing now
+  s.clock.advance(15);
+  const sum = await s.run();
+  assert.equal(sum.outcome, "ok");
+  assert.deepEqual(s.store.actions.map((a) => [a.kind, a.status]), [["propose", "pending"]]);
+  assert.equal(s.store.activity.length, 1, "the proposal is still the right question, so nothing new is asked");
+  // Approving it still works: Wright is among the options.
+  assert.equal((await decideAction(s.deps, "user-1", s.store.actions[0]!.id, "approve")).ok, true);
+});
+
+test("a half payload with HTTP 200 is a failed read, not an alarm per starting slot", async () => {
+  const empty = team();
+  empty.entries = []; // roster.entries absent from ESPN's answer
+  const s = setup({ roster: empty, at: SUNDAY_8AM });
+  const sum = await s.run();
+  assert.equal(sum.outcome, "error");
+  assert.equal(s.store.activity.length, 0, "not seven 'Nobody is starting at ...'");
+  assert.equal(s.store.checks.at(-1)!.patch.lastRoster, undefined);
+  assert.equal(sum.nextCheckAt, "2026-10-04T12:05:00.000Z");
+
+  const blank = team(); // entries present, player data absent: every status unknown, no kickoffs
+  for (const e of blank.entries) {
+    e.player.status = "unknown";
+    e.player.game = undefined;
+  }
+  const t = setup({ roster: blank, at: SUNDAY_8AM });
+  assert.equal((await t.run()).outcome, "error");
+  assert.equal(t.store.activity.length, 0, "not seven 'injury status could not be read'");
+
+  // The whole read that follows has nothing to add or withdraw.
+  s.espn.roster = team();
+  s.clock.advance(5);
+  const next = await s.run();
+  assert.deepEqual([next.outcome, next.findings, next.notified], ["ok", 0, 0]);
+  assert.equal(s.store.activity.length, 0);
+});
+
+test("the third incomplete read in a row is said once; a whole read in between starts the count again", async () => {
+  const s = setup({ roster: achaneOut(), at: SUNDAY_8AM });
+  s.espn.onRead = (_n, r) => noSchedule(r);
+  await s.run();
+  s.clock.advance(5);
+  await s.run();
+  assert.equal(s.store.activity.length, 0, "one or two is ESPN's half payload");
+  s.clock.advance(5);
+  const third = await s.run();
+  assert.equal(third.notified, 1);
+  assert.deepEqual(
+    s.store.activity.map((x) => [x.type, x.title]),
+    [["STATUS_CHANGED", "ESPN's data looks incomplete"]],
+  );
+  assert.match(s.store.activity[0]!.body, /won't make a move on my own until a read looks right\. Check your lineup in the ESPN app for now\.$/);
+  s.clock.advance(5);
+  await s.run();
+  s.clock.advance(5);
+  await s.run();
+  assert.equal(s.store.activity.length, 1, "said once");
+  assert.equal(s.push.sent.length, 1);
+
+  const t = setup({ roster: achaneOut(), at: SUNDAY_8AM });
+  t.espn.onRead = (n, r) => (n === 3 ? withSchedule(r) : noSchedule(r));
+  for (let i = 0; i < 5; i++) {
+    await t.run();
+    t.clock.advance(5);
+  }
+  assert.deepEqual(t.store.activity.map((x) => x.type), ["ACTION_RECOMMENDED"], "the whole read's proposal; no run of three");
+});
+
+test("a passing refusal on the read that verifies a write is not a failed write, a sign-out or a held week", async () => {
+  const s = setup({ roster: achaneOut() });
+  s.espn.onRead = (n) => {
+    s.espn.read = n === 3 ? "auth" : "ok"; // ESPN's WAF, once, on the read after the write
+  };
+  const sum = await s.run();
+  assert.equal(sum.outcome, "ok");
+  assert.equal(sum.executed, 1);
+  assert.equal(s.espn.reads, 4);
+  assert.deepEqual(s.pauses, [3000]);
+  assert.equal(s.store.actions[0]!.status, "done");
+  assert.equal(s.store.connections.get("conn-1")!.status, "active");
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_COMPLETED"]);
+  assert.equal(await s.store.failedWrites("conn-1", 5), 0, "the rest of the week stays automatic");
+});
+
+test("a 5xx on the read that verifies a write is tried again before anything is called unconfirmed", async () => {
+  const s = setup({ roster: achaneOut() });
+  s.espn.onRead = (n) => {
+    s.espn.read = n === 3 ? "error" : "ok";
+  };
+  const sum = await s.run();
+  assert.equal(sum.executed, 1);
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_COMPLETED"]);
+  assert.equal(s.espn.writes.length, 1, "the write itself is never sent twice");
+});
+
+test("a read host that lags the write by a moment gets a second look before the write is called unconfirmed", async () => {
+  const s = setup({ roster: achaneOut() });
+  s.espn.onRead = (n, r) => {
+    if (n < 3) return; // the check's read and the re-read before the write see the problem
+    const lag = n === 3; // the first read after the write still shows the old lineup
+    entry(r, ACHANE).slot = lag ? "RB" : "BENCH";
+    entry(r, WRIGHT).slot = lag ? "BENCH" : "RB";
+  };
+  const sum = await s.run();
+  assert.equal(sum.executed, 1);
+  assert.equal(s.espn.reads, 4);
+  assert.deepEqual(s.pauses, [3000]);
+  assert.equal(s.store.actions[0]!.status, "done");
+  assert.equal(s.espn.writes.length, 1);
+});
+
+test("the Saturday test swap's verifying read is patient in the same way", async () => {
+  const s = setup({ at: "2026-10-03T18:00:00.000Z", conn: { writeVerifiedAt: null } });
+  s.espn.onRead = (n) => {
+    s.espn.read = n === 2 ? "auth" : "ok";
+  };
+  const r = await manualSwap(s.deps, "user-1", "conn-1", SHAHEED, WALKER);
+  assert.equal(r.ok, true);
+  assert.equal(s.store.connections.get("conn-1")!.writeVerifiedAt, "2026-10-03T18:00:00.000Z", "the proof is not lost to a passing 403");
+  assert.equal(s.store.connections.get("conn-1")!.status, "active");
+});
+
+test("an automatic move the user undoes in the ESPN app is offered once for a tap, never made again, never silent", async () => {
+  const s = setup({ roster: achaneOut() });
+  assert.equal((await s.run()).executed, 1);
+  entry(s.espn.roster, ACHANE).slot = "RB"; // undone by mistake in the ESPN app at T-40
+  entry(s.espn.roster, WRIGHT).slot = "BENCH";
+  s.clock.advance(5);
+  const sum = await s.run();
+  assert.deepEqual([sum.findings, sum.executed, sum.proposed], [1, 0, 1]);
+  assert.equal(s.espn.writes.length, 1);
+  assert.equal(s.store.activity.at(-1)!.body, "Start Jaylen Wright at RB instead? Tap to approve. I already made an automatic move for this, so this one is yours to approve.");
+  for (let i = 0; i < 3; i++) {
+    s.clock.advance(2);
+    await s.run();
+  }
+  assert.equal(s.store.activity.length, 2, "said once");
+  assert.equal(s.espn.writes.length, 1);
+});
+
+test("the retry after a failed read, and after a sign-out, sit on the minute boundary the cron tick lands on", async () => {
+  const s = setup({ roster: achaneOut(), at: T - 45 * MIN + 800 }); // a check that started 800 ms after the tick
+  s.espn.read = "error";
+  assert.equal((await s.run()).nextCheckAt, new Date(T - 40 * MIN).toISOString(), "no roster to set a cadence by: 5 minutes, from the minute");
+
+  const r = achaneOut();
+  r.entries.push({ slot: "TE", player: { ...entry(r, SHAHEED).player, id: "9999" } });
+  const u = setup({ roster: r, at: T - 45 * MIN + 800 });
+  assert.equal((await u.run()).nextCheckAt, new Date(T - 43 * MIN).toISOString(), "an incomplete read's kickoffs still set the cadence: 2 minutes, from the minute");
+
+  const t = setup({ roster: achaneOut(), at: T - 45 * MIN + 800 });
+  t.espn.read = "auth";
+  assert.equal((await t.run()).nextCheckAt, new Date(T - 40 * MIN).toISOString());
 });

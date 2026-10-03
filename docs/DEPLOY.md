@@ -23,7 +23,7 @@ secret (`CRON_SECRET`, the owner's, by hand), and some Auth settings on the host
 | `deploy_edge_function` ×6, `list_edge_functions` | Anonymous sign-ins on (step 5) |
 | `get_publishable_keys`: confirm `eas.json` | Two email templates with `{{ .Token }}` (step 5) |
 | `get_advisors`, `query_logs`: check it | Email delivery: invited address or SMTP (step 5) |
-| `build_run`, `build_info`, `build_logs` (Expo) | Install the APK from the build page (step 8) |
+| `build_run`, `build_info`, `build_logs` (Expo), building the **pushed** branch from GitHub | Link the GitHub repo to the EAS project on expo.dev, then install the APK from the build page (step 8) |
 
 The dashboard is `https://supabase.com/dashboard/project/givfmjtlbojhsntceone`. On a phone
 the left sidebar is behind the menu button; the names below are the sidebar entries.
@@ -56,9 +56,22 @@ apply_migration
   query: <the whole of supabase/migrations/20261003000000_beta.sql>
 ```
 
-`name` is the migration's version with its label **(unverified: the tool may want the
-label alone, `beta`; either way it records the migration in
-`supabase_migrations.schema_migrations`, so a later CLI `db push` will not run it twice)**.
+`name` is a label in snake_case, not a version: the tool's own description asks for "the
+name of the migration in snake_case", and **the version it records in
+`supabase_migrations.schema_migrations` is its own (the time of the call), with the name
+stored beside it** (unverified: from the tool's description, not a run). The CLI matches
+local files to hosted rows by version alone, so it would never recognise
+`20261003000000_beta.sql` as applied and `db push` would try to run it again. After the
+call, read what was recorded:
+
+```sql
+-- execute_sql
+select version, name from supabase_migrations.schema_migrations order by version;
+```
+
+Write the version here and commit: **applied version: `_______________`** (fill in after
+step 2). Then either rename the local file to `<version>_beta.sql` so the CLI matches it,
+or run `migration repair` before any `db push` (see "Fallback").
 
 It creates the five tables, their RLS policies and column grants, the Vault functions,
 enables `pg_cron` and `pg_net`, and schedules the job `hangoverbot-check` every minute.
@@ -143,9 +156,12 @@ costs nothing to turn off: every user function checks the caller itself
 without a user; the publishable key alone is refused too), and `check` takes
 `x-cron-secret`, which pg_cron sends with no JWT at all, so `check` *must* have it off or
 cron's calls never arrive. `supabase/config.toml` says the same for the CLI path.
-**If the tool has no `verify_jwt` field (unverified):** the owner turns it off per
-function in the dashboard, **Edge Functions** → the function → **Details** → *Verify JWT
-with legacy secret* off **(unverified label)**. Do `check` first.
+The tool **has** the field: `verify_jwt` is **required**, its default is `true`, and its
+description argues for `true` ("you SHOULD ALWAYS enable this"). It is still `false` here,
+on every deploy and every redeploy, for the reasons above; each bundle's `manifest.json`
+carries `verify_jwt: false` so the value is read, not remembered. If a deploy ever lands
+with it on, the owner can turn it off in the dashboard, **Edge Functions** → the function →
+**Details** → *Verify JWT with legacy secret* off **(unverified label)**, `check` first.
 
 Then `list_edge_functions`: six functions, each `ACTIVE`, each `verify_jwt: false`.
 
@@ -158,7 +174,8 @@ logs only the variable's name (`store: database key from ...`). If every functio
 500 and the log says `SUPABASE_URL and one of SUPABASE_SECRET_KEYS, SUPABASE_SECRET_KEY,
 SUPABASE_SERVICE_ROLE_KEY must be set`, the runtime names the key something else: add
 that name to `keys.ts`, or set `SUPABASE_SECRET_KEY` by hand on the Secrets page to the
-project's secret key (dashboard, **Project Settings** → **API Keys**).
+project's secret key (dashboard, **Project Settings** → **API Keys**). A key that is set
+but **refused** looks different: every user call answers 401, not 500 (step 6).
 
 ## 5. What the owner sets by hand in the dashboard
 
@@ -223,6 +240,20 @@ curl -s -X POST "https://givfmjtlbojhsntceone.supabase.co/functions/v1/read" \
 # -> 404 {"error":"not_found",...}. A 401 here means the gateway or requireUser refused the session.
 ```
 
+Two 401s look alike from the phone and are not:
+
+- A 401 whose body has **no `error` field** (`Invalid JWT`) is the gateway's: `verify_jwt`
+  is on for that function (step 4).
+- A 401 `{"error":"unauthorized"}` on **every** call with a fresh session, with
+  `auth: getUser refused (401 ...)` in that function's log (`query_logs`, service
+  `edge-function`), means the Auth server refused the function's **own** key, not the
+  user's token: the runtime injected only the legacy `SUPABASE_SERVICE_ROLE_KEY` and the
+  project's legacy JWT keys are disabled (plausible here: `eas.json` already carries an
+  `sb_publishable_` key). The app shows it as "Your session has ended" on every screen
+  after sign-in. The remedy is on the Secrets page: `SUPABASE_SECRET_KEY` = the project's
+  `sb_secret_` key (**Project Settings** → **API Keys**); `_lib/keys.ts` prefers it over the
+  legacy name. `requireUser` logs the refusal's status and error name only, never the token.
+
 That proves the session reaches a function, the function reaches the database, and the
 caller check works. The first real proof of ESPN is the app (step 8): sign in to ESPN
 inside it, pick the league, and the **What we read from ESPN** screen is `espn-connect`,
@@ -242,12 +273,32 @@ into the app.
 
 ## 8. The app build, through the Expo MCP connector
 
-The project is linked: id `ffa6f3e6-8c06-4fc3-a893-5605dd208191`, slug
-`rosterbuddies-fkijb1junjqxswiiv33pi`, in `apps/mobile/app.config.ts`. From the repo:
+The project exists on expo.dev: id `ffa6f3e6-8c06-4fc3-a893-5605dd208191`, slug
+`rosterbuddies-fkijb1junjqxswiiv33pi`, in `apps/mobile/app.config.ts`.
+
+`build_run` builds **from a GitHub repository connected to the EAS project**, never from
+the session's checkout (its description: "requires a GitHub repository to be connected to
+the project"). So two things come first:
+
+1. **The owner, on expo.dev:** the project → **GitHub** (under the project's settings) →
+   install the Expo GitHub app on the repository if asked → connect this repo → **Base
+   directory** `apps/mobile` **(unverified: the page's exact labels)**. Without this the
+   call is refused for want of a connected repository.
+2. **The coordinator pushes the branch to build.** `eas.json`, `app.config.ts` and the
+   whole app are read from that commit on GitHub, not from the local checkout: an edit
+   that is not pushed is not in the build.
+
+Then, with the tool's real parameters (`platform`, `buildProfile` and `gitRef` are
+required; `appId` or `appFullName` names the project; `baseDirectory` is the monorepo's):
 
 ```
-build_run     platform: android, profile: preview, project directory: apps/mobile   (unverified parameter names)
-build_info    the build id it returns: status, and when finished the artifact (APK) URL
+build_run
+  appId:          "ffa6f3e6-8c06-4fc3-a893-5605dd208191"
+  platform:       "ANDROID"
+  buildProfile:   "preview"
+  gitRef:         "<the pushed branch, tag or commit SHA>"
+  baseDirectory:  "apps/mobile"
+build_info    buildId: <the id build_run returns>: status, and when finished the artifact (APK) URL
 build_logs    the same id, when it fails
 ```
 
@@ -297,7 +348,10 @@ and the database pooler host, `SUPABASE_ACCESS_TOKEN` and the database password.
 ```sh
 export REF=givfmjtlbojhsntceone
 npx -y supabase@2 link --project-ref "$REF" --password "$DB_PASSWORD"   # -p; or --db-url with the pooler string
-npx supabase db push --dry-run                                            # should list 20261003000000_beta.sql only
+npx supabase db push --dry-run     # before the migration is applied: lists 20261003000000_beta.sql only.
+                                   # After step 2 it must list nothing; if it still lists the file, the hosted
+                                   # row has the version apply_migration gave it (step 2), so first:
+npx supabase migration repair --status applied <that version>             # or rename the file to <version>_beta.sql
 npx supabase db push
 npx supabase secrets set CRON_SECRET="$CRON_SECRET" --project-ref "$REF"
 npx supabase functions deploy --project-ref "$REF"      # all six; config.toml carries verify_jwt = false and the import maps
@@ -315,6 +369,12 @@ read its diff first, it may also overwrite settings the file leaves at defaults.
 
 - **Code in `packages/`:** `npm run functions:build`, commit, `npm run functions:bundle`,
   redeploy the functions whose bundles changed (all six share `_shared`, so usually all).
+  **Every redeploy passes `verify_jwt: false`**, read from the bundle's `manifest.json`: the
+  tool's field is required, defaults to `true`, and its description argues for `true`. A
+  redeploy that takes the default puts the gateway check back on, and for `check` that means
+  every cron POST is refused at the door with 401 while `cron.job_run_details` still says
+  `succeeded`, so nothing is checked on Sunday until someone reads `net._http_response`.
+  Afterwards `list_edge_functions` must show `verify_jwt: false` for all six.
 - **Schema:** a new, later-dated file in `supabase/migrations/`, applied with
   `apply_migration` (or `db push`). Never edit a migration that has been applied. The
   Oct 3 edits to `20261003000000_beta.sql` (`write_verified_at`, the credential delete

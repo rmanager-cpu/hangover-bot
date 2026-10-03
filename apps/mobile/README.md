@@ -68,13 +68,15 @@ id the app still builds and runs, but cannot sign up for push.
 ### Without a computer
 
 EAS builds in the cloud, so a laptop is only needed to start a build, and even that has two
-phone-friendly routes. The planned one: a cloud session with the **Expo MCP connector**
-(`build_run` for Android, `preview` profile; `build_info` for the status and the APK link;
-`build_logs` if it fails), see `docs/DEPLOY.md` step 8. The other: link the GitHub repo to
-the project on expo.dev (base directory `apps/mobile`), set the environment variables below
-on expo.dev, and start builds from the website. Either way the Android build page has an
-install link that opens on the phone (allow your browser to install apps when Android asks).
-Not yet tried end to end.
+phone-friendly routes. **Both build from GitHub, so both need the repo linked to the EAS
+project on expo.dev** (the project → GitHub → install the Expo GitHub app → connect the
+repo, base directory `apps/mobile`) and the branch pushed. The planned one: a cloud session
+with the **Expo MCP connector** (`build_run` with `gitRef` the pushed branch, `platform`
+`ANDROID`, `buildProfile` `preview`, `baseDirectory` `apps/mobile`; `build_info` for the
+status and the APK link; `build_logs` if it fails), see `docs/DEPLOY.md` step 8. The other:
+set the environment variables below on expo.dev and start builds from the website. Either
+way the Android build page has an install link that opens on the phone (allow your browser
+to install apps when Android asks). Not yet tried end to end.
 
 ## Environment
 
