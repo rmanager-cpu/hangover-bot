@@ -7,10 +7,15 @@ const TURBO_PURPLE = "#6726E8";
 // Permanent once in App Store Connect (DECISIONS.md, 2026-10-02).
 const APP_ID = "com.turbolabs.hangoverbot";
 
+// The project the owner created on expo.dev. EAS refuses to build unless the slug
+// matches that project's slug; the name people see is still HangoverBot.
+const EAS_PROJECT_ID = "ffa6f3e6-8c06-4fc3-a893-5605dd208191";
+const EAS_SLUG = "rosterbuddies-fkijb1junjqxswiiv33pi";
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "HangoverBot",
-  slug: "hangoverbot",
+  slug: EAS_SLUG,
   scheme: "hangoverbot",
   version: "0.1.0",
   orientation: "portrait",
@@ -48,6 +53,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ],
   extra: {
     ...config.extra,
-    ...(process.env.EAS_PROJECT_ID ? { eas: { projectId: process.env.EAS_PROJECT_ID } } : {}),
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? EAS_PROJECT_ID },
   },
 });

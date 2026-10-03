@@ -63,11 +63,11 @@ browser to install apps when Android asks). Not yet tried end to end.
 |---|---|---|
 | `EXPO_PUBLIC_SUPABASE_URL` | `eas.json`, each profile | `https://<project-ref>.supabase.co`. Public. |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | `eas.json`, each profile | The project's anon key. Public. Never the service-role key. |
-| `EAS_PROJECT_ID` | shell + EAS environment variable | The id `eas init` prints. Needed for push tokens. |
+| `EAS_PROJECT_ID` | optional override | The owner's expo.dev project (`ffa6f3e6-…`) is already in `app.config.ts`, with its slug. Needed for push tokens. |
 | `GOOGLE_SERVICES_JSON` | EAS **file** environment variable | Firebase's `google-services.json` for Android push. Optional: without it the APK builds and runs, and Android push stays off (Settings says so). |
 
-`eas.json` ships with `REPLACE_WITH_SUPABASE_URL` / `REPLACE_WITH_SUPABASE_ANON_KEY`. A build
-made with those still opens, and says on screen that it isn't connected to a server.
+`eas.json` carries the beta project's Supabase URL and publishable key. Both are public by
+design: they ship inside the app, and Row Level Security is what protects the data.
 
 For pushes to arrive, Expo's push service also needs the platform keys on expo.dev,
 Credentials: an **FCM V1 service account key** for Android, and an **APNs key** for iOS (EAS
