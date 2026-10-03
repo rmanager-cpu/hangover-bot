@@ -75,3 +75,24 @@ Two deliberate departures from the sheet:
 Not in the mockups, required by the beta: the pre-sign-in disclosure, the ESPN sign-in
 WebView, "What we read from ESPN" with the test swap, claim-by-email, Activity with
 Approve/Decline, Settings with replacement order. Style them from the same system.
+
+## As built in the app (Oct 3)
+
+Where the beta and the sheet differ, the app went this way; change here before changing it there.
+
+- **Tabs stay Home · Activity · Settings**, the beta contract. The sheet's Team tab is the
+  "What we read from ESPN" row on Home's team card, and again under League in Settings.
+- **"Keep it safe" and "Replacement source" sit on the Protection screen**, not a step of their
+  own: fixed orange checkmarks with the sheet's copy, "Bench only" selected and "Bench + free
+  agents" dimmed "Coming soon", and the "Send Sunday lineup alerts" switch bound to the phone's
+  notification permission (once on, it is turned off in the phone's Settings, and the app says so).
+- **Choose team (04) is not a screen**: `connection-setup` finds the member's team. Its button,
+  "This is my team", is the confirm on "What we read from ESPN" during setup.
+- **Provider rows** are ESPN, Yahoo, Sleeper and MyFantasyLeague, each with our own one-letter
+  disc; only ESPN opens. Welcome's "How it works" unfolds the three promises in place.
+- **Icons** are `icons/icon-1024.png` and `adaptive-icon-1024.png` as this file says. The
+  **splash is the lockup on Midnight**, not the flying robot.
+- **The mascots** ship cut out against the brand navy (`apps/mobile/assets/brand/robot-*.png`,
+  made by `apps/mobile/scripts/brand-assets.py`), which only reads right on Midnight: the
+  flying robot on Welcome, the head peeking in beside "You're covered" on Home.
+- No Terms/Privacy line yet: there is no page to link to.

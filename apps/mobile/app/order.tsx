@@ -8,7 +8,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useData } from "../src/lib/data";
 import { slotLabel } from "../src/lib/format";
 import { color, font, radius, space } from "../src/theme";
-import { Banner, Body, Button, Loading, Muted, Screen } from "../src/ui";
+import { Banner, Body, Button, Card, Header, Loading, Muted, Screen } from "../src/ui";
 
 export default function ReplacementOrder() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -35,7 +35,7 @@ export default function ReplacementOrder() {
   if (!conn.lastRoster) {
     return (
       <Screen>
-        <Body>HangoverBot hasn't read your team yet. Open "What we read from ESPN" first, then come back.</Body>
+        <Header title="Replacement order" subtitle="HangoverBot hasn't read your team yet. Open “What we read from ESPN” first, then come back." />
       </Screen>
     );
   }
@@ -69,21 +69,21 @@ export default function ReplacementOrder() {
     <Screen
       footer={
         <View>
-          <Button title="Save order" large busy={saving} disabled={!changed} onPress={() => save(players.map((p) => p.id))} />
+          <Button title="Save order" arrow large busy={saving} disabled={!changed} onPress={() => save(players.map((p) => p.id))} />
           {conn.replacementOrder.length ? (
             <Button title="Clear it and use ESPN's projections" variant="quiet" disabled={saving} onPress={() => save([])} style={{ marginTop: space.sm }} />
           ) : null}
         </View>
       }
     >
-      <Body>When a starter can't play, I start the first player on this list who can fill that slot.</Body>
-      <Muted style={{ marginTop: space.sm, marginBottom: space.lg }}>
+      <Header title="Replacement order" subtitle="When a starter can't play, I start the first player on this list who can fill that slot." style={{ marginBottom: space.sm }} />
+      <Muted style={{ marginBottom: space.lg }}>
         {conn.replacementOrder.length ? "This is your saved order." : "No order saved yet, so I use ESPN's projections. This list starts in that order."}
       </Muted>
       {error ? <Banner tone="warn" body={error} /> : null}
       {players.length === 0 ? <Muted>Nobody is on your bench in the last read.</Muted> : null}
       {players.map((p, i) => (
-        <View key={p.id} style={s.row}>
+        <Card key={p.id} style={s.row}>
           <Text style={s.rank}>{i + 1}</Text>
           <View style={{ flex: 1 }}>
             <Body style={{ fontWeight: "700" }} numberOfLines={1}>
@@ -96,7 +96,7 @@ export default function ReplacementOrder() {
           </View>
           <Arrow label="Up" glyph="▲" disabled={i === 0} onPress={() => move(i, -1)} />
           <Arrow label="Down" glyph="▼" disabled={i === players.length - 1} onPress={() => move(i, 1)} />
-        </View>
+        </Card>
       ))}
     </Screen>
   );
@@ -110,7 +110,7 @@ function Arrow(props: { label: string; glyph: string; disabled: boolean; onPress
       disabled={props.disabled}
       onPress={props.onPress}
       hitSlop={6}
-      style={({ pressed }) => [s.arrow, props.disabled && { opacity: 0.25 }, pressed && { backgroundColor: color.purpleSoft }]}
+      style={({ pressed }) => [s.arrow, props.disabled && { opacity: 0.25 }, pressed && { backgroundColor: color.orangeSoft }]}
     >
       <Text style={s.glyph}>{props.glyph}</Text>
     </Pressable>
@@ -118,20 +118,8 @@ function Arrow(props: { label: string; glyph: string; disabled: boolean; onPress
 }
 
 const s = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: color.navy,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: color.line,
-    paddingVertical: space.sm,
-    paddingLeft: space.md,
-    paddingRight: space.sm,
-    marginBottom: space.sm,
-    gap: space.sm,
-  },
-  rank: { width: 24, color: color.electric, fontSize: font.h2, fontWeight: "900" },
-  arrow: { width: 44, height: 44, borderRadius: radius.sm, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: color.line },
-  glyph: { color: color.text, fontSize: font.body },
+  row: { flexDirection: "row", alignItems: "center", paddingVertical: space.sm, paddingLeft: space.lg, paddingRight: space.sm, marginBottom: space.sm, gap: space.sm },
+  rank: { width: 26, color: color.orange, fontSize: font.h2, fontWeight: "900" },
+  arrow: { width: 44, height: 44, borderRadius: radius.sm, alignItems: "center", justifyContent: "center", backgroundColor: color.inkRaised },
+  glyph: { color: color.ink, fontSize: font.body },
 });

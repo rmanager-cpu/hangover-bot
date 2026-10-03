@@ -8,7 +8,7 @@ import { useSession } from "../src/lib/session";
 import { finishSetup } from "../src/lib/setup";
 import { supabase } from "../src/lib/supabase";
 import { space } from "../src/theme";
-import { Banner, Body, Button, Card, Field, H2, Muted, Screen } from "../src/ui";
+import { Banner, Body, Button, Card, Field, H2, Header, Muted, Screen } from "../src/ui";
 
 const looksLikeEmail = (e: string) => /^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(e.trim());
 
@@ -88,8 +88,8 @@ export default function Claim() {
 
   if (claimed) {
     return (
-      <Screen footer={<Button title="Continue" large busy={busy} onPress={() => { setBusy(true); done().finally(() => setBusy(false)); }} />}>
-        <Card tone="calm">
+      <Screen footer={<Button title="Continue" arrow large busy={busy} onPress={() => { setBusy(true); done().finally(() => setBusy(false)); }} />}>
+        <Card>
           <H2>Your account is claimed</H2>
           <Body style={{ marginTop: space.sm }}>Signed in as {user?.email ?? "your email"}.</Body>
         </Card>
@@ -104,10 +104,12 @@ export default function Claim() {
         setup === "1" && then !== "bench_protection" ? <Button title="Skip for now" variant="quiet" onPress={finishSetup} /> : undefined
       }
     >
-      <Body>
-        Add your email so your league stays yours if you change phones. It's also what lets Bench Protection make moves on its own: without it, I ask you first.
-      </Body>
-      <Muted style={{ marginTop: space.sm, marginBottom: space.xl }}>No password. We email you a 6-digit code.</Muted>
+      <Header
+        title="Claim your account"
+        subtitle="Add your email so your league stays yours if you change phones. It's also what lets Bench Protection make moves on its own: without it, I ask you first."
+        style={{ marginBottom: space.sm }}
+      />
+      <Muted style={{ marginBottom: space.xl }}>No password. We email you a 6-digit code.</Muted>
 
       {error ? (
         <Banner
@@ -133,7 +135,7 @@ export default function Claim() {
             returnKeyType="send"
             onSubmitEditing={() => looksLikeEmail(email) && send()}
           />
-          <Button title="Send code" busy={busy} disabled={!looksLikeEmail(email)} onPress={send} />
+          <Button title="Send code" arrow busy={busy} disabled={!looksLikeEmail(email)} onPress={send} />
         </>
       ) : (
         <>
@@ -150,7 +152,7 @@ export default function Claim() {
             returnKeyType="done"
             onSubmitEditing={() => code.length === 6 && verify()}
           />
-          <Button title="Confirm" busy={busy} disabled={code.length !== 6} onPress={verify} />
+          <Button title="Confirm" arrow busy={busy} disabled={code.length !== 6} onPress={verify} />
           <Button title="Send a new code" variant="quiet" disabled={busy} onPress={send} style={{ marginTop: space.md }} />
           <Button
             title="Use a different email"

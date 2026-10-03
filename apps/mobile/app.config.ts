@@ -1,8 +1,9 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-// Brand from the handoff, section 24.
+// Brand (docs/brand/README.md). The icons are the owner's flying robot on the brand navy.
 const MIDNIGHT = "#070A24";
-const TURBO_PURPLE = "#6726E8";
+const ICON_NAVY = "#000523";
+const TURBO_ORANGE = "#FF7A00";
 
 // Permanent once in App Store Connect (DECISIONS.md, 2026-10-02).
 const APP_ID = "com.turbolabs.hangoverbot";
@@ -31,7 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: APP_ID,
-    adaptiveIcon: { foregroundImage: "./assets/adaptive-icon.png", backgroundColor: MIDNIGHT },
+    adaptiveIcon: { foregroundImage: "./assets/adaptive-icon.png", backgroundColor: ICON_NAVY },
     // Expo's defaults; this app never draws over other apps or touches shared storage.
     blockedPermissions: [
       "android.permission.SYSTEM_ALERT_WINDOW",
@@ -43,12 +44,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    // The splash is the lockup on Midnight.
     [
       "expo-splash-screen",
-      { image: "./assets/splash-icon.png", imageWidth: 160, resizeMode: "contain", backgroundColor: MIDNIGHT },
+      { image: "./assets/splash-icon.png", imageWidth: 300, resizeMode: "contain", backgroundColor: MIDNIGHT },
     ],
     // The service names this channel on every push (ANDROID_CHANNEL); src/lib/push.tsx creates it.
-    ["expo-notifications", { icon: "./assets/notification-icon.png", color: TURBO_PURPLE, defaultChannel: "default" }],
+    ["expo-notifications", { icon: "./assets/notification-icon.png", color: TURBO_ORANGE, defaultChannel: "default" }],
     "./plugins/with-cookies-gradle.js",
   ],
   extra: {

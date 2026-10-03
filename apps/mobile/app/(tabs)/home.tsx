@@ -1,17 +1,20 @@
-// Home stays small (handoff section 3): are you covered, the next kickoff, who's being
-// watched, the protection level, anything unresolved, and the last receipt.
+// Home stays small (handoff section 3), laid out as the brand sheet draws it: are you
+// covered, the team card with its watched starters, the last action, and anything
+// unresolved. The robot peeks in beside the headline when all is well.
 
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ROBOT_PEEK } from "../../src/brand";
+import { Clock, GearIcon, Tick, Tile } from "../../src/icons";
 import { useData, usePull, type Connection, type Proposal } from "../../src/lib/data";
-import { agoText, AUTHORITY, kickoffText, slotLabel, statusTag, untilText, whenText } from "../../src/lib/format";
+import { agoText, kickoffText, protectionLine, slotLabel, statusPill, untilText, whenText } from "../../src/lib/format";
 import { usePush } from "../../src/lib/push";
 import { nextKickoff, problems, proposalFor, shortName, starters, type Problem } from "../../src/lib/roster";
 import { useSession } from "../../src/lib/session";
 import { Proposals } from "../../src/Proposals";
-import { color, font, space } from "../../src/theme";
-import { Banner, Body, Button, Card, H2, Hero, Label, Loading, Muted, Pill, Screen } from "../../src/ui";
+import { color, space } from "../../src/theme";
+import { Banner, Body, Button, Card, Divider, Dot, H2, Hero, Label, Loading, Muted, Pill, Row, Screen, Wordmark } from "../../src/ui";
 
 export default function Home() {
   const data = useData();
@@ -42,73 +45,100 @@ export default function Home() {
   const open = roster ? problems(roster, now).filter((pr) => !proposalFor(pr, mine, conn.id)) : [];
   const receipt = data.activity.find((a) => a.connectionId === conn.id && a.type === "ACTION_COMPLETED");
   const actingAsAskMe = (conn.authority === "bench_protection" || conn.authority === "ai_rescue") && !claimed;
+  const next = roster ? nextKickoff(roster, now) : null;
+  const weekLine = roster ? `Week ${roster.period} · ${next ? `Next lock ${kickoffText(next.at)}` : "No more kickoffs this week"}` : "Not read yet";
 
   return (
     <Screen edges={["top", "left", "right"]} {...pull}>
       <View style={s.top}>
-        <Text style={s.brand}>HangoverBot</Text>
-        {data.connections.length > 1 ? (
-          <Pressable onPress={() => cycle(data.connections, conn, data.select)} hitSlop={8}>
-            <Pill text={(conn.leagueName ?? "League") + "  ›"} />
-          </Pressable>
-        ) : null}
+        <Wordmark width={168} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Settings" onPress={() => router.push("/settings")} hitSlop={10}>
+          <GearIcon color={color.muted} size={26} />
+        </Pressable>
       </View>
+      {data.connections.length > 1 ? (
+        <Pressable accessibilityRole="button" onPress={() => cycle(data.connections, conn, data.select)} hitSlop={8} style={{ alignSelf: "flex-start", marginBottom: space.md }}>
+          <Pill text={(conn.leagueName ?? "League") + "  ›"} />
+        </Pressable>
+      ) : null}
 
-      <Status conn={conn} needTap={needTap} open={open} scheduled={scheduled} />
+      <Status conn={conn} claimed={claimed} needTap={needTap} open={open} scheduled={scheduled} />
 
       {needTap.length ? <Proposals pending={needTap} limit={2} /> : null}
 
       {data.error ? <Banner tone="warn" body={data.error} /> : null}
 
-      {roster ? <Kickoff roster={roster} now={now} /> : null}
-
-      {roster ? (
-        <Card>
-          <Label>Watched starters</Label>
-          {starters(roster).map((e, i, all) => {
-            const tag = statusTag(e.player.status);
-            const bye = e.player.game === null;
+      <Card>
+        <View style={s.cardHead}>
+          <Tile tone="orange">
+            <Tick size={16} />
+          </Tile>
+          <View style={{ flex: 1 }}>
+            <H2 style={{ fontSize: 20 }} numberOfLines={1}>
+              {conn.teamName ?? "Your team"}
+            </H2>
+            <Muted style={{ marginTop: 2 }}>{weekLine}</Muted>
+            {next ? <Muted>{`${next.names.map(shortName).join(", ")} ${untilText(next.at, now)}`}</Muted> : null}
+          </View>
+        </View>
+        <Divider style={{ marginVertical: space.lg }} />
+        <Label>Watched starters</Label>
+        {roster ? (
+          starters(roster).map((e, i, all) => {
+            const pill = statusPill(e.player.status, e.player.game === null);
             return (
-              <View key={e.player.id + e.slot + i} style={[s.starter, i < all.length - 1 && s.line]}>
-                <Text style={s.slot}>{slotLabel(e.slot)}</Text>
-                <Body style={{ flex: 1 }} numberOfLines={1}>
+              <View key={e.player.id + e.slot + i} style={[s.starter, i < all.length - 1 && s.starterLine]}>
+                <View style={s.slot}>
+                  <Text style={s.slotText}>{slotLabel(e.slot)}</Text>
+                </View>
+                <Body style={{ flex: 1, fontWeight: "600" }} numberOfLines={1}>
                   {e.player.name}
                 </Body>
-                {bye ? <Pill text="BYE" tone="warn" /> : tag ? <Pill text={tag.tag} tone="warn" /> : null}
+                <Pill text={pill.text} tone={pill.tone} />
               </View>
             );
-          })}
-          <Button title="What we read from ESPN" variant="quiet" onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} style={{ alignSelf: "flex-start", marginTop: space.sm }} />
-        </Card>
-      ) : (
-        <Banner body="HangoverBot hasn't read your team yet." action={{ title: "Read it now", onPress: () => router.push({ pathname: "/read/[id]", params: { id: conn.id } }) }} />
-      )}
+          })
+        ) : (
+          <Muted>HangoverBot hasn't read your team yet.</Muted>
+        )}
+        <Divider style={{ marginTop: space.sm }} />
+        <Row title="What we read from ESPN" detail={roster ? "Your team as HangoverBot sees it, and the test swap" : "Read it now"} onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} last />
+      </Card>
 
       <Card>
-        <Label>Protection</Label>
-        <H2>{AUTHORITY[conn.authority === "ai_rescue" ? "bench_protection" : conn.authority].name}</H2>
-        <Muted style={{ marginTop: space.xs }}>
-          {actingAsAskMe ? "Working as Ask Me until you claim your account." : AUTHORITY[conn.authority === "ai_rescue" ? "bench_protection" : conn.authority].short}
-        </Muted>
-        <View style={{ flexDirection: "row", gap: space.sm, marginTop: space.md, flexWrap: "wrap" }}>
-          <Button title="Change" variant="secondary" onPress={() => router.push({ pathname: "/protection", params: { id: conn.id } })} />
-          {actingAsAskMe ? <Button title="Claim your account" variant="decisive" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} /> : null}
+        <View style={s.cardHead}>
+          <Tile tone="grey">
+            <Clock />
+          </Tile>
+          <View style={{ flex: 1 }}>
+            <H2 style={{ fontSize: 20 }}>Last action</H2>
+            {receipt ? (
+              <>
+                <Body style={{ marginTop: 2 }}>{receipt.title}</Body>
+                <Muted style={{ marginTop: 2 }}>
+                  {receipt.body ? receipt.body + " · " : ""}
+                  {whenText(receipt.createdAt)}
+                </Muted>
+              </>
+            ) : (
+              <Muted style={{ marginTop: 2 }}>No moves made yet.</Muted>
+            )}
+          </View>
+        </View>
+        <View style={s.actions}>
+          <Button title="View activity" variant="secondary" onPress={() => router.push("/activity")} style={s.action} />
+          <Button title="Manage protection" onPress={() => router.push({ pathname: "/protection", params: { id: conn.id } })} style={s.action} />
         </View>
       </Card>
 
-      <Card>
-        <Label>Last receipt</Label>
-        {receipt ? (
-          <>
-            <H2>{receipt.title}</H2>
-            <Body style={{ marginTop: space.xs }}>{receipt.body}</Body>
-            <Muted style={{ marginTop: space.xs }}>{whenText(receipt.createdAt)}</Muted>
-          </>
-        ) : (
-          <Muted>No moves yet. Every move I make shows up in Activity with a receipt.</Muted>
-        )}
-        <Button title="All activity" variant="quiet" onPress={() => router.push("/activity")} style={{ alignSelf: "flex-start", marginTop: space.sm }} />
-      </Card>
+      {actingAsAskMe ? (
+        <Banner
+          tone="warn"
+          title="Working as Ask me first"
+          body="Bench Protection only moves players on its own for a claimed account. Until then I send you each move to approve."
+          action={{ title: "Claim your account", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
+        />
+      ) : null}
 
       {push.state.status === "denied" ? (
         <Banner body="Alerts are off for HangoverBot on this phone, so you'll only see news when you open the app." action={{ title: "Turn on alerts", onPress: () => push.enable(true) }} />
@@ -125,94 +155,99 @@ function cycle(all: Connection[], cur: Connection, select: (id: string) => void)
   if (next) select(next.id);
 }
 
-function Status(props: { conn: Connection; needTap: Proposal[]; open: Problem[]; scheduled: Proposal[] }) {
+function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]; open: Problem[]; scheduled: Proposal[] }) {
   const { conn } = props;
   const team = conn.teamName ?? "your team";
+  const line = protectionLine(conn.authority, props.claimed, conn.status);
   const checked = conn.lastCheckedAt ? `Last checked ${agoText(conn.lastCheckedAt)}.` : "First check coming up.";
 
   if (conn.status === "needs_reauth") {
     return (
-      <Card tone="warn">
-        <Text style={[s.state, { color: color.orange }]}>ACTION NEEDED</Text>
-        <H2 style={{ marginTop: space.sm }}>ESPN signed HangoverBot out</H2>
-        <Body style={{ marginTop: space.xs }}>Sign in to ESPN again so I can keep watching {team}. Until then I can't see or fix your lineup.</Body>
-        <Button title="Sign in to ESPN" variant="decisive" large onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })} style={{ marginTop: space.lg }} />
-      </Card>
+      <>
+        <Headline tone="red" title="Signed out of ESPN" line="ESPN signed HangoverBot out." />
+        <Card tone="warn">
+          <Body>Sign in to ESPN again so I can keep watching {team}. Until then I can't see or fix your lineup.</Body>
+          <Button title="Sign in to ESPN" arrow large onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })} style={{ marginTop: space.lg }} />
+        </Card>
+      </>
     );
   }
   if (conn.status === "paused") {
     return (
-      <Card>
-        <Text style={s.state}>PAUSED</Text>
-        <Body style={{ marginTop: space.sm }}>I'm not watching {team} right now.</Body>
-        <Button title="Resume in Settings" variant="secondary" onPress={() => router.push("/settings")} style={{ marginTop: space.lg, alignSelf: "flex-start" }} />
-      </Card>
+      <>
+        <Headline tone="muted" title="Paused" line={line} />
+        <Card>
+          <Body>I'm not watching {team} right now.</Body>
+          <Button title="Resume in Settings" variant="secondary" onPress={() => router.push("/settings")} style={{ marginTop: space.lg, alignSelf: "flex-start" }} />
+        </Card>
+      </>
     );
   }
   if (props.needTap.length || props.open.length) {
     return (
-      <Card tone="warn">
-        <Text style={[s.state, { color: color.orange }]}>ACTION NEEDED</Text>
-        {props.open.map((p, i) => (
-          <Body key={p.text + i} style={{ marginTop: space.sm }}>
-            {p.text}.
-          </Body>
-        ))}
-        {props.open.length ? (
-          <Muted style={{ marginTop: space.xs }}>
-            {conn.authority === "alerts" ? "You're on Alerts, so I leave the fix to you in the ESPN app." : "I don't have a move I can make for this. Check your lineup in the ESPN app."}
-          </Muted>
-        ) : null}
-        {props.needTap.length ? <Body style={{ marginTop: space.sm }}>{props.needTap.length === 1 ? "One move needs your answer." : `${props.needTap.length} moves need your answer.`}</Body> : null}
-        <Muted style={{ marginTop: space.sm }}>{checked}</Muted>
-      </Card>
+      <>
+        <Headline tone="orange" title="Action needed" line={line} note={checked} />
+        <Card tone="warn">
+          {props.open.map((p, i) => (
+            <Body key={p.text + i} style={{ fontWeight: "600", marginBottom: space.xs }}>
+              {p.text}.
+            </Body>
+          ))}
+          {props.open.length ? (
+            <Muted>
+              {conn.authority === "alerts" ? "You're on Tell me, so I leave the fix to you in the ESPN app." : "I don't have a move I can make for this. Check your lineup in the ESPN app."}
+            </Muted>
+          ) : null}
+          {props.needTap.length ? (
+            <Body style={{ fontWeight: "600", marginTop: props.open.length ? space.sm : 0 }}>
+              {props.needTap.length === 1 ? "One move needs your answer." : `${props.needTap.length} moves need your answer.`}
+            </Body>
+          ) : null}
+        </Card>
+      </>
     );
   }
   return (
-    <Card tone="calm" style={s.covered}>
-      <View style={s.check}>
-        <View style={s.checkMark} />
-      </View>
-      <Hero style={{ marginTop: space.md }}>YOU'RE COVERED</Hero>
-      <Body style={{ marginTop: space.xs, color: color.muted }}>{team}</Body>
+    <>
+      <Headline tone="green" title="You're covered" line={line} note={checked} robot />
       {props.scheduled.map((p) => (
-        <Body key={p.id} style={{ marginTop: space.md }}>
+        <Body key={p.id} style={{ color: color.muted, marginBottom: space.md }}>
           Scheduled for {whenText(p.autoAt!)}: {p.summary.charAt(0).toLowerCase() + p.summary.slice(1)}.
         </Body>
       ))}
-      <Muted style={{ marginTop: space.sm }}>{checked}</Muted>
-    </Card>
+    </>
   );
 }
 
-function Kickoff(props: { roster: NonNullable<Connection["lastRoster"]>; now: Date }) {
-  const next = nextKickoff(props.roster, props.now);
+/** The big line at the top of Home, with the robot peeking in from the right when asked. */
+function Headline(props: { tone: "green" | "orange" | "red" | "muted"; title: string; line: string; note?: string; robot?: boolean }) {
   return (
-    <Card>
-      <Label>Next kickoff</Label>
-      {next ? (
-        <>
-          <H2>
-            {kickoffText(next.at)} <Text style={{ color: color.muted, fontWeight: "400", fontSize: font.body }}>({untilText(next.at, props.now)})</Text>
-          </H2>
-          <Muted style={{ marginTop: space.xs }}>{next.names.map(shortName).join(", ")}</Muted>
-        </>
-      ) : (
-        <Muted>No more kickoffs for your starters this week.</Muted>
-      )}
-    </Card>
+    <View style={s.headline}>
+      {props.robot ? <Image source={ROBOT_PEEK.source} style={s.robot} resizeMode="contain" accessibilityIgnoresInvertColors /> : null}
+      <View style={[{ flex: 1 }, props.robot && { paddingRight: 96 }]}>
+        <View style={s.headRow}>
+          <Dot tone={props.tone} />
+          <Hero style={s.hero}>{props.title}</Hero>
+        </View>
+        <Body style={s.line}>{props.line}</Body>
+        {props.note ? <Muted style={{ marginTop: space.xs }}>{props.note}</Muted> : null}
+      </View>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.lg, marginTop: space.sm },
-  brand: { color: color.text, fontSize: font.h2, fontWeight: "900", letterSpacing: 0.3 },
-  state: { color: color.text, fontSize: font.title, fontWeight: "900", letterSpacing: 0.5 },
-  covered: { alignItems: "flex-start", paddingVertical: space.xl },
-  check: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.purple, alignItems: "center", justifyContent: "center" },
-  checkMark: { width: 18, height: 10, borderLeftWidth: 3.5, borderBottomWidth: 3.5, borderColor: color.paper, transform: [{ rotate: "-45deg" }], marginTop: -4 },
+  top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.lg, marginTop: space.xs },
+  headline: { minHeight: 96, justifyContent: "center", marginBottom: space.lg },
+  headRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+  hero: { fontSize: 32, lineHeight: 38, flexShrink: 1 },
+  line: { color: color.muted, fontSize: 17, marginTop: space.xs, marginLeft: 14 + space.md },
+  robot: { position: "absolute", right: -space.sm, top: -space.md, width: 176, height: 176 / ROBOT_PEEK.aspect },
+  cardHead: { flexDirection: "row", alignItems: "center", gap: space.md },
   starter: { flexDirection: "row", alignItems: "center", paddingVertical: space.sm, gap: space.md },
-  line: { borderBottomWidth: 1, borderBottomColor: color.line },
-  slot: { width: 44, color: color.muted, fontSize: font.small, fontWeight: "800" },
+  starterLine: { borderBottomWidth: 1, borderBottomColor: color.inkLine },
+  slot: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.inkRaised, alignItems: "center", justifyContent: "center" },
+  slotText: { color: color.inkMuted, fontSize: 11, fontWeight: "800" },
+  actions: { flexDirection: "row", gap: space.sm, marginTop: space.lg },
+  action: { flex: 1, paddingHorizontal: space.md },
 });
-

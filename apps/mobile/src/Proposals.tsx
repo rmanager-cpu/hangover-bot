@@ -7,7 +7,7 @@ import { View } from "react-native";
 import { api, messageOf } from "./lib/api";
 import { useData, type Proposal } from "./lib/data";
 import { kickoffText, whenText } from "./lib/format";
-import { space } from "./theme";
+import { color, space } from "./theme";
 import { Body, Button, Card, H2, Label, Muted, Pill } from "./ui";
 
 const sentence = (t: string) => (/[.!?]$/.test(t) ? t : t + ".");
@@ -41,8 +41,8 @@ export function Proposals(props: { pending: Proposal[]; limit?: number }) {
   return (
     <View>
       {answers.map((a) => (
-        <Card key={"a" + a.proposal.id} tone={a.ok ? "calm" : "warn"}>
-          <Pill text={a.ok ? "ANSWERED" : "DIDN'T GO THROUGH"} tone={a.ok ? "calm" : "warn"} />
+        <Card key={"a" + a.proposal.id}>
+          <Pill text={a.ok ? "Answered" : "Didn't go through"} tone={a.ok ? "healthy" : "out"} />
           <H2 style={{ marginTop: space.sm }}>{a.proposal.summary}</H2>
           <Body style={{ marginTop: space.sm }}>{a.message}</Body>
         </Card>
@@ -51,8 +51,8 @@ export function Proposals(props: { pending: Proposal[]; limit?: number }) {
         const auto = !!p.autoAt;
         const mine = busy?.id === p.id;
         return (
-          <Card key={p.id} tone={auto ? "calm" : "warn"}>
-            <Label>{auto ? "Scheduled move" : "Your call"}</Label>
+          <Card key={p.id} tone={auto ? "light" : "warn"}>
+            <Label style={auto ? undefined : { color: color.orange }}>{auto ? "Scheduled move" : "Your call"}</Label>
             <H2>{p.summary}</H2>
             {p.reason ? <Body style={{ marginTop: space.xs }}>{sentence(p.reason)}</Body> : null}
             {p.autoAt ? (
@@ -61,7 +61,7 @@ export function Proposals(props: { pending: Proposal[]; limit?: number }) {
             {p.deadline ? <Muted style={{ marginTop: space.xs }}>Answer before kickoff, {kickoffText(p.deadline)}.</Muted> : null}
             <Button
               title="Approve"
-              variant="decisive"
+              arrow
               large
               busy={mine && busy?.decision === "approve"}
               disabled={!!busy}

@@ -15,6 +15,7 @@ import {
   Text,
   TextInput,
   View,
+  type ImageStyle,
   type StyleProp,
   type TextInputProps,
   type TextStyle,
@@ -79,12 +80,12 @@ export function Loading(props: { label?: string }) {
 // Marks.
 
 /** The official lockup, HangoverBot: Roster Protection, as wide as its box. */
-export function Lockup(props: { style?: StyleProp<ViewStyle> }) {
+export function Lockup(props: { style?: StyleProp<ImageStyle> }) {
   return <Image source={LOCKUP.source} style={[{ width: "100%", aspectRatio: LOCKUP.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot: Roster Protection" accessibilityIgnoresInvertColors />;
 }
 
 /** The wordmark with "by TurboLabs", small, for inner screens and the navigation header. */
-export function Wordmark(props: { width?: number; style?: StyleProp<ViewStyle> }) {
+export function Wordmark(props: { width?: number; style?: StyleProp<ImageStyle> }) {
   const w = props.width ?? 150;
   return <Image source={WORDMARK.source} style={[{ width: w, height: w / WORDMARK.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot by TurboLabs" accessibilityIgnoresInvertColors />;
 }

@@ -103,12 +103,20 @@ EXPO_OFFLINE=1 npx expo export --platform ios
 Only **types** come in from `@rosterbots/*` (`import type`), so no server code ends up in the
 app bundle. `verbatimModuleSyntax` keeps it that way.
 
+## Brand
+
+`src/theme.ts` holds the palette and spacing, `src/ui.tsx` the pieces every screen is built
+from (Button, Card, Option, Pill, Header, the wordmark), `src/icons.tsx` the marks drawn from
+Views. The brand itself is `docs/brand/README.md`; the images in `assets/` and `assets/brand/`
+are made from it by `python3 apps/mobile/scripts/brand-assets.py` (needs Pillow): the logos
+trimmed and downscaled, the icons copied, the splash from the lockup, and the two robots cut
+out against the brand navy. Those two only look right on Midnight; never put one on a card.
+
 ## Known edges
 
 - `@react-native-cookies/cookies` 6.2.1 (2022) still names `jcenter()`, which Gradle 9 removed.
   `plugins/with-cookies-gradle.js` swaps that line for `mavenCentral()` during prebuild. If
   the Android build still fails inside that library, its maintained successor
   `@preeternal/react-native-cookie-manager` keeps the same `get(url, useWebKit)` call.
-- The icons in `assets/` are placeholders drawn from the brand palette, not final art.
 - Nothing here has run on a real phone yet. The first real proof is the owner's own league:
   sign in, compare "What we read" with the ESPN app, then one test swap and swap back.

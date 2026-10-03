@@ -7,8 +7,8 @@ import { StyleSheet, View } from "react-native";
 import { useData, usePull } from "../../src/lib/data";
 import { ACTIVITY_LABEL, isWarning, whenText } from "../../src/lib/format";
 import { Proposals } from "../../src/Proposals";
-import { color, radius, space } from "../../src/theme";
-import { Banner, Body, H2, Label, Muted, Screen } from "../../src/ui";
+import { color, space } from "../../src/theme";
+import { Banner, Body, Card, H2, Label, Muted, Screen } from "../../src/ui";
 
 export default function Activity() {
   const data = useData();
@@ -41,7 +41,7 @@ export default function Activity() {
         data.activity.map((a) => {
           const warn = isWarning(a.type);
           return (
-            <View key={a.id} style={[s.item, warn && s.itemWarn]}>
+            <Card key={a.id} style={[s.item, warn && s.itemWarn]}>
               <View style={s.meta}>
                 <Label style={[{ marginBottom: 0 }, warn && { color: color.orange }]}>{ACTIVITY_LABEL[a.type] ?? a.type}</Label>
                 <Muted>{whenText(a.createdAt)}</Muted>
@@ -49,7 +49,7 @@ export default function Activity() {
               <H2 style={{ marginTop: space.xs }}>{a.title}</H2>
               {a.body ? <Body style={{ marginTop: space.xs }}>{a.body}</Body> : null}
               {league(a.connectionId) ? <Muted style={{ marginTop: space.xs }}>{league(a.connectionId)}</Muted> : null}
-            </View>
+            </Card>
           );
         })
       )}
@@ -58,16 +58,7 @@ export default function Activity() {
 }
 
 const s = StyleSheet.create({
-  item: {
-    backgroundColor: color.navy,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: color.line,
-    borderLeftWidth: 4,
-    borderLeftColor: color.electric,
-    padding: space.lg,
-    marginBottom: space.md,
-  },
+  item: { borderLeftWidth: 5, borderLeftColor: color.electric },
   itemWarn: { borderLeftColor: color.orange },
   meta: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 });

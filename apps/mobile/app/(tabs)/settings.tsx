@@ -8,7 +8,7 @@ import { usePush } from "../../src/lib/push";
 import { useSession } from "../../src/lib/session";
 import { supabase } from "../../src/lib/supabase";
 import { color, space } from "../../src/theme";
-import { Banner, Body, Card, H2, Label, Loading, Muted, Row, Screen } from "../../src/ui";
+import { Banner, Body, Card, H2, Label, Loading, Muted, Row, Screen, Wordmark } from "../../src/ui";
 
 export default function Settings() {
   const data = useData();
@@ -90,15 +90,16 @@ export default function Settings() {
         <Muted>
           {conn.teamName ?? "Your team"} · {conn.season}
         </Muted>
-        <Body style={{ marginTop: space.sm, color: conn.status === "needs_reauth" ? color.orange : color.text }}>{statusLine}</Body>
+        <Body style={{ marginTop: space.sm, color: conn.status === "needs_reauth" ? color.orangeInk : color.ink }}>{statusLine}</Body>
         <View style={s.switchRow}>
-          <Body style={{ flex: 1 }}>Watch this league</Body>
+          <Body style={{ flex: 1, fontWeight: "600" }}>Watch this league</Body>
           <Switch
             value={watching}
             disabled={saving || conn.status === "needs_reauth"}
             onValueChange={setWatching}
-            trackColor={{ true: color.purple, false: color.raised }}
-            thumbColor={color.paper}
+            trackColor={{ true: color.orange, false: color.inkLine }}
+            thumbColor={color.white}
+            ios_backgroundColor={color.inkLine}
           />
         </View>
         <Row title="What we read from ESPN" detail="Your team as HangoverBot sees it, and the test swap" onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} />
@@ -159,18 +160,18 @@ export default function Settings() {
       </Card>
 
       <Label>About</Label>
-      <Card>
-        <H2>HangoverBot</H2>
-        <Muted>Fantasy help for real life. By TurboLabs.</Muted>
+      <Card tone="dark">
+        <Wordmark width={180} />
+        <Muted style={{ marginTop: space.sm }}>HangoverBot: Roster Protection. Fantasy help for real life.</Muted>
         <Body style={{ marginTop: space.md }}>
           HangoverBot reads your ESPN team with the sign-in you gave it in this app, and never sees your ESPN password. It changes your lineup only as your protection setting allows, and tells you every time it does.
         </Body>
-        <Muted style={{ marginTop: space.md }}>Version {Constants.expoConfig?.version ?? "unknown"} · beta</Muted>
+        <Muted style={{ marginTop: space.md }}>Version {Constants.expoConfig?.version ?? "unknown"} · beta · by TurboLabs</Muted>
       </Card>
     </Screen>
   );
 }
 
 const s = StyleSheet.create({
-  switchRow: { flexDirection: "row", alignItems: "center", paddingVertical: space.md, borderBottomWidth: 1, borderBottomColor: color.line, marginTop: space.sm },
+  switchRow: { flexDirection: "row", alignItems: "center", paddingVertical: space.md, borderBottomWidth: 1, borderBottomColor: color.inkLine, marginTop: space.sm },
 });
