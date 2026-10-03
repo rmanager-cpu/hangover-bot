@@ -12,9 +12,15 @@ import { Banner, Body, Button, Card, Field, H2, Muted, Screen } from "../src/ui"
 
 const looksLikeEmail = (e: string) => /^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(e.trim());
 
-function authMessage(e: { message?: string; status?: number } | null, step: "email" | "code"): string {
+/** The email is already some account's: the fix is to sign in to it, not to claim again. */
+const isTaken = (e: { message?: string; code?: string } | null): boolean => {
   const m = (e?.message ?? "").toLowerCase();
-  if (m.includes("already") && m.includes("registered")) return "That email already belongs to another HangoverBot account. Use a different one.";
+  return e?.code === "email_exists" || (m.includes("already") && m.includes("registered"));
+};
+
+function authMessage(e: { message?: string; code?: string; status?: number } | null, step: "email" | "code"): string {
+  const m = (e?.message ?? "").toLowerCase();
+  if (isTaken(e)) return "That email already belongs to a HangoverBot account. Sign in to it instead, or use a different email.";
   if (m.includes("security purposes") || e?.status === 429) return "Too many codes asked for. Wait a minute, then try again.";
   if (step === "code") return "That code didn't work. Check the newest email from HangoverBot, or send a new code.";
   if (m.includes("invalid") && m.includes("email")) return "That email address doesn't look right.";
@@ -30,6 +36,7 @@ export default function Claim() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [taken, setTaken] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
   const done = async () => {

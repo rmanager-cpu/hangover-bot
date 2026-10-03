@@ -24,6 +24,7 @@ export default function Welcome() {
         </View>
       ))}
       <Muted style={{ marginTop: space.xl }}>Works with ESPN fantasy football. You sign in to ESPN inside the app; nothing to copy, no computer needed.</Muted>
+      <Button title="Already claimed an account? Sign in" variant="quiet" onPress={() => router.push("/signin")} style={{ marginTop: space.lg, alignSelf: "flex-start" }} />
     </Screen>
   );
 }
