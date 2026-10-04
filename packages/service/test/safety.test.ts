@@ -68,7 +68,7 @@ test("an approval ESPN did not apply is never made again automatically at T-90",
   assert.equal(failures(s), 1, "the same failure is not told twice");
 });
 
-test("a change the user approved and then undid in the ESPN app is not redone at T-90", async () => {
+test("a change the user approved and then undid in the ESPN app is redone at T-90 (owner, Oct 4: no hole stays in the lineup)", async () => {
   const s = setup({ roster: achaneOut(), at: T - 180 * MIN });
   await s.run();
   assert.equal((await decideAction(s.deps, "user-1", s.store.actions[0]!.id, "approve")).ok, true);
@@ -77,8 +77,9 @@ test("a change the user approved and then undid in the ESPN app is not redone at
 
   s.clock.set(T - 90 * MIN);
   await s.run();
-  assert.equal(s.espn.writes.length, 1);
-  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_RECOMMENDED", "ACTION_COMPLETED"]);
+  assert.equal(s.espn.writes.length, 2);
+  assert.equal(entry(s.espn.roster, ACHANE).slot, "BENCH");
+  assert.deepEqual(s.store.activity.map((x) => x.type).slice(-1), ["ACTION_COMPLETED"]);
 });
 
 // ---- the reason for a move is checked again, and a proposal outlives no problem
@@ -498,22 +499,54 @@ test("the Saturday test swap's verifying read is patient in the same way", async
   assert.equal(s.store.connections.get("conn-1")!.status, "active");
 });
 
-test("an automatic move the user undoes in the ESPN app is offered once for a tap, never made again, never silent", async () => {
+test("a hole the user puts back in the ESPN app is filled again automatically, within the daily cap (owner, Oct 4)", async () => {
   const s = setup({ roster: achaneOut() });
   assert.equal((await s.run()).executed, 1);
-  entry(s.espn.roster, ACHANE).slot = "RB"; // undone by mistake in the ESPN app at T-40
+  entry(s.espn.roster, ACHANE).slot = "RB"; // put back in the ESPN app at T-40
   entry(s.espn.roster, WRIGHT).slot = "BENCH";
   s.clock.advance(5);
   const sum = await s.run();
-  assert.deepEqual([sum.findings, sum.executed, sum.proposed], [1, 0, 1]);
-  assert.equal(s.espn.writes.length, 1);
-  assert.equal(s.store.activity.at(-1)!.body, "Start Jaylen Wright at RB instead? Tap to approve. I already made an automatic move for this, so this one is yours to approve.");
+  assert.deepEqual([sum.findings, sum.executed, sum.proposed], [1, 1, 0]);
+  assert.equal(s.espn.writes.length, 2);
+  assert.equal(entry(s.espn.roster, ACHANE).slot, "BENCH");
+  assert.equal(s.store.activity.at(-1)!.type, "ACTION_COMPLETED");
   for (let i = 0; i < 3; i++) {
+    entry(s.espn.roster, ACHANE).slot = "RB";
+    entry(s.espn.roster, WRIGHT).slot = "BENCH";
     s.clock.advance(2);
     await s.run();
   }
-  assert.equal(s.store.activity.length, 2, "said once");
-  assert.equal(s.espn.writes.length, 1);
+  assert.equal(s.espn.writes.length, 3, "three automatic moves a day, then it asks");
+  assert.equal(s.store.activity.at(-1)!.body, "Start Jaylen Wright at RB instead? Tap to approve. I've already made today's limit of automatic moves.");
+});
+
+test("a move the user approved and then undid in the ESPN app is said again and made automatically in the window (Oct 4: Jefferson)", async () => {
+  const s = setup({ roster: achaneOut(), at: SUNDAY_8AM });
+  await s.run();
+  const first = s.store.actions.find((a) => a.kind === "propose")!;
+  assert.equal((await decideAction(s.deps, "user-1", first.id, "approve")).ok, true);
+  entry(s.espn.roster, ACHANE).slot = "RB"; // put back in the ESPN app
+  entry(s.espn.roster, WRIGHT).slot = "BENCH";
+  s.clock.advance(15);
+  assert.equal((await s.run()).proposed, 1, "not silent");
+  assert.equal(s.store.activity.at(-1)!.body, "Start Jaylen Wright at RB instead? Tap to approve. I'll do it automatically at 11:30 AM ET if you don't decide first.");
+  const told = s.store.activity.length;
+  s.clock.advance(15);
+  await s.run();
+  assert.equal(s.store.activity.length, told, "said once");
+  s.clock.set(T - 45 * MIN);
+  assert.equal((await s.run()).executed, 1);
+  assert.equal(entry(s.espn.roster, ACHANE).slot, "BENCH");
+});
+
+test("a declined fix for a hole stands: the user's Decline is the one thing that stops it", async () => {
+  const s = setup({ roster: achaneOut(), at: SUNDAY_8AM });
+  await s.run();
+  const first = s.store.actions.find((a) => a.kind === "propose")!;
+  assert.equal((await decideAction(s.deps, "user-1", first.id, "decline")).ok, true);
+  s.clock.set(T - 45 * MIN);
+  assert.equal((await s.run()).executed, 0);
+  assert.equal(s.espn.writes.length, 0);
 });
 
 test("the retry after a failed read, and after a sign-out, sit on the minute boundary the cron tick lands on", async () => {

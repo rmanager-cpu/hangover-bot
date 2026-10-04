@@ -15,7 +15,8 @@
     "functions:build": "node scripts/build-functions.ts",
     "functions:check": "node scripts/build-functions.ts --check",
     "espn:check": "node scripts/espn-check.ts",
-    "functions:bundle": "node scripts/bundle-functions.ts"
+    "functions:bundle": "node scripts/bundle-functions.ts",
+    "functions:compile": "sh scripts/compile-functions.sh"
   },
   "dependencies": {
     "@rosterbots/core": "0.0.0",

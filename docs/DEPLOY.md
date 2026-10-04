@@ -129,6 +129,14 @@ then the owner edits `CRON_SECRET` the same way.
 
 ## 4. Deploy the six functions
 
+**As done on Oct 4:** the 24-file bundles below are about 140 KB each, too large to send inline
+in one `deploy_edge_function` call. `npm run functions:compile` turns each bundle into one
+JS file (`supabase/.bundle-min/<fn>/index.js`, 20 to 50 KB, same code without comments) with
+a `deno.json` that maps only `@supabase/supabase-js`. Deploy those two files per function:
+`entrypoint_path: "index.js"`, `import_map_path: "deno.json"`, `verify_jwt: false`. A change
+to the engine needs both `check` and `decide` redeployed together: an approval re-runs the
+engine and refuses a proposal the other engine would not make.
+
 For each of `espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`, read
 `supabase/.bundle/<name>/manifest.json`, read every file it lists, and call:
 

@@ -51,13 +51,14 @@ const clean = (p: Player): boolean => p.status === "active" && p.game != null;
 
 /**
  * A starter who could take another starting slot right now. He is already in, so the
- * question is only whether ESPN would let him move and whether anything about him is in
- * doubt: a pivot is active, with a known kickoff still ahead and a projection, never a
- * problem of his own (a doubt, a hole, a bye, a schedule ESPN did not send).
+ * question is only whether ESPN would let him move: a pivot is playing (owner, Oct 3: a
+ * projection is the source of truth, so a questionable starter ESPN still projects is
+ * playing), with a known kickoff still ahead, never a hole of his own, on bye, or on a
+ * team ESPN's schedule did not send. Moving him keeps him in the lineup either way.
  */
 function shiftable(p: Player, now: number): boolean {
   if (p.locked) return false;
-  if (p.status !== "active") return false;
+  if (p.status !== "active" && p.status !== "questionable") return false;
   if (p.game == null) return false; // on bye, or no schedule for his team
   if (p.projection !== undefined && p.projection <= 0) return false; // a hole of his own
   const k = kickoffMs(p);
@@ -187,7 +188,11 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
 
   const findings: Finding[] = [];
   const shifted = new Set<string>();
+  // Where a shifted starter lands, so a doubt about him later in this run is judged at the
+  // slot he will be in, not the one he is leaving.
+  const landed = new Map<string, Slot>();
   for (const p of problems) {
+    if (p.starter && landed.has(p.starter.id)) p.slot = landed.get(p.starter.id)!;
     const hard = HARD.includes(p.kind);
     const key = `${roster.period}:${p.kind}:${p.starter ? p.starter.id : p.slot + "#" + p.index}`;
     const base = { key, kind: p.kind, hard, slot: p.slot, ...(p.starter ? { starter: p.starter } : {}) };
@@ -208,6 +213,7 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
     if (pick) {
       bench = bench.filter((e) => e.player.id !== pick.candidate.player.id);
       for (const v of pick.candidate.via ?? []) shifted.add(v.id);
+      for (const m of pick.candidate.moves) if (shifted.has(m.playerId)) landed.set(m.playerId, m.to);
       const deadline = earliest(p.starter?.game?.kickoff, ...kickoffsOf(pick.candidate));
       findings.push({ ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) });
       continue;

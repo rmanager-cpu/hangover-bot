@@ -142,13 +142,12 @@ test("the same bench player is offered once, by the shorter route", () => {
   assert.deepEqual(cands.map((c) => [c.player.id, c.via, c.moves.length]), [["t", undefined, 2], ["u", undefined, 2]]);
 });
 
-test("a locked, started, out, bye, questionable, unreadable or unscheduled starter never shifts", () => {
+test("a locked, started, out, bye, unreadable or unscheduled starter never shifts", () => {
   for (const flex of [
     wr("c", { locked: true }),
     wr("c", { game: { kickoff: THURSDAY } }),
     wr("c", { status: "out" }),
     wr("c", { game: null }),
-    wr("c", { status: "questionable" }),
     wr("c", { status: "unknown" }),
     wr("c", { game: undefined }),
   ]) {
@@ -175,6 +174,25 @@ test("of two routes of the same length, the one whose shifted starter kicks off 
   const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
   assert.deepEqual(c?.via?.map((p) => p.id), ["c2"]);
   assert.equal(f?.deadline, new Date(LATE).toISOString());
+});
+
+test("a questionable starter ESPN still projects is playing, so he can slide; his own doubt is then judged at his new slot (Oct 4)", () => {
+  // The owner's lineup at 4 AM Oct 4: Jefferson OUT at WR, McConkey questionable at FLEX.
+  const r = shiftRoster([at("BENCH", rb("dob", { projection: 10.1, game: { kickoff: LATE } })), at("BENCH", wr("btj", { projection: 8.2 }))], wr("mcc", { status: "questionable", projection: 11.8, game: { kickoff: LATE } }));
+  const found = rules(r);
+  const hole = found.find((f) => f.kind === "starter_out");
+  const c = hole?.resolution.type === "deterministic" ? hole.resolution.candidate : undefined;
+  assert.equal(c?.player.id, "dob");
+  assert.deepEqual(c?.via?.map((p) => p.id), ["mcc"]);
+  assert.deepEqual(c?.moves, [
+    { playerId: "jj", from: "WR", to: "BENCH" },
+    { playerId: "mcc", from: "FLEX", to: "WR" },
+    { playerId: "dob", from: "BENCH", to: "FLEX" },
+  ]);
+  const doubt = found.find((f) => f.kind === "starter_questionable");
+  assert.equal(doubt?.slot, "WR", "judged where he lands");
+  const opts = doubt?.resolution.type === "judgment" ? doubt.resolution.candidates : [];
+  assert.deepEqual(opts.map((o) => [o.player.id, o.moves]), [["btj", [{ playerId: "mcc", from: "WR", to: "BENCH" }, { playerId: "btj", from: "BENCH", to: "WR" }]]]);
 });
 
 test("a starter shifts at most once per evaluation", () => {

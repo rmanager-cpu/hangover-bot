@@ -354,6 +354,22 @@ function findingHold(rows: ActionRow[]): string | undefined {
   return undefined;
 }
 
+/**
+ * Why this finding's automatic move waits for a tap. A hole (a starter projected for zero,
+ * OUT, IR, suspended or on bye, or an empty slot) is filled whatever happened to it before
+ * this week, a change made and then undone in the ESPN app included (owner, Oct 4: "never a
+ * situation in which an injured player with a 0 projection is in your starting lineup. I
+ * don't want to have to approve it or not"). The user's own Decline in the app is the one
+ * thing that stops it; a failed write still holds the week, through connectionHold.
+ */
+function userHold(f: Finding, rows: ActionRow[]): string | undefined {
+  if (!f.hard) return findingHold(rows);
+  if (rows.some((a) => a.status === "approved")) return HELD_APPROVED; // a write for it is under way
+  if (rows.some((a) => a.status === "failed")) return HELD_FAILED;
+  if (rows.some((a) => a.status === "declined")) return HELD_DECLINED;
+  return undefined;
+}
+
 /** Why every automatic move on this connection waits for a tap. */
 function connectionHold(c: Check): string | undefined {
   if (c.failedNow) return HELD_FAILED_NOW;
@@ -366,12 +382,15 @@ async function propose(c: Check, step: Propose, period: number, now: Date): Prom
   const f = step.finding;
   const moves = step.candidate.moves;
   const sig = signature("propose", f.key, moves);
-  // Never promise an automatic move that a hold on the whole connection would stop.
-  const wide = step.held?.autoAt ? connectionHold(c) : undefined;
+  const rows = await history(c, f, period, now);
+  // Never promise an automatic move that a hold on this finding or the whole connection would stop.
+  const wide = step.held?.autoAt ? userHold(f, rows) ?? connectionHold(c) : undefined;
   const held = wide ? { reason: wide } : step.held;
   const autoAt = held?.autoAt ?? null;
-  const rows = await history(c, f, period, now);
-  const same = announced(rows, sig);
+  // A proposal the user approved and that ESPN showed is done. The same problem back again
+  // means it was undone in the ESPN app (Oct 4: Jefferson back at WR after the approved
+  // swap): that is news, never silence until kickoff.
+  const same = announced(rows.filter((a) => !(a.kind === "propose" && a.status === "done")), sig);
   if (same) {
     // Already said. Except when it promised "automatically at 11:30", 11:30 has
     // come, and it is still only a proposal: the user must hear that it will not happen.
@@ -405,13 +424,12 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   const sig = signature("execute", f.key, moves);
   const rows = await history(c, f, period, now);
 
-  // Never twice: a write for it still in flight is the next check's to settle. One already
-  // made or failed is a hold below, so the problem coming back (the user undid the move in
-  // the ESPN app, say) is a proposal the user hears about, not silence until kickoff.
+  // Never twice at once: a write for it still in flight is the next check's to settle.
   if (rows.some((a) => a.signature === sig && a.status === "approved")) return;
-  // One automatic attempt per finding a week, a decline stands, and a write that did not
-  // land, or a league where no change of the user's has landed yet, stops automatic moves.
-  const hold = findingHold(rows) ?? connectionHold(c);
+  // A hole is filled again if it comes back (userHold); anything else gets one automatic
+  // attempt a week. A decline stands, and a write that did not land, or a league where no
+  // change of the user's has landed yet, stops automatic moves.
+  const hold = userHold(f, rows) ?? connectionHold(c);
   if (hold) return propose(c, { do: "propose", finding: f, candidate: step.candidate, source: step.source, held: { reason: hold } }, period, now);
 
   // Re-validate immediately before the write. If the fresh read no longer gives these
@@ -424,8 +442,10 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
 
   // The last look before the write: while ESPN was read, the user may have declined or
   // approved, paused the league or lowered its protection. Their answer wins.
+  // Another write of these moves in flight, or one made moments ago (its run read before ours wrote), stops this one.
   const latest = await c.deps.store.actionsFor(c.conn.id, f.key, period);
-  if (findingHold(latest) || latest.some((a) => a.signature === sig)) return;
+  const recent = (a: ActionRow) => a.status === "approved" || at.getTime() - Date.parse(a.createdAt) < INTERRUPTED_MS;
+  if (userHold(f, latest) || latest.some((a) => a.signature === sig && recent(a))) return;
   const live = await c.deps.store.getConnection(c.conn.id);
   if (!live || !automatic(live) || writeUnproven(live)) return;
   if (!(await supersede(c, latest))) return;

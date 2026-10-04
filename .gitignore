@@ -10,3 +10,4 @@ out/
 !.env.example
 supabase/.temp/
 supabase/.bundle/
+supabase/.bundle-min/
