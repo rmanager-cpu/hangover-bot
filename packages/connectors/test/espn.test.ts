@@ -55,6 +55,7 @@ test("an ESPN status we have never seen is unknown, never active", () => {
   assert.equal(statusOf(undefined, true), "unknown");
   assert.equal(statusOf(undefined, false), "active");
   assert.equal(statusOf("INJURY_RESERVE", true), "ir");
+  assert.equal(statusOf("DAY_TO_DAY", true), "questionable", "ESPN's DTD is a doubt, never active and never unknown");
 });
 
 test("without a schedule, kickoff is unknown rather than a bye", () => {

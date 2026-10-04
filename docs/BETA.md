@@ -21,8 +21,9 @@ as `bench_protection` by the service.
 
 Automatic moves only for **hard** problems (starter OUT / IR / suspended / bye, or an empty
 slot) with a **deterministic** fix (the user's replacement order, else highest projection),
-at Bench Protection, for a **claimed** account, with bench swaps on. On top of that, the
-first-weekend guardrails (`core.guard`):
+at Bench Protection, for a **claimed** account, with bench swaps on. A bench player ESPN
+projects for zero points is never a candidate, automatic or proposed (owner, Oct 3; a
+missing projection is not zero). On top of that, the first-weekend guardrails (`core.guard`):
 
 1. Only inside the window **T-90 to T-4** minutes (owner, Oct 3: T-4, not T-10, so a late
    scratch that ESPN shows after T-10, like Odunze's, can still be fixed), where T is the

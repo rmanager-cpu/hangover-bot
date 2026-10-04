@@ -114,6 +114,8 @@ Sentry.
 - **Never log a request to ESPN.** It carries the user's cookies.
 - **Team ids are not 1..N, and a negative player id is real** (every D/ST).
 - An ESPN status we have not mapped is `unknown`, and `unknown` never moves a player.
+- **A player projected for zero points is never moved into the lineup** (owner, Oct 3):
+  not automatically, not as a proposal, not as an option. A missing projection is not zero.
 - Runs on Node 22.18+ with native TypeScript type stripping: import with `.ts`
   extensions, and no enums, namespaces or parameter properties (`erasableSyntaxOnly`).
 - After changing `packages/*/src`, run `npm run functions:build`: the Edge Functions deploy

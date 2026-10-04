@@ -44,6 +44,9 @@ export function statusOf(injuryStatus: string | undefined, injured: boolean | un
     case "PROBABLE":
       return "active";
     case "QUESTIONABLE":
+    // Seen on the first live read (Oct 3): ESPN's "DTD". A doubt, so judgment only and
+    // never an automatic move, like questionable.
+    case "DAY_TO_DAY":
       return "questionable";
     case "DOUBTFUL":
       return "doubtful";

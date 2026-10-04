@@ -85,6 +85,26 @@ test("a healthy bench player ranks ahead of a questionable one with a bigger pro
   assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "h");
 });
 
+test("a bench player projected for zero points is never a candidate, even alone (owner, Oct 3)", () => {
+  const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("zero", { projection: 0 }))]);
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type, "none");
+  // Nor as an option when the pick is a judgment call.
+  const r2 = roster([
+    at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")),
+    at("BENCH", wr("x", { projection: undefined })), at("BENCH", wr("y", { projection: undefined })), at("BENCH", wr("zero", { projection: 0 })),
+  ]);
+  const [g] = rules(r2);
+  assert.equal(g?.resolution.type, "judgment");
+  assert.deepEqual(g?.resolution.type === "judgment" ? g.resolution.candidates.map((c) => c.player.id).sort() : [], ["x", "y"]);
+});
+
+test("a missing projection is not zero: alone and healthy, he is still the fix", () => {
+  const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("np", { projection: undefined }))]);
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "np");
+});
+
 test("a questionable bench player alone is never the automatic fix", () => {
   const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("q", { status: "questionable" }))]);
   assert.equal(rules(r)[0]?.resolution.type, "judgment");

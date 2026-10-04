@@ -32,6 +32,11 @@ function viable(p: Player, now: number): boolean {
   if (p.locked) return false;
   if (p.status !== "active" && p.status !== "questionable") return false;
   if (p.game === null) return false; // bye
+  // Owner, Oct 3: a player the provider projects for zero points never goes into the
+  // lineup, automatically or as an option. ESPN's zero is its own "not playing" signal
+  // and covers statuses the mapping has not seen (Josh Jacobs, day-to-day and suspended,
+  // read as unknown on the first live read). A missing projection is not zero.
+  if (p.projection !== undefined && p.projection <= 0) return false;
   const k = kickoffMs(p);
   if (k !== undefined && k <= now) return false;
   return true;
