@@ -168,7 +168,8 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
 }
 
 export function proposal(f: Finding, c: Candidate, held: { reason: string; autoAt?: string } | undefined, now: Date, aside?: string): Notice {
-  const ask = `${startText(f, c)}${f.starter ? " instead" : ""}?`;
+  // With a shift, "instead" would read as attaching to the shifted starter: say who sits.
+  const ask = c.via?.length ? `${changeOf(f, c)}?` : `${startText(f, c)}${f.starter ? " instead" : ""}?`;
   const why = held ? heldText(held, now) : aside;
   return { type: "ACTION_RECOMMENDED", title: problemOf(f), body: [ask, "Tap to approve.", why].filter(Boolean).join(" ") };
 }
@@ -181,8 +182,17 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   const kick = f.starter?.game?.kickoff;
   const by = f.deadline ?? kick;
   const before = by ? ` before ${clock(by, now)}` : "";
+  // A shift option names where the bench player lands, since it is not the hole: "J.K.
+  // Dobbins at FLEX (Nabers moves to WR)", under "Ways to fill WR".
   const names = (cs: Candidate[]) =>
-    list(cs.map((c) => (c.via?.length ? `${c.player.name} (${list(c.via.map((p) => `${shortName(p.name)} moves to ${slotName(lands(c, f, p.id))}`))})` : c.player.name)));
+    list(
+      cs.map((c) =>
+        c.via?.length
+          ? `${c.player.name} at ${slotName(lands(c, f, c.player.id))} (${list(c.via.map((p) => `${shortName(p.name)} moves to ${slotName(lands(c, f, p.id))}`))})`
+          : c.player.name,
+      ),
+    );
+  const intro = (cs: Candidate[]) => (cs.some((c) => c.via?.length) ? `Ways to fill ${slot}` : `Bench options at ${slot}`);
 
   if (step.do === "wait") {
     const plays = kick ? `He plays at ${clock(kick, now)}. ` : "";
@@ -201,19 +211,20 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
     return {
       type: "ACTION_REQUIRED",
       title,
-      body: `${lead}Bench options at ${slot}: ${names(step.candidates)}.${rank} Your call${before}: swap in the app or in ESPN.`,
+      body: `${lead}${intro(step.candidates)}: ${names(step.candidates)}.${rank} Your call${before}: swap in the app or in ESPN.`,
     };
   }
 
   const r = f.resolution;
   if (r.type === "deterministic") {
-    return { type: "ACTION_REQUIRED", title, body: `${r.candidate.player.name} is your best bench option at ${slot}. You're on Alerts, so I haven't changed anything.` };
+    const fix = r.candidate.via?.length ? `The fix: ${changeOf(f, r.candidate)}.` : `${r.candidate.player.name} is your best bench option at ${slot}.`;
+    return { type: "ACTION_REQUIRED", title, body: `${fix} You're on Alerts, so I haven't changed anything.` };
   }
   if (r.type === "judgment") {
     return {
       type: f.hard ? "ACTION_REQUIRED" : "STATUS_CHANGED",
       title,
-      body: `Bench options at ${slot}: ${names(r.candidates)}. You're on Alerts, so I haven't changed anything.`,
+      body: `${intro(r.candidates)}: ${names(r.candidates)}. You're on Alerts, so I haven't changed anything.`,
     };
   }
   if (f.kind === "starter_status_unknown") {
@@ -233,8 +244,9 @@ export function movesText(moves: Move[], who: Lookup): string {
   return lines.join(" ");
 }
 
+/** The move that puts the incoming player in: from the bench into a starting slot, else the first starting move (the test swap). */
 function lead(moves: Move[]): Move | undefined {
-  return moves.find((m) => isStarting(m.to));
+  return moves.find((m) => m.from === BENCH && isStarting(m.to)) ?? moves.find((m) => isStarting(m.to));
 }
 
 /**
@@ -253,9 +265,14 @@ export function receipt(reason: string | null, moves: Move[], who: Lookup, now: 
 /** A write that a fresh read did not confirm. Says what ESPN shows now, when we know. */
 export function failure(reason: string | null, moves: Move[], who: Lookup, after: Roster | undefined, deadline: string | null, now: Date): Notice {
   const m = lead(moves);
-  const name = m ? who(m.playerId)?.name ?? "a player" : "";
+  const full = (id: string) => who(id)?.name ?? "a player";
+  const name = m ? full(m.playerId) : "";
+  // The whole change, so a shift that did not land is not read as the shifted starter being benched.
+  const shifts = moves.filter((x) => x !== m && isStarting(x.to));
   const title = m ? `Couldn't start ${name} at ${slotName(m.to)}` : "A lineup change didn't go through";
-  const asked = m ? `I asked ESPN to start ${name} at ${slotName(m.to)}` : "I asked ESPN to change your lineup";
+  const asked = m
+    ? `I asked ESPN to start ${name} at ${slotName(m.to)}${shifts.length ? ` and move ${list(shifts.map((x) => `${full(x.playerId)} to ${slotName(x.to)}`))}` : ""}`
+    : "I asked ESPN to change your lineup";
   const slotOf = (id: string) => after?.entries.find((e) => e.player.id === id)?.slot;
   const state = after
     ? `ESPN now shows ${list(moves.map((x) => `${shortName(who(x.playerId)?.name ?? "a player")} ${where(slotOf(x.playerId))}`))}.`

@@ -75,6 +75,7 @@ test("a shift fix goes to ESPN as one three-move write, verified and receipted (
   assert.equal(a.deadline, KICKOFF, "Achane and Shaheed kick off first; Walker's later game does not stretch it");
   const receipt = s.store.activity[0]!;
   assert.equal(receipt.type, "ACTION_COMPLETED");
+  assert.equal(receipt.title, "Rashid Shaheed is in at FLEX", "the headline names the player who came off the bench, not the one who shifted");
   assert.match(receipt.body, /Moved Kenneth Walker III from FLEX to RB\. Moved Rashid Shaheed from bench to FLEX\. Achane is on your bench\./);
   const saved = s.store.checks.at(-1)!.patch.lastRoster!;
   assert.equal(entry(saved, WALKER).slot, "RB");
@@ -138,7 +139,7 @@ test("AI Rescue with a questionable starter at T-60 asks the user; nothing consu
   assert.deepEqual(s.store.actions.map((a) => [a.kind, a.status]), [["ask_user", "done"]]);
   const told = s.store.activity[0]!;
   assert.equal(told.type, "ACTION_REQUIRED");
-  assert.equal(told.body, "He might play. Bench options at RB: Jaylen Wright and Rashid Shaheed (Walker moves to RB). Your call before 1:00 PM ET: swap in the app or in ESPN.");
+  assert.equal(told.body, "He might play. Ways to fill RB: Jaylen Wright and Rashid Shaheed at FLEX (Walker moves to RB). Your call before 1:00 PM ET: swap in the app or in ESPN.");
   assert.deepEqual(told.data?.candidates, [
     { playerId: WRIGHT, name: "Jaylen Wright", moves: SWAP },
     {

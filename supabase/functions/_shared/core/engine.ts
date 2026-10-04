@@ -50,16 +50,16 @@ function viable(p: Player, now: number): boolean {
 const clean = (p: Player): boolean => p.status === "active" && p.game != null;
 
 /**
- * A starter who could take another starting slot right now. He is already in, so his
- * projection is not the question; only whether ESPN would let him move and whether he
- * is a problem of his own (out, on bye, unreadable).
+ * A starter who could take another starting slot right now. He is already in, so the
+ * question is only whether ESPN would let him move and whether anything about him is in
+ * doubt: a pivot is active, with a known kickoff still ahead and a projection, never a
+ * problem of his own (a doubt, a hole, a bye, a schedule ESPN did not send).
  */
 function shiftable(p: Player, now: number): boolean {
   if (p.locked) return false;
-  if (p.status !== "active" && p.status !== "questionable") return false;
-  if (p.game === null) return false;
+  if (p.status !== "active") return false;
+  if (p.game == null) return false; // on bye, or no schedule for his team
   if (p.projection !== undefined && p.projection <= 0) return false; // a hole of his own
-
   const k = kickoffMs(p);
   if (k !== undefined && k <= now) return false;
   return true;
@@ -104,14 +104,20 @@ function candidatesFor(
   // playing leaves the lineup. Breadth first over the slots a shift could vacate, so the
   // first route found for a bench player is his shortest, and a straight move beats a shift.
   type Route = { need: Slot; shifts: { player: Player; from: Slot; to: Slot }[]; seen: Set<Slot> };
+  // The earliest kickoff among a route's shifted starters. The later it is, the longer the
+  // window to make the move, so of two routes of the same length the later one is kept.
+  const viaKickoff = (vias: Player[] | undefined): number => Math.min(...(vias ?? []).map((p) => kickoffMs(p) ?? Infinity));
   const queue: Route[] = [{ need: slot, shifts: [], seen: new Set([slot]) }];
   while (queue.length) {
     const r = queue.shift()!;
     for (const e of bench) {
-      if (out.has(e.player.id) || !e.player.eligibleSlots.includes(r.need) || !viable(e.player, now)) continue;
+      if (!e.player.eligibleSlots.includes(r.need) || !viable(e.player, now)) continue;
+      const vias = r.shifts.map((x) => x.player);
+      const have = out.get(e.player.id);
+      if (have && (have.moves.length < benchStarter.length + r.shifts.length + 1 || viaKickoff(have.via) >= viaKickoff(vias))) continue;
       out.set(e.player.id, {
         player: e.player,
-        ...(r.shifts.length ? { via: r.shifts.map((x) => x.player) } : {}),
+        ...(vias.length ? { via: vias } : {}),
         moves: [...benchStarter, ...r.shifts.map((x) => ({ playerId: x.player.id, from: x.from, to: x.to })), { playerId: e.player.id, from: BENCH, to: r.need }],
       });
     }

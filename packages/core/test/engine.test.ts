@@ -142,14 +142,39 @@ test("the same bench player is offered once, by the shorter route", () => {
   assert.deepEqual(cands.map((c) => [c.player.id, c.via, c.moves.length]), [["t", undefined, 2], ["u", undefined, 2]]);
 });
 
-test("a locked, started, out, bye or unreadable starter never shifts", () => {
-  for (const flex of [wr("c", { locked: true }), wr("c", { game: { kickoff: THURSDAY } }), wr("c", { status: "out" }), wr("c", { game: null }), wr("c", { status: "unknown" })]) {
+test("a locked, started, out, bye, questionable, unreadable or unscheduled starter never shifts", () => {
+  for (const flex of [
+    wr("c", { locked: true }),
+    wr("c", { game: { kickoff: THURSDAY } }),
+    wr("c", { status: "out" }),
+    wr("c", { game: null }),
+    wr("c", { status: "questionable" }),
+    wr("c", { status: "unknown" }),
+    wr("c", { game: undefined }),
+  ]) {
     // An out, bye or unreadable FLEX starter is a problem of his own, so find jj's finding.
     const f = rules(shiftRoster([at("BENCH", rb("d", { projection: 12 })), at("BENCH", wr("t", { projection: 8 }))], flex)).find((x) => x.starter?.id === "jj");
     const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
     assert.equal(c?.player.id, "t", `flex ${JSON.stringify({ locked: flex.locked, status: flex.status, game: flex.game })}`);
     assert.equal(c?.via, undefined);
   }
+});
+
+test("of two routes of the same length, the one whose shifted starter kicks off later wins: a longer window", () => {
+  const r = roster(
+    [
+      at("WR", wr("jj", { status: "out", game: { kickoff: LATE } })),
+      at("WR", wr("b")),
+      at("FLEX", wr("c1", { game: { kickoff: EARLY } })),
+      at("FLEX", wr("c2", { game: { kickoff: LATE } })),
+      at("BENCH", rb("d", { projection: 12, game: { kickoff: LATE } })),
+    ],
+    ["WR", "WR", "FLEX", "FLEX"],
+  );
+  const [f] = rules(r);
+  const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+  assert.deepEqual(c?.via?.map((p) => p.id), ["c2"]);
+  assert.equal(f?.deadline, new Date(LATE).toISOString());
 });
 
 test("a starter shifts at most once per evaluation", () => {
