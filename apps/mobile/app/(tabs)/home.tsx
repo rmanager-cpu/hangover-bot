@@ -159,7 +159,11 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
   const { conn } = props;
   const team = conn.teamName ?? "your team";
   const line = protectionLine(conn.authority, props.claimed, conn.status);
-  const checked = conn.lastCheckedAt ? `Last checked ${agoText(conn.lastCheckedAt)}.` : "First check coming up.";
+  const checked = conn.lastCheckedAt
+    ? `Last checked ${agoText(conn.lastCheckedAt)}.`
+    : conn.nextCheckAt
+      ? `First check ${untilText(conn.nextCheckAt)}.`
+      : "First check coming up.";
 
   if (conn.status === "needs_reauth") {
     return (
@@ -195,7 +199,13 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
           ))}
           {props.open.length ? (
             <Muted>
-              {conn.authority === "alerts" ? "You're on Tell me, so I leave the fix to you in the ESPN app." : "I don't have a move I can make for this. Check your lineup in the ESPN app."}
+              {conn.authority === "alerts"
+                ? "You're on Tell me, so I leave the fix to you in the ESPN app."
+                : !conn.lastCheckedAt
+                  ? // Before the first check nothing has been judged yet, so "no move" would be
+                    // wrong: the Oct 3 install showed it for an OUT starter with a healthy bench.
+                    "I haven't checked this yet. If there's a move to make, it comes here after the first check."
+                  : "I don't have a move I can make for this. Check your lineup in the ESPN app."}
             </Muted>
           ) : null}
           {props.needTap.length ? (
