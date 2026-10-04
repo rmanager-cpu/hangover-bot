@@ -134,6 +134,7 @@ export const HELD_FAILED = "an earlier change for this failed";
 export const HELD_FAILED_NOW = "a change failed this check";
 export const HELD_FAILED_WEEK = "a change failed this week";
 export const HELD_UNPROVEN = "ESPN changes not proven yet";
+export const HELD_JUDGMENT = "now a judgment call";
 
 /** Why a move that could have been automatic is waiting for a tap. */
 export function heldText(held: { reason: string; autoAt?: string }, now: Date): string {
@@ -159,6 +160,8 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
       return "A lineup change just didn't go through on ESPN, so for the rest of the week I'll ask before every move.";
     case HELD_FAILED_WEEK:
       return "A lineup change didn't go through on ESPN earlier this week, so for the rest of the week I'll ask before every move.";
+    case HELD_JUDGMENT:
+      return "Something about this option has changed since I said I'd do it, so I won't do it on my own. It's your call.";
     case HELD_UNPROVEN:
       return "I haven't yet seen a change from HangoverBot go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, or approve this one, and then I can make moves like this on my own.";
     default:

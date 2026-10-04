@@ -214,7 +214,8 @@ export async function retryAt(deps: Deps, conn: ConnectionRow, now: Date, latest
  */
 export async function signedOut(deps: Deps, conn: ConnectionRow, now: Date, cause: unknown): Promise<{ told: boolean; nextCheckAt: string }> {
   const next = await retryAt(deps, conn, now);
-  await deps.store.saveCheck(conn.id, { status: "needs_reauth", lastCheckedAt: now.toISOString(), nextCheckAt: next });
+  // A league the user paused stays paused: the sign-in is asked for, but nothing resumes on its own.
+  await deps.store.saveCheck(conn.id, { ...(conn.status === "paused" ? {} : { status: "needs_reauth" as const }), lastCheckedAt: now.toISOString(), nextCheckAt: next });
   if (conn.status === "needs_reauth") return { told: false, nextCheckAt: next };
   await announce(deps, conn, signIn(conn.teamName, cause instanceof WrongTeamError), { reason: cause instanceof WrongTeamError ? "wrong_team" : "signed_out" });
   return { told: true, nextCheckAt: next };

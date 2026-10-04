@@ -80,5 +80,8 @@ export function rosterLooksSane(roster: Roster): boolean {
     room.set(e.slot, left - 1);
   }
 
-  return starters.filter((e) => !e.player.locked && OUT.includes(e.player.status)).length <= MAX_STARTERS_OUT;
+  // Locked ones are excused only a little: a read that marks the whole lineup OUT late on
+  // Sunday, when few are unlocked, is still a bad read.
+  const out = starters.filter((e) => OUT.includes(e.player.status));
+  return out.filter((e) => !e.player.locked).length <= MAX_STARTERS_OUT && out.length <= MAX_STARTERS_OUT + 2;
 }

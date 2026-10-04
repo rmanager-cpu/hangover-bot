@@ -37,12 +37,13 @@ const CONNECTION_COLUMNS =
   "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,write_verified_at";
 
 /**
- * How long a run holds the connections it took. Longer than any one run can last (the
- * 150 s wall clock), so the next minute's run cannot take the same connection while this
- * one is still on it, and longer than the service's 3 minutes for a write left in flight
- * once the due slack is added. No longer: a run that dies leaves it to expire, and inside
- * T-10 every minute it stands is a minute of the window (it was 5 minutes until Oct 4).
- * saveCheck replaces it with the real next check.
+ * How long a run holds the connections it took: longer than any one run can last (the
+ * Edge Function's 150 s wall clock), so the next minute's run cannot take the same
+ * connection while this one is still on it. The due slack applies on both sides, so this
+ * is the real lease. No longer: a run that dies leaves it to expire, and inside T-10 every
+ * minute it stands is a minute of the window (it was 5 minutes until Oct 4). A write a dead
+ * run left in flight is settled after 3 minutes, so the run after the lease may see it still
+ * open and leave it (userHold) for the one after. saveCheck replaces it with the real next check.
  */
 const LEASE_MS = 160_000;
 

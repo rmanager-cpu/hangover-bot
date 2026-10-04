@@ -232,6 +232,12 @@ test("a starter who has already played and is now OUT or IR does not count again
   assert.equal(rosterLooksSane(roster(lineup, slots)), true);
 });
 
+test("a read that marks the whole lineup OUT late on Sunday, when most starters are locked, is still a bad read", () => {
+  const slots: Slot[] = ["WR", "WR", "FLEX", "FLEX", "WR", "FLEX"];
+  const lineup = slots.map((s, i) => slot(s, wr(`s${i}`, { status: "out", ...(i < 4 ? { locked: true } : {}) })));
+  assert.equal(rosterLooksSane(roster(lineup, slots)), false);
+});
+
 test("injured players on the bench or IR do not count against the read", () => {
   const hurt = ["e", "f", "g", "h", "i"].map((id, i) => slot(i % 2 ? "IR" : "BENCH", wr(id, { status: "out" })));
   assert.equal(rosterLooksSane(roster([...healthy(), ...hurt])), true);

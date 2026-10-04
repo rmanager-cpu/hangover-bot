@@ -184,7 +184,10 @@ export const NOBODY_PLAYING = "nobody on the bench who can fill this slot is pro
  * kickoff, is left to the user.
  */
 function rulesPick(cands: Candidate[], order: string[]): { candidate: Candidate; why: string } | undefined {
-  const [top, next] = cands;
+  // The best option that can fill it: an unprojected questionable one ranks above a projected
+  // doubtful one, but only the doubtful one is set to play.
+  const fills = cands.filter((c) => fillsHole(c.player));
+  const [top, next] = fills.length && cands[0] && !fillsHole(cands[0].player) ? fills : cands;
   if (!top || !fillsHole(top.player)) return undefined;
   const p = top.player;
   if (!clean(p)) {

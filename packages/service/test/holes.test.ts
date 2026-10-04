@@ -179,8 +179,72 @@ test("a promise of an automatic move that can no longer be kept is withdrawn and
   await s.run();
   assert.equal(s.espn.writes.length, 0);
   assert.equal(promised.status, "superseded");
-  assert.equal(s.store.activity.at(-1)!.type, "ACTION_REQUIRED");
-  assert.match(s.store.activity.at(-1)!.body, /Your call/);
+  // Still one tap away: the same move, approvable, no longer promised.
+  const again = s.store.actions.at(-1)!;
+  assert.deepEqual([again.kind, again.status, again.autoAt, again.signature], ["propose", "pending", null, promised.signature]);
+  assert.equal(s.store.activity.at(-1)!.type, "ACTION_RECOMMENDED");
+  assert.match(s.store.activity.at(-1)!.body, /Tap to approve\. Something about this option has changed since I said I'd do it/);
+  // Said once.
+  s.clock.advance(2);
+  await s.run();
+  assert.equal(s.store.activity.filter((a) => a.type === "ACTION_RECOMMENDED").length, 2);
+});
+
+test("an approval that finishes while the checker reads ESPN is not written a second time", async () => {
+  const s = setup({ roster: achaneOut(), at: T - 120 * MIN });
+  await s.run();
+  const proposal = s.store.actions[0]!;
+  s.clock.set(T - 90 * MIN);
+  // This check's own read is the next one; the one after is the fresh read before its write.
+  // ESPN serves that fresh read, then the user's Approve runs to the end before the last look.
+  const fresh = s.espn.reads + 2;
+  const realRead = s.espn.getRoster.bind(s.espn);
+  let approving = false;
+  s.espn.getRoster = async (league: string) => {
+    const r = await realRead(league);
+    if (s.espn.reads === fresh && !approving) {
+      approving = true;
+      assert.equal((await decideAction(s.deps, "user-1", proposal.id, "approve")).ok, true);
+    }
+    return r;
+  };
+  await s.run();
+  assert.equal(s.espn.writes.length, 1, "the user's own write only");
+});
+
+test("an unconfirmed write does not hold another hole in the same check", async () => {
+  const r = achaneOut();
+  entry(r, WALKER).player.status = "out";
+  entry(r, WALKER).player.game = { kickoff: KICKOFF };
+  const s = setup({ roster: r });
+  // #1 the check's read; #2 the fresh read for the first fill; #3 and #4 its read-backs fail.
+  s.espn.onRead = (n) => {
+    s.espn.read = n === 3 || n === 4 ? "error" : "ok";
+  };
+  await s.run();
+  assert.equal(s.espn.writes.length, 2);
+  assert.equal(s.store.activity.filter((a) => /for the rest of the week/.test(a.body)).length, 0);
+});
+
+test("a doubtful bench player ESPN projects fills a hole even when an unprojected questionable one ranks above him", async () => {
+  const r = achaneOut();
+  entry(r, WRIGHT).player.status = "questionable";
+  delete entry(r, WRIGHT).player.projection;
+  entry(r, SHAHEED).player.projection = 0;
+  r.entries.push({ slot: "BENCH", player: player("4999001", "Backup Back", RB, { status: "doubtful", projection: 5, game: { kickoff: KICKOFF } }) });
+  const s = setup({ roster: r });
+  assert.equal((await s.run()).executed, 1);
+  assert.deepEqual(moved(s), [`${ACHANE}:RB>BENCH,4999001:BENCH>RB`]);
+});
+
+test("a refusal while approving never turns a paused league back on", async () => {
+  const s = setup({ roster: achaneOut(), at: "2026-10-04T12:00:00.000Z" });
+  await s.run();
+  const proposal = s.store.actions[0]!;
+  s.store.connections.get("conn-1")!.status = "paused";
+  s.espn.read = "auth";
+  await decideAction(s.deps, "user-1", proposal.id, "approve");
+  assert.equal(s.store.connections.get("conn-1")!.status, "paused");
 });
 
 test("a starter who played Thursday and is now on IR does not stop Sunday's fills", async () => {

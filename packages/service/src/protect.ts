@@ -43,6 +43,7 @@ import {
   HELD_FAILED,
   HELD_FAILED_NOW,
   HELD_FAILED_WEEK,
+  HELD_JUDGMENT,
   HELD_TRIED,
   HELD_UNPROVEN,
   changeOf,
@@ -348,6 +349,11 @@ async function tell(c: Check, step: Inform, period: number, now: Date): Promise<
   const broken = (a: ActionRow) => a.autoAt !== null && Date.parse(a.autoAt) <= now.getTime();
   const pending = rows.filter((a) => a.kind === "propose" && a.status === "pending");
   if (pending.some((a) => fixes.has(a.signature) && !broken(a))) return;
+  // A broken promise whose fix is still one of the options stays one tap away: offered again,
+  // approvable, saying it will not happen on its own.
+  const kept = pending.find((a) => fixes.has(a.signature));
+  const again = kept && candidates.find((x) => signature("propose", f.key, x.moves) === kept.signature);
+  if (again) return propose(c, { do: "propose", finding: f, candidate: again, source: "rules", held: { reason: HELD_JUDGMENT } }, period, now);
   if (!(await supersede(c, rows))) return;
   if (!pending.some(broken) && announced(rows, sig)) return;
   const notice = inform(step, now);
@@ -482,7 +488,8 @@ async function execute(c: Check, first: Execute, period: number, now: Date): Pro
   // was undone in the ESPN app, and the hole is filled again (owner, Oct 4).
   const latest = await c.deps.store.actionsFor(c.conn.id, f.key, period);
   const recent = (a: ActionRow) => a.status === "approved" || (a.executedAt !== null && Date.parse(a.executedAt) >= readFrom);
-  if (userHold(f, latest) || latest.some((a) => a.signature === sig && recent(a))) return;
+  // Of either kind: an approval that finished while ESPN was read stops this one too.
+  if (userHold(f, latest) || latest.some((a) => (a.kind === "execute" || a.kind === "propose") && recent(a))) return;
   const live = await c.deps.store.getConnection(c.conn.id);
   if (!live || !automatic(live) || writeUnproven(live)) return;
   if (!(await supersede(c, latest))) return;
@@ -498,9 +505,9 @@ async function execute(c: Check, first: Execute, period: number, now: Date): Pro
   try {
     out = await writeAndVerify(c.deps, c.espn, c.conn, moves, fresh.period);
   } catch (e) {
-    // The read back failed, so nothing is confirmed either way: no more writes in this check,
-    // and the next check's read settles this one (settle) as done or failed.
-    c.failedNow = true;
+    // The read back failed, so nothing is confirmed either way: the next check's read settles
+    // this one (settle) as done or failed. Not a failed write, so another hole in this check
+    // still gets its own fresh read and its fill (Oct 4 review).
     await leaveUnconfirmed(c.deps, row, e);
     if (isSignedOut(e)) throw e;
     return;
