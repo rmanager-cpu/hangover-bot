@@ -233,6 +233,20 @@ test("a hole is filled through a chain of shifts when no shorter route exists, a
   assert.deepEqual(c?.moves.filter((m) => m.to === "BENCH").map((m) => m.playerId), ["jj"], "only the hole leaves the lineup");
 });
 
+test("a starter projected below zero is playing, not a hole: only exactly zero is", () => {
+  const r = roster([at("WR", wr("neg", { projection: -1.5 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  assert.deepEqual(rules(r), []);
+});
+
+test("a questionable starter is asked about before his last bench option locks, not after", () => {
+  const r = roster([at("WR", wr("q", { status: "questionable", game: { kickoff: LATE } })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("t", { game: { kickoff: EARLY } }))]);
+  const [f] = rules(r);
+  assert.equal(f?.deadline, new Date(EARLY).toISOString(), "the option kicks off first");
+  const step = plan(f!, S(), NOW);
+  assert.equal(step.do, "wait");
+  assert.equal(step.do === "wait" && step.until, "2026-10-04T15:20:00.000Z", "100 minutes before the option locks, not before q's own game");
+});
+
 test("a lineup with no hole is never reshuffled, however much better the bench looks", () => {
   const r = roster([at("WR", wr("a", { projection: 3 })), at("WR", wr("b", { projection: 4 })), at("FLEX", wr("c", { projection: 2 })), at("BENCH", wr("d", { projection: 30 }))]);
   assert.deepEqual(rules(r), []);

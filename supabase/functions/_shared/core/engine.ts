@@ -70,8 +70,9 @@ function classify(p: Player): FindingKind | undefined {
   if (p.status === "out" || p.status === "ir" || p.status === "suspended") return "starter_out";
   // Owner, Oct 3: ESPN's zero projection is the source of truth for movement. A starter
   // projected for nothing is a hole whatever his status says; one projected for something
-  // is playing, and is never taken out of the lineup on his own.
-  if (p.projection !== undefined && p.projection <= 0) return "starter_zero";
+  // is playing, and is never taken out of the lineup on his own. Exactly zero: a D/ST can
+  // be projected below zero and still be playing.
+  if (p.projection === 0) return "starter_zero";
   if (p.status === "doubtful") return "starter_doubtful";
   if (p.status === "questionable") return "starter_questionable";
   if (p.status === "unknown") return "starter_status_unknown";
@@ -233,7 +234,10 @@ export function plan(finding: Finding, settings: Settings, now: Date): Step {
   // A soft problem is decided close to kickoff, when the news is in. Until then, a heads-up.
   const kick = finding.starter?.game?.kickoff;
   if (!finding.hard && kick) {
-    const until = new Date(Date.parse(kick) - JUDGMENT_LEAD_MINUTES * 60_000);
+    // Before the earlier of his kickoff and the last option's (the deadline): an ask that
+    // lands after every replacement has locked is no ask at all.
+    const by = finding.deadline ?? kick;
+    const until = new Date(Date.parse(by) - JUDGMENT_LEAD_MINUTES * 60_000);
     if (now < until) return { do: "wait", finding, until: until.toISOString() };
   }
 
