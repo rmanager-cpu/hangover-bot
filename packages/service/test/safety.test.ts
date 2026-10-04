@@ -131,7 +131,9 @@ test("a scheduled move whose problem went away is withdrawn, said once, and neve
 });
 
 test("a proposal whose fix has gone is replaced by the notice that says so", async () => {
-  const s = setup({ roster: achaneOut(), authority: "ask_me", at: SUNDAY_8AM });
+  const r = achaneOut();
+  entry(r, WALKER).player.locked = true; // no shift route: Wright is the one fix
+  const s = setup({ roster: r, authority: "ask_me", at: SUNDAY_8AM });
   await s.run();
   entry(s.espn.roster, WRIGHT).player.status = "out";
   s.clock.advance(15);
@@ -370,7 +372,9 @@ test("a schedule that drops out for one check neither withdraws a scheduled move
 });
 
 test("a pending proposal is kept when the engine downgrades its finding to a choice that still includes it", async () => {
-  const s = setup({ roster: achaneOut(), authority: "ask_me", at: SUNDAY_8AM });
+  const r = achaneOut();
+  entry(r, WALKER).player.locked = true; // no shift route: Wright is the one fix
+  const s = setup({ roster: r, authority: "ask_me", at: SUNDAY_8AM });
   await s.run();
   entry(s.espn.roster, WRIGHT).player.game = undefined; // only his kickoff is missing now
   s.clock.advance(15);

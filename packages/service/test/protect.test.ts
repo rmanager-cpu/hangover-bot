@@ -52,6 +52,36 @@ test("a starter ruled OUT inside T-90..T-4 is replaced automatically, verified a
   assert.equal(sum.nextCheckAt, saved.nextCheckAt);
 });
 
+test("a shift fix goes to ESPN as one three-move write, verified and receipted (owner, Oct 3)", async () => {
+  const r = achaneOut();
+  entry(r, WRIGHT).player.projection = 5; // Shaheed, with Walker shifting to RB, brings in more
+  entry(r, SHAHEED).player.projection = 9;
+  const s = setup({ roster: r, at: T - 45 * MIN });
+  const sum = await s.run();
+  assert.equal(sum.executed, 1);
+  assert.deepEqual(s.espn.writes, [
+    {
+      moves: [
+        { playerId: ACHANE, from: "RB", to: "BENCH" },
+        { playerId: WALKER, from: "FLEX", to: "RB" },
+        { playerId: SHAHEED, from: "BENCH", to: "FLEX" },
+      ],
+      period: 5,
+    },
+  ]);
+  const a = s.store.actions[0]!;
+  assert.equal(a.status, "done");
+  assert.equal(a.summary, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB instead of De'Von Achane");
+  assert.equal(a.deadline, KICKOFF, "Achane and Shaheed kick off first; Walker's later game does not stretch it");
+  const receipt = s.store.activity[0]!;
+  assert.equal(receipt.type, "ACTION_COMPLETED");
+  assert.match(receipt.body, /Moved Kenneth Walker III from FLEX to RB\. Moved Rashid Shaheed from bench to FLEX\. Achane is on your bench\./);
+  const saved = s.store.checks.at(-1)!.patch.lastRoster!;
+  assert.equal(entry(saved, WALKER).slot, "RB");
+  assert.equal(entry(saved, SHAHEED).slot, "FLEX");
+  assert.equal(entry(saved, ACHANE).slot, "BENCH");
+});
+
 test("hours before kickoff it is a proposal that says when; at T-90 a later check supersedes it and acts", async () => {
   const s = setup({ roster: achaneOut(), at: SUNDAY_8AM });
   const early = await s.run();
@@ -108,8 +138,19 @@ test("AI Rescue with a questionable starter at T-60 asks the user; nothing consu
   assert.deepEqual(s.store.actions.map((a) => [a.kind, a.status]), [["ask_user", "done"]]);
   const told = s.store.activity[0]!;
   assert.equal(told.type, "ACTION_REQUIRED");
-  assert.equal(told.body, "He might play. Bench options at RB: Jaylen Wright. Your call before 1:00 PM ET: swap in the app or in ESPN.");
-  assert.deepEqual(told.data?.candidates, [{ playerId: WRIGHT, name: "Jaylen Wright", moves: SWAP }]);
+  assert.equal(told.body, "He might play. Bench options at RB: Jaylen Wright and Rashid Shaheed (Walker moves to RB). Your call before 1:00 PM ET: swap in the app or in ESPN.");
+  assert.deepEqual(told.data?.candidates, [
+    { playerId: WRIGHT, name: "Jaylen Wright", moves: SWAP },
+    {
+      playerId: SHAHEED,
+      name: "Rashid Shaheed",
+      moves: [
+        { playerId: ACHANE, from: "RB", to: "BENCH" },
+        { playerId: WALKER, from: "FLEX", to: "RB" },
+        { playerId: SHAHEED, from: "BENCH", to: "FLEX" },
+      ],
+    },
+  ]);
 });
 
 test("a questionable starter ESPN projects for zero is not said to 'might play' (owner, Oct 3)", async () => {
@@ -119,7 +160,7 @@ test("a questionable starter ESPN projects for zero is not said to 'might play' 
   const s = setup({ roster: r, authority: "bench_protection", at: T - 60 * MIN });
   await s.run();
   assert.equal(s.espn.writes.length, 0);
-  assert.equal(s.store.activity[0]!.body, "ESPN projects him for zero points. Bench options at RB: Jaylen Wright. Your call before 1:00 PM ET: swap in the app or in ESPN.");
+  assert.equal(s.store.activity[0]!.body, "ESPN projects him for zero points. Bench options at RB: Jaylen Wright and Rashid Shaheed (Walker moves to RB). Your call before 1:00 PM ET: swap in the app or in ESPN.");
 });
 
 // ---- who never gets an automatic move
@@ -222,6 +263,7 @@ test("a fresh read that turns odd before the write stops it", async () => {
 test("with no kickoff for the replacement nothing moves on its own: the user decides, and hears why", async () => {
   const r = achaneOut();
   entry(r, WRIGHT).player.game = undefined; // ESPN's schedule has no entry for his team
+  entry(r, WALKER).player.locked = true; // and no shift route: Wright is the one option
   const s = setup({ roster: r });
   await s.run();
   assert.equal(s.espn.writes.length, 0);

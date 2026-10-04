@@ -20,7 +20,9 @@ as `bench_protection` by the service.
 ## The automation rule for this weekend
 
 Automatic moves only for **hard** problems (starter OUT / IR / suspended / bye, or an empty
-slot) with a **deterministic** fix (the user's replacement order, else highest projection),
+slot) with a **deterministic** fix (the user's replacement order, else highest projection;
+the fix may shift one current starter into the broken slot and fill his old slot from the
+bench when that brings in the better player, owner, Oct 3),
 at Bench Protection, for a **claimed** account, with bench swaps on. A bench player ESPN
 projects for zero points is never a candidate, automatic or proposed (owner, Oct 3; a
 missing projection is not zero). On top of that, the first-weekend guardrails (`core.guard`):

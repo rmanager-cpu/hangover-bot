@@ -12,6 +12,7 @@ import {
   type Candidate,
   type Finding,
   type FindingKind,
+  type Move,
   type Player,
   type Roster,
   type RosterEntry,
@@ -45,6 +46,20 @@ function viable(p: Player, now: number): boolean {
 /** Viable and nothing about him needs a second opinion. */
 const clean = (p: Player): boolean => p.status === "active" && p.game != null;
 
+/**
+ * A starter who could take another starting slot right now. He is already in, so his
+ * projection is not the question; only whether ESPN would let him move and whether he
+ * is a problem of his own (out, on bye, unreadable).
+ */
+function shiftable(p: Player, now: number): boolean {
+  if (p.locked) return false;
+  if (p.status !== "active" && p.status !== "questionable") return false;
+  if (p.game === null) return false;
+  const k = kickoffMs(p);
+  if (k !== undefined && k <= now) return false;
+  return true;
+}
+
 function classify(p: Player): FindingKind | undefined {
   if (p.game === null) return "starter_on_bye";
   if (p.status === "out" || p.status === "ir" || p.status === "suspended") return "starter_out";
@@ -59,28 +74,57 @@ function classify(p: Player): FindingKind | undefined {
  * replacement order, then the highest projection. A player with anything to doubt
  * (questionable, schedule unknown) ranks after every clean one.
  */
-function candidatesFor(slot: Slot, starter: Player | undefined, bench: RosterEntry[], now: number, order: string[]): Candidate[] {
+function candidatesFor(
+  slot: Slot,
+  starter: Player | undefined,
+  bench: RosterEntry[],
+  starters: RosterEntry[],
+  now: number,
+  order: string[],
+  shifted: Set<string>,
+): Candidate[] {
   const rank = (p: Player) => {
     const i = order.indexOf(p.id);
     return i === -1 ? Infinity : i;
   };
-  return bench
-    .filter((e) => e.player.eligibleSlots.includes(slot) && viable(e.player, now))
-    .map((e) => e.player)
-    .sort(
-      (a, b) =>
-        Number(clean(b)) - Number(clean(a)) ||
-        rank(a) - rank(b) ||
-        (b.projection ?? -Infinity) - (a.projection ?? -Infinity),
-    )
-    .map((p) => ({
-      player: p,
-      moves: [
-        ...(starter ? [{ playerId: starter.id, from: slot, to: BENCH }] : []),
-        { playerId: p.id, from: BENCH, to: slot },
-      ],
-    }));
+  const out = new Map<string, Candidate>();
+  const offer = (c: Candidate) => {
+    if (!out.has(c.player.id)) out.set(c.player.id, c);
+  };
+  const benchStarter: Move[] = starter ? [{ playerId: starter.id, from: slot, to: BENCH }] : [];
+
+  // Straight from the bench first, so the shorter route wins a tie for the same player.
+  for (const e of bench) {
+    if (e.player.eligibleSlots.includes(slot) && viable(e.player, now)) {
+      offer({ player: e.player, moves: [...benchStarter, { playerId: e.player.id, from: BENCH, to: slot }] });
+    }
+  }
+  // Owner, Oct 3: or one current starter shifts into the broken slot and the bench fills
+  // his old one (Nabers FLEX to WR, Dobbins to FLEX). The lineup is still ranked by the
+  // player coming in, since the shifted starter plays either way. One shift per fix, no
+  // chains, and a starter shifts at most once per evaluation.
+  for (const s of starters) {
+    if (s.slot === slot || !isStarting(s.slot) || shifted.has(s.player.id) || s.player.id === starter?.id) continue;
+    if (!s.player.eligibleSlots.includes(slot) || !shiftable(s.player, now)) continue;
+    for (const e of bench) {
+      if (!e.player.eligibleSlots.includes(s.slot) || !viable(e.player, now)) continue;
+      offer({
+        player: e.player,
+        via: s.player,
+        moves: [...benchStarter, { playerId: s.player.id, from: s.slot, to: slot }, { playerId: e.player.id, from: BENCH, to: s.slot }],
+      });
+    }
+  }
+  return [...out.values()].sort(
+    (a, b) =>
+      Number(clean(b.player)) - Number(clean(a.player)) ||
+      rank(a.player) - rank(b.player) ||
+      (b.player.projection ?? -Infinity) - (a.player.projection ?? -Infinity),
+  );
 }
+
+/** The kickoffs a candidate's moves depend on: his own, and the shifted starter's. */
+const kickoffsOf = (c: Candidate): (string | undefined)[] => [c.player.game?.kickoff, c.via?.game?.kickoff];
 
 function earliest(...isos: (string | undefined)[]): string | undefined {
   const ms = isos.filter((s): s is string => Boolean(s)).map((s) => Date.parse(s));
@@ -128,6 +172,7 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
   problems.sort((a, b) => order(a) - order(b) || soon(a) - soon(b));
 
   const findings: Finding[] = [];
+  const shifted = new Set<string>();
   for (const p of problems) {
     const hard = HARD.includes(p.kind);
     const key = `${roster.period}:${p.kind}:${p.starter ? p.starter.id : p.slot + "#" + p.index}`;
@@ -138,7 +183,7 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
       continue;
     }
 
-    const cands = candidatesFor(p.slot, p.starter, bench, t, settings.replacementOrder);
+    const cands = candidatesFor(p.slot, p.starter, bench, starters, t, settings.replacementOrder, shifted);
     if (!cands.length) {
       const why = hard ? "nobody on the bench can fill this slot" : "nobody healthy on the bench to replace him";
       findings.push({ ...base, resolution: { type: "none", why } });
@@ -148,13 +193,14 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
     const pick = hard ? rulesPick(cands, settings.replacementOrder) : undefined;
     if (pick) {
       bench = bench.filter((e) => e.player.id !== pick.candidate.player.id);
-      const deadline = earliest(p.starter?.game?.kickoff, pick.candidate.player.game?.kickoff);
+      if (pick.candidate.via) shifted.add(pick.candidate.via.id);
+      const deadline = earliest(p.starter?.game?.kickoff, ...kickoffsOf(pick.candidate));
       findings.push({ ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) });
       continue;
     }
 
     const why = hard ? "no projection or replacement order to rank the options by" : `${p.starter?.name} might play`;
-    const deadline = earliest(p.starter?.game?.kickoff, ...cands.map((c) => c.player.game?.kickoff));
+    const deadline = earliest(p.starter?.game?.kickoff, ...cands.flatMap(kickoffsOf));
     findings.push({ ...base, resolution: { type: "judgment", candidates: cands, why }, ...(deadline ? { deadline } : {}) });
   }
   return findings;

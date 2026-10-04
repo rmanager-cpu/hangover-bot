@@ -109,9 +109,18 @@ export function problemOf(f: Finding): string {
   }
 }
 
+/** The slot a candidate ends up in: the broken one, or the shifted starter's old one. */
+const takes = (c: Candidate, f: Finding): Slot => c.moves.find((m) => m.playerId === c.player.id)?.to ?? f.slot;
+
+/** "Start Jaylen Wright at RB", or with a shift, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB". */
+function startText(f: Finding, c: Candidate): string {
+  const start = `Start ${c.player.name} at ${slotName(takes(c, f))}`;
+  return c.via ? `${start} and move ${c.via.name} to ${slotName(f.slot)}` : start;
+}
+
 /** The action's `summary`: "Start Jaylen Wright at RB instead of De'Von Achane". */
 export function changeOf(f: Finding, c: Candidate): string {
-  const start = `Start ${c.player.name} at ${slotName(f.slot)}`;
+  const start = startText(f, c);
   return f.starter ? `${start} instead of ${f.starter.name}` : start;
 }
 
@@ -157,7 +166,7 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
 }
 
 export function proposal(f: Finding, c: Candidate, held: { reason: string; autoAt?: string } | undefined, now: Date, aside?: string): Notice {
-  const ask = `Start ${c.player.name} at ${slotName(f.slot)}${f.starter ? " instead" : ""}?`;
+  const ask = `${startText(f, c)}${f.starter ? " instead" : ""}?`;
   const why = held ? heldText(held, now) : aside;
   return { type: "ACTION_RECOMMENDED", title: problemOf(f), body: [ask, "Tap to approve.", why].filter(Boolean).join(" ") };
 }
@@ -170,7 +179,7 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   const kick = f.starter?.game?.kickoff;
   const by = f.deadline ?? kick;
   const before = by ? ` before ${clock(by, now)}` : "";
-  const names = (cs: Candidate[]) => list(cs.map((c) => c.player.name));
+  const names = (cs: Candidate[]) => list(cs.map((c) => (c.via ? `${c.player.name} (${shortName(c.via.name)} moves to ${slot})` : c.player.name)));
 
   if (step.do === "wait") {
     const plays = kick ? `He plays at ${clock(kick, now)}. ` : "";

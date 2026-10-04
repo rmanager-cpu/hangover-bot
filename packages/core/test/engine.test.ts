@@ -105,6 +105,70 @@ test("a missing projection is not zero: alone and healthy, he is still the fix",
   assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "np");
 });
 
+// ---- the shift move (owner, Oct 3): a starter moves into the broken slot, the bench fills his
+
+const RB_ELIG: Slot[] = ["RB", "RB/WR", "FLEX", "BENCH", "IR"];
+const rb = (id: string, over: Partial<Player> = {}): Player => wr(id, { position: "RB", eligibleSlots: RB_ELIG, ...over });
+const shiftRoster = (bench: RosterEntry[], flex: Player = wr("c")) =>
+  roster([at("WR", wr("jj", { status: "out", game: { kickoff: LATE } })), at("WR", wr("b")), at("FLEX", flex), ...bench]);
+
+test("an OUT starter can be fixed by shifting a starter into his slot and filling the gap from the bench, when that brings in the better player", () => {
+  const [f] = rules(shiftRoster([at("BENCH", rb("d", { projection: 12, game: { kickoff: LATE } })), at("BENCH", wr("t", { projection: 8 }))]));
+  assert.equal(f?.resolution.type, "deterministic");
+  const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+  assert.equal(c?.player.id, "d");
+  assert.equal(c?.via?.id, "c");
+  assert.deepEqual(c?.moves, [
+    { playerId: "jj", from: "WR", to: "BENCH" },
+    { playerId: "c", from: "FLEX", to: "WR" },
+    { playerId: "d", from: "BENCH", to: "FLEX" },
+  ]);
+  assert.equal(f?.deadline, new Date(EARLY).toISOString(), "the shifted starter kicks off first, so the move is due before his game");
+});
+
+test("the straight bench option wins when it brings in the better player, and takes two moves", () => {
+  const [f] = rules(shiftRoster([at("BENCH", rb("d", { projection: 12 })), at("BENCH", wr("t", { projection: 15 }))]));
+  const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+  assert.equal(c?.player.id, "t");
+  assert.equal(c?.via, undefined);
+  assert.equal(c?.moves.length, 2);
+});
+
+test("the same bench player is offered once, by the shorter route", () => {
+  const r = shiftRoster([at("BENCH", wr("t", { projection: undefined })), at("BENCH", wr("u", { projection: undefined }))]);
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type, "judgment");
+  const cands = f?.resolution.type === "judgment" ? f.resolution.candidates : [];
+  assert.deepEqual(cands.map((c) => [c.player.id, c.via?.id, c.moves.length]), [["t", undefined, 2], ["u", undefined, 2]]);
+});
+
+test("a locked, started, out, bye or unreadable starter never shifts", () => {
+  for (const flex of [wr("c", { locked: true }), wr("c", { game: { kickoff: THURSDAY } }), wr("c", { status: "out" }), wr("c", { game: null }), wr("c", { status: "unknown" })]) {
+    // An out, bye or unreadable FLEX starter is a problem of his own, so find jj's finding.
+    const f = rules(shiftRoster([at("BENCH", rb("d", { projection: 12 })), at("BENCH", wr("t", { projection: 8 }))], flex)).find((x) => x.starter?.id === "jj");
+    const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+    assert.equal(c?.player.id, "t", `flex ${JSON.stringify({ locked: flex.locked, status: flex.status, game: flex.game })}`);
+    assert.equal(c?.via, undefined);
+  }
+});
+
+test("a starter shifts at most once per evaluation", () => {
+  const r = roster([
+    at("WR", wr("jj1", { status: "out" })), at("WR", wr("jj2", { status: "out" })), at("FLEX", wr("c")),
+    at("BENCH", rb("d1", { projection: 12 })), at("BENCH", rb("d2", { projection: 11 })),
+  ]);
+  const [f1, f2] = rules(r);
+  assert.equal(f1?.resolution.type === "deterministic" && f1.resolution.candidate.via?.id, "c");
+  assert.equal(f2?.resolution.type, "none", "c already moved; no bench WR is left");
+});
+
+test("a shift never brings in a zero-projection player either", () => {
+  const [f] = rules(shiftRoster([at("BENCH", rb("d", { projection: 0 })), at("BENCH", wr("t", { projection: 8 }))]));
+  const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+  assert.equal(c?.player.id, "t");
+  assert.equal(c?.via, undefined);
+});
+
 test("a questionable bench player alone is never the automatic fix", () => {
   const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("q", { status: "questionable" }))]);
   assert.equal(rules(r)[0]?.resolution.type, "judgment");

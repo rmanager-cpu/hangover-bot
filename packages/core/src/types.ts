@@ -70,6 +70,11 @@ export interface Candidate {
   player: Player;
   /** The moves that would put this player in the slot. */
   moves: Move[];
+  /**
+   * Owner, Oct 3: the current starter who shifts into the broken slot so this player can
+   * take his old one. Absent when the player goes straight from the bench.
+   */
+  via?: Player;
 }
 
 export type Resolution =
