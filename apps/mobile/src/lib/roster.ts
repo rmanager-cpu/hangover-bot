@@ -49,6 +49,8 @@ export function problems(roster: Roster, now: Date): Problem[] {
     else if (p.status === "out") out.push({ keyEnd: ":" + p.id, text: `${name} is OUT` });
     else if (p.status === "ir") out.push({ keyEnd: ":" + p.id, text: `${name} is on IR` });
     else if (p.status === "suspended") out.push({ keyEnd: ":" + p.id, text: `${name} is suspended` });
+    // Owner, Oct 3: a zero projection is a hole whatever the status says (core `classify`).
+    else if (p.projection !== undefined && p.projection <= 0) out.push({ keyEnd: ":" + p.id, text: `ESPN projects ${name} for zero points` });
   }
   const filled = new Map<string, number>();
   for (const e of roster.entries) if (starting(e.slot)) filled.set(e.slot, (filled.get(e.slot) ?? 0) + 1);

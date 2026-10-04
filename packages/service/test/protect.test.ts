@@ -153,14 +153,18 @@ test("AI Rescue with a questionable starter at T-60 asks the user; nothing consu
   ]);
 });
 
-test("a questionable starter ESPN projects for zero is not said to 'might play' (owner, Oct 3)", async () => {
+test("a questionable starter ESPN projects for zero is a hole: replaced inside the window, with the projection as the reason (owner, Oct 3)", async () => {
   const r = team();
   entry(r, ACHANE).player.status = "questionable";
   entry(r, ACHANE).player.projection = 0;
   const s = setup({ roster: r, authority: "bench_protection", at: T - 60 * MIN });
-  await s.run();
-  assert.equal(s.espn.writes.length, 0);
-  assert.equal(s.store.activity[0]!.body, "ESPN projects him for zero points. Bench options at RB: Jaylen Wright and Rashid Shaheed (Walker moves to RB). Your call before 1:00 PM ET: swap in the app or in ESPN.");
+  const sum = await s.run();
+  assert.equal(sum.executed, 1);
+  assert.deepEqual(s.espn.writes, [{ moves: SWAP, period: 5 }]);
+  const a = s.store.actions[0]!;
+  assert.equal(a.findingKey, `5:starter_zero:${ACHANE}`);
+  assert.equal(a.reason, "ESPN projects Achane for zero points");
+  assert.equal(s.store.activity[0]!.body, "ESPN projects Achane for zero points. Moved Jaylen Wright from bench to RB. Achane is on your bench. Done at 12:00 PM ET.");
 });
 
 // ---- who never gets an automatic move

@@ -117,7 +117,7 @@ test("an OUT starter can be fixed by shifting a starter into his slot and fillin
   assert.equal(f?.resolution.type, "deterministic");
   const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
   assert.equal(c?.player.id, "d");
-  assert.equal(c?.via?.id, "c");
+  assert.deepEqual(c?.via?.map((p) => p.id), ["c"]);
   assert.deepEqual(c?.moves, [
     { playerId: "jj", from: "WR", to: "BENCH" },
     { playerId: "c", from: "FLEX", to: "WR" },
@@ -139,7 +139,7 @@ test("the same bench player is offered once, by the shorter route", () => {
   const [f] = rules(r);
   assert.equal(f?.resolution.type, "judgment");
   const cands = f?.resolution.type === "judgment" ? f.resolution.candidates : [];
-  assert.deepEqual(cands.map((c) => [c.player.id, c.via?.id, c.moves.length]), [["t", undefined, 2], ["u", undefined, 2]]);
+  assert.deepEqual(cands.map((c) => [c.player.id, c.via, c.moves.length]), [["t", undefined, 2], ["u", undefined, 2]]);
 });
 
 test("a locked, started, out, bye or unreadable starter never shifts", () => {
@@ -158,7 +158,7 @@ test("a starter shifts at most once per evaluation", () => {
     at("BENCH", rb("d1", { projection: 12 })), at("BENCH", rb("d2", { projection: 11 })),
   ]);
   const [f1, f2] = rules(r);
-  assert.equal(f1?.resolution.type === "deterministic" && f1.resolution.candidate.via?.id, "c");
+  assert.equal(f1?.resolution.type === "deterministic" && f1.resolution.candidate.via?.[0]?.id, "c");
   assert.equal(f2?.resolution.type, "none", "c already moved; no bench WR is left");
 });
 
@@ -167,6 +167,50 @@ test("a shift never brings in a zero-projection player either", () => {
   const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
   assert.equal(c?.player.id, "t");
   assert.equal(c?.via, undefined);
+});
+
+test("a starter ESPN projects for zero is a hole whatever his status says; a projected starter never is (owner, Oct 3)", () => {
+  for (const status of ["active", "questionable", "doubtful", "unknown"] as const) {
+    const r = roster([at("WR", wr("z", { status, projection: 0 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+    const [f] = rules(r);
+    assert.equal(f?.kind, "starter_zero", status);
+    assert.equal(f?.hard, true);
+    assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "d", status);
+  }
+  const fine = roster([at("WR", wr("p", { status: "questionable", projection: 0.5 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  assert.equal(rules(fine)[0]?.kind, "starter_questionable", "a projection, however small, means he is playing: judgment, never a hole");
+  const out = roster([at("WR", wr("o", { status: "out", projection: 4 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  assert.equal(rules(out)[0]?.kind, "starter_out", "OUT stays a hole even before ESPN zeroes the projection");
+});
+
+test("a hole is filled through a chain of shifts when no shorter route exists, and nobody playing leaves the lineup", () => {
+  const WRTE: Slot[] = ["WR", "WR/TE", "FLEX", "BENCH", "IR"];
+  const TE: Slot[] = ["TE", "WR/TE", "FLEX", "BENCH", "IR"];
+  const r = roster(
+    [
+      at("WR", wr("jj", { status: "out", game: { kickoff: LATE } })),
+      at("WR/TE", wr("y1", { eligibleSlots: WRTE })),
+      at("FLEX", wr("y2", { position: "TE", eligibleSlots: TE })),
+      at("BENCH", rb("z", { projection: 12 })),
+    ],
+    ["WR", "WR/TE", "FLEX"],
+  );
+  const [f] = rules(r);
+  const c = f?.resolution.type === "deterministic" ? f.resolution.candidate : undefined;
+  assert.equal(c?.player.id, "z");
+  assert.deepEqual(c?.via?.map((p) => p.id), ["y1", "y2"]);
+  assert.deepEqual(c?.moves, [
+    { playerId: "jj", from: "WR", to: "BENCH" },
+    { playerId: "y1", from: "WR/TE", to: "WR" },
+    { playerId: "y2", from: "FLEX", to: "WR/TE" },
+    { playerId: "z", from: "BENCH", to: "FLEX" },
+  ]);
+  assert.deepEqual(c?.moves.filter((m) => m.to === "BENCH").map((m) => m.playerId), ["jj"], "only the hole leaves the lineup");
+});
+
+test("a lineup with no hole is never reshuffled, however much better the bench looks", () => {
+  const r = roster([at("WR", wr("a", { projection: 3 })), at("WR", wr("b", { projection: 4 })), at("FLEX", wr("c", { projection: 2 })), at("BENCH", wr("d", { projection: 30 }))]);
+  assert.deepEqual(rules(r), []);
 });
 
 test("a questionable bench player alone is never the automatic fix", () => {

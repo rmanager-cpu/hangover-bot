@@ -63,6 +63,8 @@ export type FindingKind =
   | "empty_slot"
   | "starter_on_bye"
   | "starter_out"
+  /** ESPN projects him for zero points, whatever his status says (owner, Oct 3). */
+  | "starter_zero"
   | "starter_doubtful"
   | "starter_questionable"
   | "starter_status_unknown";
@@ -72,10 +74,11 @@ export interface Candidate {
   /** The moves that would put this player in the slot. */
   moves: Move[];
   /**
-   * Owner, Oct 3: the current starter who shifts into the broken slot so this player can
-   * take his old one. Absent when the player goes straight from the bench.
+   * Owner, Oct 3: the starters who shift to make room, nearest the broken slot first: the
+   * first moves into it, each next one into the slot the previous vacated, and this player
+   * takes the last one's. Absent when he goes straight from the bench.
    */
-  via?: Player;
+  via?: Player[];
 }
 
 export type Resolution =

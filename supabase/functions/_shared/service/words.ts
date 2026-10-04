@@ -100,6 +100,8 @@ export function problemOf(f: Finding): string {
       if (f.starter?.status === "ir") return `${who} is on IR`;
       if (f.starter?.status === "suspended") return `${who} is suspended`;
       return `${who} was ruled OUT`;
+    case "starter_zero":
+      return `ESPN projects ${who} for zero points`;
     case "starter_doubtful":
       return `${who} is doubtful`;
     case "starter_questionable":
@@ -109,13 +111,13 @@ export function problemOf(f: Finding): string {
   }
 }
 
-/** The slot a candidate ends up in: the broken one, or the shifted starter's old one. */
-const takes = (c: Candidate, f: Finding): Slot => c.moves.find((m) => m.playerId === c.player.id)?.to ?? f.slot;
+/** Where a candidate's move puts a player: the hole, or the slot a shifted starter vacated. */
+const lands = (c: Candidate, f: Finding, id: string): Slot => c.moves.find((m) => m.playerId === id)?.to ?? f.slot;
 
-/** "Start Jaylen Wright at RB", or with a shift, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB". */
+/** "Start Jaylen Wright at RB", or with shifts, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB". */
 function startText(f: Finding, c: Candidate): string {
-  const start = `Start ${c.player.name} at ${slotName(takes(c, f))}`;
-  return c.via ? `${start} and move ${c.via.name} to ${slotName(f.slot)}` : start;
+  const start = `Start ${c.player.name} at ${slotName(lands(c, f, c.player.id))}`;
+  return c.via?.length ? `${start} and move ${list(c.via.map((p) => `${p.name} to ${slotName(lands(c, f, p.id))}`))}` : start;
 }
 
 /** The action's `summary`: "Start Jaylen Wright at RB instead of De'Von Achane". */
@@ -179,16 +181,15 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   const kick = f.starter?.game?.kickoff;
   const by = f.deadline ?? kick;
   const before = by ? ` before ${clock(by, now)}` : "";
-  const names = (cs: Candidate[]) => list(cs.map((c) => (c.via ? `${c.player.name} (${shortName(c.via.name)} moves to ${slot})` : c.player.name)));
+  const names = (cs: Candidate[]) =>
+    list(cs.map((c) => (c.via?.length ? `${c.player.name} (${list(c.via.map((p) => `${shortName(p.name)} moves to ${slotName(lands(c, f, p.id))}`))})` : c.player.name)));
 
   if (step.do === "wait") {
     const plays = kick ? `He plays at ${clock(kick, now)}. ` : "";
     return { type: "PREGAME_WARNING", title, body: `${plays}News can change until inactives, so I'll look again at ${clock(step.until, now)}.` };
   }
   if (step.do === "ask_user") {
-    // "He might play" is wrong for a starter ESPN projects for zero (owner, Oct 3).
-    const zero = f.starter?.projection !== undefined && f.starter.projection <= 0;
-    const lead = f.hard ? "" : zero ? "ESPN projects him for zero points. " : "He might play. ";
+    const lead = f.hard ? "" : "He might play. ";
     // Hard and still a judgment: no ranking data, the best option has a doubt of his own, or
     // his kickoff could not be read, which is worth saying, since it is ESPN's gap, not his.
     const top = step.candidates[0];

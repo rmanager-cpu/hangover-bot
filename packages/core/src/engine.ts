@@ -20,7 +20,10 @@ import {
   type Step,
 } from "./types.ts";
 
-const HARD: readonly FindingKind[] = ["empty_slot", "starter_on_bye", "starter_out"];
+const HARD: readonly FindingKind[] = ["empty_slot", "starter_on_bye", "starter_out", "starter_zero"];
+
+/** How many starters may shift to fill one hole. A bound, not a target. */
+const MAX_SHIFTS = 3;
 
 /** How long before a soft finding's kickoff we start deciding it: the inactives window plus margin. */
 export const JUDGMENT_LEAD_MINUTES = 100;
@@ -54,6 +57,8 @@ function shiftable(p: Player, now: number): boolean {
   if (p.locked) return false;
   if (p.status !== "active" && p.status !== "questionable") return false;
   if (p.game === null) return false;
+  if (p.projection !== undefined && p.projection <= 0) return false; // a hole of his own
+
   const k = kickoffMs(p);
   if (k !== undefined && k <= now) return false;
   return true;
@@ -62,6 +67,10 @@ function shiftable(p: Player, now: number): boolean {
 function classify(p: Player): FindingKind | undefined {
   if (p.game === null) return "starter_on_bye";
   if (p.status === "out" || p.status === "ir" || p.status === "suspended") return "starter_out";
+  // Owner, Oct 3: ESPN's zero projection is the source of truth for movement. A starter
+  // projected for nothing is a hole whatever his status says; one projected for something
+  // is playing, and is never taken out of the lineup on his own.
+  if (p.projection !== undefined && p.projection <= 0) return "starter_zero";
   if (p.status === "doubtful") return "starter_doubtful";
   if (p.status === "questionable") return "starter_questionable";
   if (p.status === "unknown") return "starter_status_unknown";
@@ -86,32 +95,30 @@ function candidatesFor(
     const i = order.indexOf(p.id);
     return i === -1 ? Infinity : i;
   };
-  const out = new Map<string, Candidate>();
-  const offer = (c: Candidate) => {
-    if (!out.has(c.player.id)) out.set(c.player.id, c);
-  };
   const benchStarter: Move[] = starter ? [{ playerId: starter.id, from: slot, to: BENCH }] : [];
+  const out = new Map<string, Candidate>();
 
-  // Straight from the bench first, so the shorter route wins a tie for the same player.
-  for (const e of bench) {
-    if (e.player.eligibleSlots.includes(slot) && viable(e.player, now)) {
-      offer({ player: e.player, moves: [...benchStarter, { playerId: e.player.id, from: BENCH, to: slot }] });
-    }
-  }
-  // Owner, Oct 3: or one current starter shifts into the broken slot and the bench fills
-  // his old one (Nabers FLEX to WR, Dobbins to FLEX). The lineup is still ranked by the
-  // player coming in, since the shifted starter plays either way. One shift per fix, no
-  // chains, and a starter shifts at most once per evaluation.
-  for (const s of starters) {
-    if (s.slot === slot || !isStarting(s.slot) || shifted.has(s.player.id) || s.player.id === starter?.id) continue;
-    if (!s.player.eligibleSlots.includes(slot) || !shiftable(s.player, now)) continue;
+  // Owner, Oct 3: a hole is filled by reshuffling. One bench player comes in, and any
+  // starters between his slot and the hole each shift one slot along; nobody who is
+  // playing leaves the lineup. Breadth first over the slots a shift could vacate, so the
+  // first route found for a bench player is his shortest, and a straight move beats a shift.
+  type Route = { need: Slot; shifts: { player: Player; from: Slot; to: Slot }[]; seen: Set<Slot> };
+  const queue: Route[] = [{ need: slot, shifts: [], seen: new Set([slot]) }];
+  while (queue.length) {
+    const r = queue.shift()!;
     for (const e of bench) {
-      if (!e.player.eligibleSlots.includes(s.slot) || !viable(e.player, now)) continue;
-      offer({
+      if (out.has(e.player.id) || !e.player.eligibleSlots.includes(r.need) || !viable(e.player, now)) continue;
+      out.set(e.player.id, {
         player: e.player,
-        via: s.player,
-        moves: [...benchStarter, { playerId: s.player.id, from: s.slot, to: slot }, { playerId: e.player.id, from: BENCH, to: s.slot }],
+        ...(r.shifts.length ? { via: r.shifts.map((x) => x.player) } : {}),
+        moves: [...benchStarter, ...r.shifts.map((x) => ({ playerId: x.player.id, from: x.from, to: x.to })), { playerId: e.player.id, from: BENCH, to: r.need }],
       });
+    }
+    if (r.shifts.length >= MAX_SHIFTS) continue;
+    for (const e of starters) {
+      if (r.seen.has(e.slot) || !isStarting(e.slot) || shifted.has(e.player.id) || e.player.id === starter?.id) continue;
+      if (!e.player.eligibleSlots.includes(r.need) || !shiftable(e.player, now)) continue;
+      queue.push({ need: e.slot, shifts: [...r.shifts, { player: e.player, from: e.slot, to: r.need }], seen: new Set([...r.seen, e.slot]) });
     }
   }
   return [...out.values()].sort(
@@ -123,7 +130,7 @@ function candidatesFor(
 }
 
 /** The kickoffs a candidate's moves depend on: his own, and the shifted starter's. */
-const kickoffsOf = (c: Candidate): (string | undefined)[] => [c.player.game?.kickoff, c.via?.game?.kickoff];
+const kickoffsOf = (c: Candidate): (string | undefined)[] => [c.player.game?.kickoff, ...(c.via ?? []).map((p) => p.game?.kickoff)];
 
 function earliest(...isos: (string | undefined)[]): string | undefined {
   const ms = isos.filter((s): s is string => Boolean(s)).map((s) => Date.parse(s));
@@ -192,7 +199,7 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
     const pick = hard ? rulesPick(cands, settings.replacementOrder) : undefined;
     if (pick) {
       bench = bench.filter((e) => e.player.id !== pick.candidate.player.id);
-      if (pick.candidate.via) shifted.add(pick.candidate.via.id);
+      for (const v of pick.candidate.via ?? []) shifted.add(v.id);
       const deadline = earliest(p.starter?.game?.kickoff, ...kickoffsOf(pick.candidate));
       findings.push({ ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) });
       continue;

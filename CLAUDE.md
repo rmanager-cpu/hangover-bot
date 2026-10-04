@@ -109,8 +109,10 @@ Sentry.
 
 - **ESPN only at launch.** Other providers are "coming soon" entries, not code.
 - **No unattended write for an anonymous account.** Enforced in `core`, not the UI.
-- **The rules engine decides; AI only picks from the candidates core gives it.** A fix is
-  one bench player in, straight or via one shifted starter (owner, Oct 3); never a chain.
+- **The rules engine decides; AI only picks from the candidates core gives it.** A hole is a
+  starter projected for zero (or OUT/IR/suspended/bye); the fix is one bench player in, with
+  playing starters shifted along to make room. A playing starter is never benched and a
+  lineup with no hole is never touched (owner, Oct 3).
 - **A write is not a success until a fresh read shows it.**
 - **Never log a request to ESPN.** It carries the user's cookies.
 - **Team ids are not 1..N, and a negative player id is real** (every D/ST).
