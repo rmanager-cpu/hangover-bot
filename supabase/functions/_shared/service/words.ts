@@ -177,7 +177,9 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
     return { type: "PREGAME_WARNING", title, body: `${plays}News can change until inactives, so I'll look again at ${clock(step.until, now)}.` };
   }
   if (step.do === "ask_user") {
-    const lead = f.hard ? "" : "He might play. ";
+    // "He might play" is wrong for a starter ESPN projects for zero (owner, Oct 3).
+    const zero = f.starter?.projection !== undefined && f.starter.projection <= 0;
+    const lead = f.hard ? "" : zero ? "ESPN projects him for zero points. " : "He might play. ";
     // Hard and still a judgment: no ranking data, the best option has a doubt of his own, or
     // his kickoff could not be read, which is worth saying, since it is ESPN's gap, not his.
     const top = step.candidates[0];

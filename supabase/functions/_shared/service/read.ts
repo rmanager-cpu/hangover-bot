@@ -83,6 +83,17 @@ export function summarizeRead(roster: Roster, now: Date): ReadSummary {
     warnings.push(`ESPN sent an injury status I don't recognize for ${list(unknown.map((e) => shortName(e.player.name)))}, so I won't move ${them}.`);
   }
 
+  // Owner, Oct 3: a zero projection keeps a bench player out of the lineup (core `viable`),
+  // so the screen says so instead of leaving him looking available. Players a status
+  // already rules out (OUT, IR, suspended, doubtful) are not worth a second line.
+  const zeroed = roster.entries.filter(
+    (e) => e.slot === BENCH && (e.player.status === "active" || e.player.status === "questionable") && e.player.projection !== undefined && e.player.projection <= 0,
+  );
+  if (zeroed.length) {
+    const them = zeroed.length === 1 ? "him" : "them";
+    warnings.push(`ESPN projects ${list(zeroed.map((e) => shortName(e.player.name)))} for zero points, so I won't move ${them} into your lineup.`);
+  }
+
   if (roster.entries.length && roster.entries.every((e) => e.player.projection === undefined)) {
     warnings.push("ESPN sent no projections, so I can only pick a replacement from your replacement order, or when just one player fits.");
   }

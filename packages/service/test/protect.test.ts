@@ -112,6 +112,16 @@ test("AI Rescue with a questionable starter at T-60 asks the user; nothing consu
   assert.deepEqual(told.data?.candidates, [{ playerId: WRIGHT, name: "Jaylen Wright", moves: SWAP }]);
 });
 
+test("a questionable starter ESPN projects for zero is not said to 'might play' (owner, Oct 3)", async () => {
+  const r = team();
+  entry(r, ACHANE).player.status = "questionable";
+  entry(r, ACHANE).player.projection = 0;
+  const s = setup({ roster: r, authority: "bench_protection", at: T - 60 * MIN });
+  await s.run();
+  assert.equal(s.espn.writes.length, 0);
+  assert.equal(s.store.activity[0]!.body, "ESPN projects him for zero points. Bench options at RB: Jaylen Wright. Your call before 1:00 PM ET: swap in the app or in ESPN.");
+});
+
 // ---- who never gets an automatic move
 
 test("an anonymous account never gets an automatic move, anywhere in the window", async () => {

@@ -104,6 +104,15 @@ test("warnings say what is wrong with the read in plain words", () => {
   ]);
 });
 
+test("a bench player ESPN projects for zero points is named as one I won't move in (owner, Oct 3)", () => {
+  const r = team();
+  entry(r, WRIGHT).player.projection = 0;
+  assert.deepEqual(summarizeRead(r, SAT).warnings, ["ESPN projects Wright for zero points, so I won't move him into your lineup."]);
+  // A status that already rules him out needs no second line.
+  entry(r, WRIGHT).player.status = "out";
+  assert.deepEqual(summarizeRead(r, SAT).warnings, []);
+});
+
 test("a read that would stop automation says so first", () => {
   const r = team();
   r.entries.push({ slot: "BENCH", player: { ...entry(r, WRIGHT).player } });
