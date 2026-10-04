@@ -4,7 +4,7 @@
 // bench to RB. Achane is on your bench." Times are US Eastern, the way kickoffs are
 // given, and say so: the owner is on Pacific time.
 
-import { BENCH, IR, isStarting, type Candidate, type Finding, type Move, type Player, type Roster, type Slot, type Step } from "@rosterbots/core";
+import { BENCH, IR, NOBODY_ELIGIBLE, isStarting, type Candidate, type Finding, type Move, type Player, type Roster, type Slot, type Step } from "@rosterbots/core";
 import type { ActionStatus, ActivityType } from "./types.ts";
 
 export interface Notice {
@@ -230,7 +230,11 @@ export function inform(step: Extract<Step, { do: "notify" | "wait" | "ask_user" 
   if (f.kind === "starter_status_unknown") {
     return { type: "STATUS_CHANGED", title, body: `ESPN sent a status I don't recognize, so I'm leaving him where he is. Check him in the ESPN app${before}.` };
   }
-  if (f.hard) return { type: "ACTION_REQUIRED", title, body: `Nobody on your bench can play ${slot}. Fix it in the ESPN app${before}.` };
+  if (f.hard) {
+    // Some can play the slot but none is set to (out, projected for zero, or already played): say that, not "nobody".
+    const who = r.why === NOBODY_ELIGIBLE ? `Nobody on your bench can play ${slot}.` : `Everyone on your bench who can play ${slot} is out, projected for zero, or already playing.`;
+    return { type: "ACTION_REQUIRED", title, body: `${who} Fix it in the ESPN app${before}.` };
+  }
   return { type: "STATUS_CHANGED", title, body: `Nobody healthy on your bench can replace him at ${slot}, so he stays in.` };
 }
 

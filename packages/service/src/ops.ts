@@ -4,10 +4,10 @@
 // Never log a request to ESPN, its headers or a credential. Nothing here logs at
 // all; errors carry HTTP statuses and connection ids, never cookies.
 
-import { applied, DEFAULT_SETTINGS, type Move, type Roster, type Settings } from "@rosterbots/core";
+import { applied, DEFAULT_SETTINGS, type Finding, type Move, type Roster, type Settings } from "@rosterbots/core";
 import { AuthError, ProviderError, type FantasyConnector } from "@rosterbots/connectors";
-import { inMinutes } from "./read.ts";
-import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps } from "./types.ts";
+import { inMinutes, nextCheckAt } from "./read.ts";
+import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps, Store } from "./types.ts";
 import { failure, signIn, type Lookup } from "./words.ts";
 
 /** How long before a second look when ESPN refuses a read: a WAF's passing block clears in seconds. */
@@ -187,15 +187,69 @@ export async function announce(
 }
 
 /**
+ * When to look again after ESPN could not be read: within REAUTH_RETRY_MIN minutes, and
+ * sooner on the kickoff cadence of the last whole read (every minute inside T-10). A late
+ * scratch with one failed read in the last minutes must not wait five and miss T-4.
+ */
+export async function retryAt(deps: Deps, conn: ConnectionRow, now: Date, latest: Roster | null = null): Promise<string> {
+  let saved: Roster | null = null;
+  try {
+    saved = await deps.store.lastRoster(conn.id);
+  } catch {
+    // The store is failing; five minutes it is.
+  }
+  let next = inMinutes(now, REAUTH_RETRY_MIN);
+  for (const r of [latest, saved]) {
+    if (!r) continue;
+    const cadence = nextCheckAt(r, now);
+    if (cadence < next) next = cadence;
+  }
+  return next.toISOString();
+}
+
+/**
  * Mark the connection needs_reauth and say so, once: a connection already marked is
- * retried every few minutes, silently, and a good read makes it active again.
+ * retried every few minutes (every minute close to a kickoff), silently, and a good read
+ * makes it active again.
  */
 export async function signedOut(deps: Deps, conn: ConnectionRow, now: Date, cause: unknown): Promise<{ told: boolean; nextCheckAt: string }> {
-  const nextCheckAt = inMinutes(now, REAUTH_RETRY_MIN).toISOString();
-  await deps.store.saveCheck(conn.id, { status: "needs_reauth", lastCheckedAt: now.toISOString(), nextCheckAt });
-  if (conn.status === "needs_reauth") return { told: false, nextCheckAt };
+  const next = await retryAt(deps, conn, now);
+  await deps.store.saveCheck(conn.id, { status: "needs_reauth", lastCheckedAt: now.toISOString(), nextCheckAt: next });
+  if (conn.status === "needs_reauth") return { told: false, nextCheckAt: next };
   await announce(deps, conn, signIn(conn.teamName, cause instanceof WrongTeamError), { reason: cause instanceof WrongTeamError ? "wrong_team" : "signed_out" });
-  return { told: true, nextCheckAt };
+  return { told: true, nextCheckAt: next };
+}
+
+/**
+ * Holes the user declined this period. Their fix stands as a fix, but it does not claim its
+ * bench player in evaluate, so a hole the user did not decline may have him (owner, Oct 4).
+ */
+export async function declinedHoles(store: Store, connectionId: string, found: Finding[], period: number): Promise<Set<string>> {
+  const out = new Set<string>();
+  for (const f of found) {
+    if (!f.hard) continue;
+    if ((await store.actionsFor(connectionId, f.key, period)).some((a) => a.status === "declined")) out.add(f.key);
+  }
+  return out;
+}
+
+/** A write ESPN was asked for, then could not be read back on: in flight until a whole read says how it ended. */
+export const UNCONFIRMED = "unconfirmed";
+export const unconfirmed = (a: ActionRow): boolean =>
+  a.status === "approved" && typeof a.result === "object" && a.result !== null && (a.result as Record<string, unknown>)[UNCONFIRMED] === true;
+
+/**
+ * The read back after a write failed twice: ESPN may well have made the change, so it is
+ * neither done nor failed. The row stays in flight, marked, and the next check's settle()
+ * reads ESPN and says which. Calling it failed would hold every automatic move for the week
+ * on a read that failed, not a write (Oct 4 review).
+ */
+export async function leaveUnconfirmed(deps: Deps, action: ActionRow, e: unknown): Promise<void> {
+  try {
+    await deps.store.updateAction(action.id, { status: "approved", result: { [UNCONFIRMED]: true, error: errorText(e) } }, "approved");
+  } catch {
+    // The store is failing; the row is 'approved' either way, and settle() takes it after INTERRUPTED_MS.
+  }
 }
 
 /**

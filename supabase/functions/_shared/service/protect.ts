@@ -20,13 +20,18 @@ import {
   IncompleteReadError,
   announce,
   connect,
+  declinedHoles,
   errorText,
   failed,
   isSignedOut,
+  leaveUnconfirmed,
+  noteWrite,
   readTeamPatiently,
+  retryAt,
   settingsFor,
   signature,
   signedOut,
+  unconfirmed,
   utcDayStart,
   writeAndVerify,
   writeUnproven,
@@ -59,6 +64,13 @@ const MIN = 60_000;
  */
 const INTERRUPTED_MS = 3 * MIN;
 
+/**
+ * The cron tick this check belongs to. Checks run on the minute and read the clock a few
+ * hundred ms later; the automatic window is judged at the tick, so the T-4 check acts
+ * (owner, Oct 3: the window runs to T-4) rather than missing it by the function's lag.
+ */
+const tickOf = (now: Date): Date => new Date(Math.floor(now.getTime() / MIN) * MIN);
+
 type Execute = Extract<Step, { do: "execute" }>;
 type Propose = Extract<Step, { do: "propose" }>;
 type Inform = Extract<Step, { do: "notify" | "wait" | "ask_user" }>;
@@ -77,6 +89,8 @@ interface Check {
   failedEarlier: boolean;
   /** No change the user made through HangoverBot has been seen landing in this league yet. */
   unproven: boolean;
+  /** Holes the user declined this period: their fixes do not claim bench players (core evaluate). */
+  release: ReadonlySet<string>;
   tally: { executed: number; proposed: number; notified: number };
 }
 
@@ -174,6 +188,7 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
       failedNow: false,
       failedEarlier: false,
       unproven: writeUnproven(conn),
+      release: new Set(),
       tally,
     };
     // Settled first, so the week's failures and the day's count below include them.
@@ -181,10 +196,12 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
     check.failedEarlier = (await deps.store.failedWrites(conn.id, first.period)) > 0;
     check.autoToday = await deps.store.autoMovesSince(conn.id, utcDayStart(now));
 
-    const found = evaluate(first, now, settings);
+    let found = evaluate(first, now, settings);
+    check.release = await declinedHoles(deps.store, conn.id, found, first.period);
+    if (check.release.size) found = evaluate(first, now, settings, check.release);
     findings = found.length;
     for (const f of found) {
-      const step = guard(plan(f, settings, now), { now, autoMovesToday: check.autoToday, readLooksSane: true, policy: check.policy });
+      const step = guard(plan(f, settings, now), { now: tickOf(now), autoMovesToday: check.autoToday, readLooksSane: true, policy: check.policy });
       await act(check, step, first.period, now);
     }
     // This read is whole (an incomplete one never gets here), so a problem it no longer shows is gone.
@@ -207,11 +224,10 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
         if (out.told) tally.notified++;
         return summary("needs_reauth", out.nextCheckAt);
       }
-      // Try again soon, but not every minute: within 5 minutes, sooner if a kickoff is close.
+      // Try again soon, but not every minute: within 5 minutes, sooner if a kickoff is close,
+      // judged by this read if it got that far and by the last one saved if not.
       const latest = check?.latest ?? first ?? null;
-      const soon = inMinutes(now, 5);
-      const cadence = nextCheckAt(latest, now);
-      const next = (cadence < soon ? cadence : soon).toISOString();
+      const next = await retryAt(deps, conn, now, latest);
       // An incomplete read is not kept: Home judges the lineup by the last roster saved.
       const keep = latest && !(e instanceof IncompleteReadError) ? { lastRoster: latest } : {};
       await deps.store.saveCheck(conn.id, { lastCheckedAt: now.toISOString(), nextCheckAt: next, ...keep });
@@ -223,12 +239,14 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
 }
 
 /**
- * Writes a run left 'approved' because it died mid-write. This check's read came after
- * them, so it says how they ended: a receipt if ESPN shows the change, ACTION_FAILED if not.
+ * Writes left 'approved': a run died mid-write, or ESPN could not be read back after it
+ * (marked unconfirmed, and settled on the next read, without waiting). This check's read came
+ * after them, so it says how they ended: a receipt if ESPN shows the change, ACTION_FAILED if not.
  */
 async function settle(c: Check, roster: Roster, now: Date): Promise<void> {
   for (const a of await c.deps.store.openActions(c.conn.id)) {
-    if (a.status !== "approved" || now.getTime() - Date.parse(a.decidedAt ?? a.createdAt) < INTERRUPTED_MS) continue;
+    if (a.status !== "approved") continue;
+    if (!unconfirmed(a) && now.getTime() - Date.parse(a.decidedAt ?? a.createdAt) < INTERRUPTED_MS) continue;
     const at = now.toISOString();
     if (a.period !== roster.period) {
       // Another week's: there is nothing left to check it against, or to tell.
@@ -238,6 +256,8 @@ async function settle(c: Check, roster: Roster, now: Date): Promise<void> {
     const who = playersIn(roster);
     if (applied(a.moves, roster)) {
       if (await c.deps.store.updateAction(a.id, { status: "done", executedAt: at, result: { interrupted: true } }, "approved")) {
+        // An approval ESPN shows is the user's own change landing: the proof automation waits for.
+        if (a.kind === "propose") await noteWrite(c.deps, c.conn, now);
         await announce(c.deps, c.conn, receipt(a.reason, a.moves, who, now), { actionId: a.id, findingKey: a.findingKey, moves: a.moves });
         c.tally.notified++;
       }
@@ -323,9 +343,14 @@ async function tell(c: Check, step: Inform, period: number, now: Date): Promise<
   // and the user has it: a downgrade from one clear move to a choice is no reason to withdraw
   // it, or to ask twice. One whose fix the engine no longer offers is out of date.
   const fixes = new Set(candidates.map((x) => signature("propose", f.key, x.moves)));
-  if (rows.some((a) => a.kind === "propose" && a.status === "pending" && fixes.has(a.signature))) return;
+  // Except one that promised "automatically at 2:35" when 2:35 has come and this is no
+  // automatic move: it is withdrawn and the question asked, so the promise is not left
+  // standing until kickoff (Oct 4 review).
+  const broken = (a: ActionRow) => a.autoAt !== null && Date.parse(a.autoAt) <= now.getTime();
+  const pending = rows.filter((a) => a.kind === "propose" && a.status === "pending");
+  if (pending.some((a) => fixes.has(a.signature) && !broken(a))) return;
   if (!(await supersede(c, rows))) return;
-  if (announced(rows, sig)) return;
+  if (!pending.some(broken) && announced(rows, sig)) return;
   const notice = inform(step, now);
   const row = await c.deps.store.insertAction(
     action(c, f, period, { kind: step.do, status: "done", moves: [], summary: notice.title, reason: problemOf(f), autoAt: null, signature: sig }),
@@ -409,20 +434,21 @@ async function propose(c: Check, step: Propose, period: number, now: Date): Prom
 
 /** evaluate, plan and guard again on a fresh read, for the one finding about to be acted on. */
 function replan(c: Check, roster: Roster, key: string, now: Date): Step | undefined {
-  const f = evaluate(roster, now, c.settings).find((x) => x.key === key);
+  const f = evaluate(roster, now, c.settings, c.release).find((x) => x.key === key);
   if (!f) return undefined;
-  return guard(plan(f, c.settings, now), { now, autoMovesToday: c.autoToday, readLooksSane: rosterLooksSane(roster), policy: c.policy });
+  return guard(plan(f, c.settings, now), { now: tickOf(now), autoMovesToday: c.autoToday, readLooksSane: rosterLooksSane(roster), policy: c.policy });
 }
 
 /** Does the connection as it stands now still allow an automatic move? */
 const automatic = (live: ConnectionRow): boolean =>
   live.status !== "paused" && (live.authority === "bench_protection" || live.authority === "ai_rescue") && live.benchSwaps;
 
-async function execute(c: Check, step: Execute, period: number, now: Date): Promise<void> {
-  const f = step.finding;
-  const moves = step.candidate.moves;
-  const sig = signature("execute", f.key, moves);
-  const rows = await history(c, f, period, now);
+async function execute(c: Check, first: Execute, period: number, now: Date): Promise<void> {
+  const rows = await history(c, first.finding, period, now);
+  let step = first;
+  let f = step.finding;
+  let moves = step.candidate.moves;
+  let sig = signature("execute", f.key, moves);
 
   // Never twice at once: a write for it still in flight is the next check's to settle.
   if (rows.some((a) => a.signature === sig && a.status === "approved")) return;
@@ -432,19 +458,31 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   const hold = userHold(f, rows) ?? connectionHold(c);
   if (hold) return propose(c, { do: "propose", finding: f, candidate: step.candidate, source: step.source, held: { reason: hold } }, period, now);
 
-  // Re-validate immediately before the write. If the fresh read no longer gives these
-  // exact moves as an execute, write nothing: the next check decides from scratch.
+  // Re-validate immediately before the write. If the fresh read no longer gives this hole
+  // an automatic fix, write nothing: the next check decides from scratch. If it gives a
+  // different one (an earlier write in this check moved a player its route used), that one
+  // was judged and guarded on the fresh read, so it is the one made: waiting a check for it
+  // can lose the window's last minute (Oct 4 review).
+  const readFrom = c.deps.now().getTime();
   const fresh = await readTeamPatiently(c.deps, c.espn, c.conn);
   c.latest = fresh;
   const at = c.deps.now();
   const again = replan(c, fresh, f.key, at);
-  if (again?.do !== "execute" || signature("execute", f.key, again.candidate.moves) !== sig) return;
+  if (again?.do !== "execute") return;
+  if (signature("execute", f.key, again.candidate.moves) !== sig) {
+    step = again;
+    f = step.finding;
+    moves = step.candidate.moves;
+    sig = signature("execute", f.key, moves);
+  }
 
   // The last look before the write: while ESPN was read, the user may have declined or
-  // approved, paused the league or lowered its protection. Their answer wins.
-  // Another write of these moves in flight, or one made moments ago (its run read before ours wrote), stops this one.
+  // approved, paused the league or lowered its protection. Their answer wins. A write of
+  // these moves in flight, or one that finished after our fresh read began (that read cannot
+  // show it), stops this one. One that finished before it, with the hole back on the read,
+  // was undone in the ESPN app, and the hole is filled again (owner, Oct 4).
   const latest = await c.deps.store.actionsFor(c.conn.id, f.key, period);
-  const recent = (a: ActionRow) => a.status === "approved" || at.getTime() - Date.parse(a.createdAt) < INTERRUPTED_MS;
+  const recent = (a: ActionRow) => a.status === "approved" || (a.executedAt !== null && Date.parse(a.executedAt) >= readFrom);
   if (userHold(f, latest) || latest.some((a) => a.signature === sig && recent(a))) return;
   const live = await c.deps.store.getConnection(c.conn.id);
   if (!live || !automatic(live) || writeUnproven(live)) return;
@@ -461,9 +499,10 @@ async function execute(c: Check, step: Execute, period: number, now: Date): Prom
   try {
     out = await writeAndVerify(c.deps, c.espn, c.conn, moves, fresh.period);
   } catch (e) {
-    // The read back failed, so nothing is confirmed.
+    // The read back failed, so nothing is confirmed either way: no more writes in this check,
+    // and the next check's read settles this one (settle) as done or failed.
     c.failedNow = true;
-    if (await failed(c.deps, c.conn, row, who, undefined, { error: errorText(e) }, c.deps.now())) c.tally.notified++;
+    await leaveUnconfirmed(c.deps, row, e);
     if (isSignedOut(e)) throw e;
     return;
   }

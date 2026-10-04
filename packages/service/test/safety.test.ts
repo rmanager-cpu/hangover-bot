@@ -11,7 +11,7 @@ const SWAP = [
   { playerId: ACHANE, from: "RB" as const, to: "BENCH" as const },
   { playerId: WRIGHT, from: "BENCH" as const, to: "RB" as const },
 ];
-const ACHANE_KEY = `5:starter_out:${ACHANE}`;
+const ACHANE_KEY = `5:hole:${ACHANE}`;
 const SATURDAY = "2026-10-03T18:00:00.000Z";
 const failures = (s: ReturnType<typeof setup>) => s.store.activity.filter((x) => x.type === "ACTION_FAILED").length;
 

@@ -59,7 +59,11 @@ const OUT: readonly Status[] = ["out", "ir", "suspended"];
 /** More than this many starters out at once is more likely a bad read than a bad week. */
 const MAX_STARTERS_OUT = 3;
 
-/** Non-empty, no duplicate player ids, starting slots known, at most 3 starters OUT/IR/suspended at once. */
+/**
+ * Non-empty, no duplicate player ids, starting slots known, at most 3 starters OUT/IR/suspended
+ * at once among those not yet locked: one who has played (Thursday's game, then IR) is no
+ * sign of a bad read, and counting him would stop every fix for the rest of the week.
+ */
 export function rosterLooksSane(roster: Roster): boolean {
   if (!roster.entries.length) return false;
   if (new Set(roster.entries.map((e) => e.player.id)).size !== roster.entries.length) return false;
@@ -76,5 +80,5 @@ export function rosterLooksSane(roster: Roster): boolean {
     room.set(e.slot, left - 1);
   }
 
-  return starters.filter((e) => OUT.includes(e.player.status)).length <= MAX_STARTERS_OUT;
+  return starters.filter((e) => !e.player.locked && OUT.includes(e.player.status)).length <= MAX_STARTERS_OUT;
 }

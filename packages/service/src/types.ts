@@ -88,6 +88,8 @@ export interface Store {
    * roster, which the app's Home shows, and leaves the check schedule to the checker.
    */
   saveRoster(connectionId: string, roster: Roster, readAt: string): Promise<void>;
+  /** The roster last saved by saveCheck or saveRoster, for when ESPN cannot be read now. */
+  lastRoster(connectionId: string): Promise<Roster | null>;
   actionsFor(connectionId: string, findingKey: string, period: number): Promise<ActionRow[]>;
   getAction(id: string): Promise<ActionRow | null>;
   insertAction(a: NewAction): Promise<ActionRow>;

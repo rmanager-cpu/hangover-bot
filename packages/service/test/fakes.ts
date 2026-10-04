@@ -113,6 +113,7 @@ export class MemoryStore implements Store {
   activity: ActivityEntry[] = [];
   checks: { connectionId: string; patch: { status?: ConnectionStatus; lastCheckedAt: string; nextCheckAt: string; lastRoster?: Roster } }[] = [];
   rosters: { connectionId: string; roster: Roster; readAt: string }[] = [];
+  saved = new Map<string, Roster>();
   failRosters = false;
   tokens = new Map<string, string[]>();
   clock: () => Date;
@@ -141,10 +142,16 @@ export class MemoryStore implements Store {
     if (patch.status) c.status = patch.status;
     c.lastCheckedAt = patch.lastCheckedAt;
     c.nextCheckAt = patch.nextCheckAt;
+    if (patch.lastRoster) this.saved.set(connectionId, structuredClone(patch.lastRoster));
   }
   async saveRoster(connectionId: string, roster: Roster, readAt: string) {
     if (this.failRosters) throw new Error("store: save roster failed");
     this.rosters.push({ connectionId, roster: structuredClone(roster), readAt });
+    this.saved.set(connectionId, structuredClone(roster));
+  }
+  async lastRoster(connectionId: string) {
+    const r = this.saved.get(connectionId);
+    return r ? structuredClone(r) : null;
   }
   async actionsFor(connectionId: string, findingKey: string, period: number) {
     return this.actions.filter((a) => a.connectionId === connectionId && a.findingKey === findingKey && a.period === period).map((a) => ({ ...a }));

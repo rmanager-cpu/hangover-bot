@@ -62,12 +62,15 @@ test("without an order, the highest projection wins, however close", () => {
   assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "x");
 });
 
-test("with neither an order nor projections, it is a judgment call, not a guess", () => {
+test("with neither an order nor projections, a hole is still filled: the fewest changes, then bench order (owner, Oct 4)", () => {
   const r = roster([
     at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")),
     at("BENCH", wr("x", { projection: undefined })), at("BENCH", wr("y", { projection: undefined })),
   ]);
-  assert.equal(rules(r)[0]?.resolution.type, "judgment");
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "x");
+  assert.match(f?.resolution.type === "deterministic" ? f.resolution.why : "", /fewest changes/);
+  assert.equal(plan(f!, as("bench_protection"), NOW).do, "execute");
 });
 
 test("a bye week starter is replaced", () => {
@@ -89,10 +92,12 @@ test("a bench player projected for zero points is never a candidate, even alone 
   const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("zero", { projection: 0 }))]);
   const [f] = rules(r);
   assert.equal(f?.resolution.type, "none");
+  assert.equal(f?.resolution.type === "none" && f.resolution.why, "nobody on the bench who can fill this slot is projected to play before it locks");
   // Nor as an option when the pick is a judgment call.
+  const doubted = { status: "questionable" as const, projection: undefined };
   const r2 = roster([
     at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")),
-    at("BENCH", wr("x", { projection: undefined })), at("BENCH", wr("y", { projection: undefined })), at("BENCH", wr("zero", { projection: 0 })),
+    at("BENCH", wr("x", doubted)), at("BENCH", wr("y", doubted)), at("BENCH", wr("zero", { projection: 0 })),
   ]);
   const [g] = rules(r2);
   assert.equal(g?.resolution.type, "judgment");
@@ -135,7 +140,9 @@ test("the straight bench option wins when it brings in the better player, and ta
 });
 
 test("the same bench player is offered once, by the shorter route", () => {
-  const r = shiftRoster([at("BENCH", wr("t", { projection: undefined })), at("BENCH", wr("u", { projection: undefined }))]);
+  // Questionable with no projection: options only, so the list can be seen.
+  const doubted = { status: "questionable" as const, projection: undefined };
+  const r = shiftRoster([at("BENCH", wr("t", doubted)), at("BENCH", wr("u", doubted))]);
   const [f] = rules(r);
   assert.equal(f?.resolution.type, "judgment");
   const cands = f?.resolution.type === "judgment" ? f.resolution.candidates : [];
@@ -270,9 +277,101 @@ test("a lineup with no hole is never reshuffled, however much better the bench l
   assert.deepEqual(rules(r), []);
 });
 
-test("a questionable bench player alone is never the automatic fix", () => {
+test("a questionable bench player ESPN still projects fills a hole on his own (owner, Oct 4); with no projection he is only an option", () => {
   const r = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("q", { status: "questionable" }))]);
-  assert.equal(rules(r)[0]?.resolution.type, "judgment");
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "q");
+  assert.equal(plan(f!, as("bench_protection"), NOW).do, "execute");
+  const unprojected = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("q", { status: "questionable", projection: undefined }))]);
+  assert.equal(rules(unprojected)[0]?.resolution.type, "judgment");
+});
+
+test("a doubtful bench player ESPN still projects fills a hole as the last resort, and is never offered for a soft problem", () => {
+  const hole = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("dd", { status: "doubtful", projection: 6 }))]);
+  const [f] = rules(hole);
+  assert.equal(f?.resolution.type === "deterministic" && f.resolution.candidate.player.id, "dd");
+  // Behind a questionable one, however their projections compare.
+  const both = roster([
+    at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")),
+    at("BENCH", wr("dd", { status: "doubtful", projection: 16 })), at("BENCH", wr("q", { status: "questionable", projection: 4 })),
+  ]);
+  const [g] = rules(both);
+  assert.equal(g?.resolution.type === "deterministic" && g.resolution.candidate.player.id, "q");
+  // A doubtful starter's own replacement is never another doubtful player.
+  const soft = roster([at("WR", wr("a", { status: "doubtful" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("dd", { status: "doubtful", projection: 6 }))]);
+  assert.equal(rules(soft)[0]?.resolution.type, "none");
+});
+
+test("a doubtful starter ESPN still projects slides along to make room: he stays in the lineup", () => {
+  const [f] = rules(shiftRoster([at("BENCH", rb("d", { projection: 12, game: { kickoff: LATE } }))], wr("c", { status: "doubtful", projection: 6, game: { kickoff: LATE } })))
+    .filter((x) => x.starter?.id === "jj");
+  assert.deepEqual(f?.resolution.type === "deterministic" ? f.resolution.candidate.moves : [], [
+    { playerId: "jj", from: "WR", to: "BENCH" },
+    { playerId: "c", from: "FLEX", to: "WR" },
+    { playerId: "d", from: "BENCH", to: "FLEX" },
+  ]);
+});
+
+test("two holes and one player who could fill either: the assignment that fills both wins over kickoff order", () => {
+  // jj (WR, 20:05) sorts first and would take d (RB) through c's shift, leaving the RB hole
+  // with nobody. t can still fill WR, so t goes to WR and d to RB.
+  const r = roster(
+    [
+      at("WR", wr("jj", { status: "out", game: { kickoff: "2026-10-04T20:05:00Z" } })), at("WR", wr("b")), at("FLEX", wr("c", { game: { kickoff: LATE } })),
+      at("RB", rb("k", { status: "out", game: { kickoff: LATE } })),
+      at("BENCH", rb("d", { projection: 12, game: { kickoff: LATE } })), at("BENCH", wr("t", { projection: 8 })),
+    ],
+    ["WR", "WR", "FLEX", "RB"],
+  );
+  const found = rules(r);
+  const pick = (id: string) => {
+    const f = found.find((x) => x.starter?.id === id);
+    return f?.resolution.type === "deterministic" ? f.resolution.candidate.player.id : f?.resolution.type;
+  };
+  assert.equal(pick("jj"), "t");
+  assert.equal(pick("k"), "d");
+  assert.deepEqual(found.map((f) => f.starter?.id), ["jj", "k"], "findings still come soonest kickoff first");
+});
+
+test("a hole the user declined keeps its fix but does not claim the player, so another hole may have him", () => {
+  const r = roster([
+    at("WR", wr("o1", { status: "out", game: { kickoff: EARLY } })), at("WR", wr("o2", { status: "out", game: { kickoff: LATE } })),
+    at("FLEX", wr("c")), at("BENCH", wr("only")),
+  ]);
+  const plain = rules(r);
+  assert.deepEqual(plain.map((f) => f.resolution.type), ["deterministic", "none"]);
+  const declined = evaluate(r, NOW, S(), new Set([plain[0]!.key]));
+  assert.deepEqual(declined.map((f) => f.resolution.type === "deterministic" && f.resolution.candidate.player.id), ["only", "only"]);
+});
+
+test("a starter whose game has started is left alone even before ESPN flags him locked", () => {
+  const r = roster([at("WR", wr("gone", { status: "out", game: { kickoff: "2026-10-04T14:00:00Z" } })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  assert.deepEqual(rules(r), []);
+});
+
+test("a hole whose own kickoff ESPN did not send has a fix but no deadline, so nothing is automatic or promised", () => {
+  const r = roster([at("WR", wr("jj", { status: "out", game: undefined })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d", { game: { kickoff: LATE } }))]);
+  const [f] = rules(r);
+  assert.equal(f?.resolution.type, "deterministic");
+  assert.equal(f?.deadline, undefined);
+});
+
+test("a hole keeps its key whatever ESPN calls it next, so a Decline holds when DTD and zero becomes OUT", () => {
+  const zero = roster([at("WR", wr("jj", { status: "questionable", projection: 0 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  const out = roster([at("WR", wr("jj", { status: "out", projection: 0 })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("d"))]);
+  const [a] = rules(zero);
+  const [b] = rules(out);
+  assert.deepEqual([a?.kind, b?.kind], ["starter_zero", "starter_out"]);
+  assert.equal(a?.key, "5:hole:jj");
+  assert.equal(b?.key, a?.key);
+});
+
+test("a hole nobody on the bench could ever play says so; one whose options are all out or played says that", () => {
+  const nobody = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("qb", { position: "QB", eligibleSlots: ["QB", "BENCH"] }))]);
+  assert.equal(rules(nobody)[0]?.resolution.type === "none" && rules(nobody)[0]?.resolution.why, "nobody on the bench can fill this slot");
+  const played = roster([at("WR", wr("out", { status: "out" })), at("WR", wr("b")), at("FLEX", wr("c")), at("BENCH", wr("thu", { game: { kickoff: THURSDAY } }))]);
+  const [f] = rules(played);
+  assert.equal(f?.resolution.type === "none" && f.resolution.why, "nobody on the bench who can fill this slot is projected to play before it locks");
 });
 
 test("matrix: player locks. Out, bye, locked, already-played and ineligible bench players are never candidates", () => {

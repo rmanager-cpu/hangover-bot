@@ -224,6 +224,14 @@ test("three starters out at once is a bad week; four is a bad read", () => {
   assert.equal(rosterLooksSane(roster(lineup(4), slots)), false);
 });
 
+test("a starter who has already played and is now OUT or IR does not count against the read", () => {
+  const statuses: Status[] = ["out", "ir", "suspended"];
+  const slots: Slot[] = ["WR", "WR", "FLEX", "FLEX"];
+  // Thursday's starter, locked, then placed on IR; three more OUT before Sunday's games.
+  const lineup = slots.map((s, i) => slot(s, wr(`s${i}`, { status: statuses[i % 3]!, ...(i === 3 ? { locked: true } : {}) })));
+  assert.equal(rosterLooksSane(roster(lineup, slots)), true);
+});
+
 test("injured players on the bench or IR do not count against the read", () => {
   const hurt = ["e", "f", "g", "h", "i"].map((id, i) => slot(i % 2 ? "IR" : "BENCH", wr(id, { status: "out" })));
   assert.equal(rosterLooksSane(roster([...healthy(), ...hurt])), true);

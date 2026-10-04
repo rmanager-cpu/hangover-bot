@@ -31,10 +31,16 @@ export const JUDGMENT_LEAD_MINUTES = 100;
 
 const kickoffMs = (p: Player): number | undefined => (p.game ? Date.parse(p.game.kickoff) : undefined);
 
-/** Could this player start right now, if moved? */
-function viable(p: Player, now: number): boolean {
+/**
+ * Could this player start right now, if moved? Active or questionable. For a hole (`hole`)
+ * a doubtful player ESPN still projects for points too, as the last resort: owner, Oct 4,
+ * "never a situation in which an injured player with a 0 projection is in your starting
+ * lineup", and the projection is the source of truth for movement (Oct 3).
+ */
+function viable(p: Player, now: number, hole: boolean): boolean {
   if (p.locked) return false;
-  if (p.status !== "active" && p.status !== "questionable") return false;
+  const doubtfulButProjected = hole && p.status === "doubtful" && p.projection !== undefined && p.projection > 0;
+  if (p.status !== "active" && p.status !== "questionable" && !doubtfulButProjected) return false;
   if (p.game === null) return false; // bye
   // Owner, Oct 3: a player the provider projects for zero points never goes into the
   // lineup, automatically or as an option. ESPN's zero is its own "not playing" signal
@@ -49,16 +55,32 @@ function viable(p: Player, now: number): boolean {
 /** Viable and nothing about him needs a second opinion. */
 const clean = (p: Player): boolean => p.status === "active" && p.game != null;
 
+/** How much there is to doubt about an option: clean, then questionable, then doubtful. */
+const doubt = (p: Player): number => (clean(p) ? 0 : p.status === "doubtful" ? 2 : 1);
+
+/**
+ * Good enough to fill a hole without asking: clean, or doubted but with a known kickoff and
+ * a projection above zero. Anything beats a starter certain to score nothing (owner, Oct 4).
+ */
+const fillsHole = (p: Player): boolean => clean(p) || (p.game != null && p.projection !== undefined && p.projection > 0);
+
+/** A known kickoff that has come: ESPN may not have flagged him locked yet, but he cannot move. */
+const started = (p: Player, now: number): boolean => {
+  const k = kickoffMs(p);
+  return k !== undefined && k <= now;
+};
+
 /**
  * A starter who could take another starting slot right now. He is already in, so the
  * question is only whether ESPN would let him move: a pivot is playing (owner, Oct 3: a
- * projection is the source of truth, so a questionable starter ESPN still projects is
- * playing), with a known kickoff still ahead, never a hole of his own, on bye, or on a
- * team ESPN's schedule did not send. Moving him keeps him in the lineup either way.
+ * projection is the source of truth, so a questionable or doubtful starter ESPN still
+ * projects is playing), with a known kickoff still ahead, never a hole of his own, on bye,
+ * or on a team ESPN's schedule did not send. Moving him keeps him in the lineup either way.
  */
 function shiftable(p: Player, now: number): boolean {
   if (p.locked) return false;
-  if (p.status !== "active" && p.status !== "questionable") return false;
+  const projected = p.projection !== undefined && p.projection > 0;
+  if (p.status !== "active" && p.status !== "questionable" && !(p.status === "doubtful" && projected)) return false;
   if (p.game == null) return false; // on bye, or no schedule for his team
   if (p.projection !== undefined && p.projection <= 0) return false; // a hole of his own
   const k = kickoffMs(p);
@@ -83,7 +105,8 @@ function classify(p: Player): FindingKind | undefined {
 /**
  * Handoff section 9, in order: legal slot, not locked or started, then the user's
  * replacement order, then the highest projection. A player with anything to doubt
- * (questionable, schedule unknown) ranks after every clean one.
+ * (questionable, schedule unknown) ranks after every clean one, and a doubtful one, an
+ * option only for a hole, after those.
  */
 function candidatesFor(
   slot: Slot,
@@ -93,6 +116,7 @@ function candidatesFor(
   now: number,
   order: string[],
   shifted: Set<string>,
+  hole: boolean,
 ): Candidate[] {
   const rank = (p: Player) => {
     const i = order.indexOf(p.id);
@@ -113,7 +137,7 @@ function candidatesFor(
   while (queue.length) {
     const r = queue.shift()!;
     for (const e of bench) {
-      if (!e.player.eligibleSlots.includes(r.need) || !viable(e.player, now)) continue;
+      if (!e.player.eligibleSlots.includes(r.need) || !viable(e.player, now, hole)) continue;
       const vias = r.shifts.map((x) => x.player);
       const have = out.get(e.player.id);
       if (have && (have.moves.length < benchStarter.length + r.shifts.length + 1 || viaKickoff(have.via) >= viaKickoff(vias))) continue;
@@ -132,7 +156,7 @@ function candidatesFor(
   }
   return [...out.values()].sort(
     (a, b) =>
-      Number(clean(b.player)) - Number(clean(a.player)) ||
+      doubt(a.player) - doubt(b.player) ||
       rank(a.player) - rank(b.player) ||
       (b.player.projection ?? -Infinity) - (a.player.projection ?? -Infinity),
   );
@@ -146,30 +170,59 @@ function earliest(...isos: (string | undefined)[]): string | undefined {
   return ms.length ? new Date(Math.min(...ms)).toISOString() : undefined;
 }
 
+/** Why a hole has no fix: nobody on the bench could ever play the slot. */
+export const NOBODY_ELIGIBLE = "nobody on the bench can fill this slot";
+/** Why a hole has no fix: some could play the slot, but none is set to play before it locks. */
+export const NOBODY_PLAYING = "nobody on the bench who can fill this slot is projected to play before it locks";
+
 /**
- * The rules' answer, if they have one. They do when the top candidate is clean and
- * is ranked by something real: the user's order, a projection, or being alone.
+ * The rules' answer for a hole, if they have one. Owner, Oct 4: a hole is filled without
+ * asking whenever anyone can fill it, so the top option is the answer when it is clean, or
+ * doubted but projected with a known kickoff; ranked by being alone, the user's order, the
+ * projection, or failing all of those by the fewest changes (the search finds the shortest
+ * route first). Only a top option with no projection and something to doubt, or no known
+ * kickoff, is left to the user.
  */
 function rulesPick(cands: Candidate[], order: string[]): { candidate: Candidate; why: string } | undefined {
   const [top, next] = cands;
-  if (!top || !clean(top.player)) return undefined;
+  if (!top || !fillsHole(top.player)) return undefined;
   const p = top.player;
+  if (!clean(p)) {
+    const doubted = `${p.name} is ${p.status}, but ESPN still projects him to score`;
+    if (!next || !fillsHole(next.player)) return { candidate: top, why: `${doubted}, and he is the only option on the bench` };
+    if (order.includes(p.id)) return { candidate: top, why: `${doubted}, and he is next in your replacement order` };
+    return { candidate: top, why: `${doubted}, and he is the highest-projected option` };
+  }
   if (!next || !clean(next.player)) return { candidate: top, why: `${p.name} is the only healthy option on the bench` };
   if (order.includes(p.id)) return { candidate: top, why: `${p.name} is next in your replacement order` };
   if (p.projection !== undefined) return { candidate: top, why: `${p.name} is your highest-projected eligible player` };
-  return undefined;
+  return { candidate: top, why: `${p.name} fills it with the fewest changes` };
 }
 
-export function evaluate(roster: Roster, now: Date, settings: Settings): Finding[] {
+/** Every ordering of a short list. */
+function permutations<T>(items: T[]): T[][] {
+  if (items.length < 2) return [items];
+  return items.flatMap((x, i) => permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [x, ...rest]));
+}
+
+/** Above this many holes at once, the first assignment stands: 6 is 720 tries, and more is not a lineup. */
+const MAX_JOINT_HOLES = 6;
+
+/**
+ * Every problem in the lineup, with what the rules make of it. `release` holds finding keys
+ * the service will not act on (holes the user declined): they are still judged, but their
+ * fix does not claim its bench player, so another hole may have him.
+ */
+export function evaluate(roster: Roster, now: Date, settings: Settings, release: ReadonlySet<string> = new Set()): Finding[] {
   const t = now.getTime();
-  let bench = roster.entries.filter((e) => e.slot === BENCH);
   const starters = roster.entries.filter((e) => isStarting(e.slot));
 
-  // A problem is a starter we could still move, or a starting slot nobody fills.
+  // A problem is a starter we could still move, or a starting slot nobody fills. A starter
+  // whose game has started is past moving whether or not ESPN has flagged him locked yet.
   type Problem = { kind: FindingKind; slot: Slot; starter?: Player; index: number };
   const problems: Problem[] = [];
   for (const e of starters) {
-    if (e.player.locked) continue;
+    if (e.player.locked || started(e.player, t)) continue;
     const kind = classify(e.player);
     if (kind) problems.push({ kind, slot: e.slot, starter: e.player, index: 0 });
   }
@@ -182,47 +235,82 @@ export function evaluate(roster: Roster, now: Date, settings: Settings): Finding
   }
 
   // Hard problems claim bench players first, soonest kickoff first.
-  const order = (p: Problem) => (HARD.includes(p.kind) ? 0 : 1);
+  const isHard = (p: Problem) => HARD.includes(p.kind);
   const soon = (p: Problem) => (p.starter ? kickoffMs(p.starter) ?? Infinity : Infinity);
-  problems.sort((a, b) => order(a) - order(b) || soon(a) - soon(b));
+  problems.sort((a, b) => Number(isHard(b)) - Number(isHard(a)) || soon(a) - soon(b));
 
-  const findings: Finding[] = [];
-  const shifted = new Set<string>();
-  // Where a shifted starter lands, so a doubt about him later in this run is judged at the
-  // slot he will be in, not the one he is leaving.
-  const landed = new Map<string, Slot>();
-  for (const p of problems) {
-    if (p.starter && landed.has(p.starter.id)) p.slot = landed.get(p.starter.id)!;
-    const hard = HARD.includes(p.kind);
-    const key = `${roster.period}:${p.kind}:${p.starter ? p.starter.id : p.slot + "#" + p.index}`;
-    const base = { key, kind: p.kind, hard, slot: p.slot, ...(p.starter ? { starter: p.starter } : {}) };
+  // What earlier fixes in this run have taken: bench players, starters shifted along, and
+  // where those starters land, so a doubt about one is judged at the slot he will be in.
+  type Claims = { bench: RosterEntry[]; shifted: Set<string>; landed: Map<string, Slot> };
+  const claims = (): Claims => ({ bench: roster.entries.filter((e) => e.slot === BENCH), shifted: new Set(), landed: new Map() });
+
+  const judge = (p: Problem, c: Claims): Finding => {
+    const slot = p.starter && c.landed.has(p.starter.id) ? c.landed.get(p.starter.id)! : p.slot;
+    const hard = isHard(p);
+    // A hole keeps its key whatever ESPN calls it next (DTD and zero, then OUT), so the
+    // user's Decline holds and their Approve still finds it. An empty slot has no starter.
+    const what = p.kind === "empty_slot" ? `empty_slot:${slot}#${p.index}` : hard ? `hole:${p.starter!.id}` : `${p.kind}:${p.starter!.id}`;
+    const key = `${roster.period}:${what}`;
+    const base = { key, kind: p.kind, hard, slot, ...(p.starter ? { starter: p.starter } : {}) };
 
     if (p.kind === "starter_status_unknown") {
-      findings.push({ ...base, resolution: { type: "none", why: "his status could not be read, so we are not touching him" } });
-      continue;
+      return { ...base, resolution: { type: "none", why: "his status could not be read, so we are not touching him" } };
     }
 
-    const cands = candidatesFor(p.slot, p.starter, bench, starters, t, settings.replacementOrder, shifted);
+    const cands = candidatesFor(slot, p.starter, c.bench, starters, t, settings.replacementOrder, c.shifted, hard);
     if (!cands.length) {
-      const why = hard ? "nobody on the bench can fill this slot" : "nobody healthy on the bench to replace him";
-      findings.push({ ...base, resolution: { type: "none", why } });
-      continue;
+      const anyone = c.bench.some((e) => e.player.eligibleSlots.includes(slot));
+      const why = !hard ? "nobody healthy on the bench to replace him" : anyone ? NOBODY_PLAYING : NOBODY_ELIGIBLE;
+      return { ...base, resolution: { type: "none", why } };
     }
 
+    // A starter whose kickoff ESPN did not send could lock before any deadline worked out
+    // from the others': no deadline, so nothing is automatic and nothing is promised.
+    const unknownKickoff = p.starter !== undefined && p.starter.game === undefined;
     const pick = hard ? rulesPick(cands, settings.replacementOrder) : undefined;
     if (pick) {
-      bench = bench.filter((e) => e.player.id !== pick.candidate.player.id);
-      for (const v of pick.candidate.via ?? []) shifted.add(v.id);
-      for (const m of pick.candidate.moves) if (shifted.has(m.playerId)) landed.set(m.playerId, m.to);
-      const deadline = earliest(p.starter?.game?.kickoff, ...kickoffsOf(pick.candidate));
-      findings.push({ ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) });
-      continue;
+      if (!release.has(key)) {
+        c.bench = c.bench.filter((e) => e.player.id !== pick.candidate.player.id);
+        for (const v of pick.candidate.via ?? []) c.shifted.add(v.id);
+        for (const m of pick.candidate.moves) if (c.shifted.has(m.playerId)) c.landed.set(m.playerId, m.to);
+      }
+      const deadline = unknownKickoff ? undefined : earliest(p.starter?.game?.kickoff, ...kickoffsOf(pick.candidate));
+      return { ...base, resolution: { type: "deterministic", ...pick }, ...(deadline ? { deadline } : {}) };
     }
 
-    const why = hard ? "no projection or replacement order to rank the options by" : `${p.starter?.name} might play`;
-    const deadline = earliest(p.starter?.game?.kickoff, ...cands.flatMap(kickoffsOf));
-    findings.push({ ...base, resolution: { type: "judgment", candidates: cands, why }, ...(deadline ? { deadline } : {}) });
+    const why = !hard
+      ? `${p.starter?.name} might play`
+      : fillsHole(cands[0]!.player)
+        ? "no projection or replacement order to rank the options by"
+        : "every option on the bench has something to doubt and no projection to go by";
+    const deadline = unknownKickoff ? undefined : earliest(p.starter?.game?.kickoff, ...cands.flatMap(kickoffsOf));
+    return { ...base, resolution: { type: "judgment", candidates: cands, why }, ...(deadline ? { deadline } : {}) };
+  };
+
+  // Holes first. One bench player can be the best fix for two holes, and taking him for
+  // the first can leave the second with nobody (owner, Oct 4: never a hole left that could
+  // be filled). So if an assignment leaves a hole without an automatic fix, every other
+  // order is tried, and the one that fills the most holes wins; ties keep kickoff order.
+  const holes = problems.filter(isHard);
+  const assign = (order: Problem[]) => {
+    const c = claims();
+    const out = new Map<Problem, Finding>();
+    for (const p of order) out.set(p, judge(p, c));
+    // A fix with no deadline (a starter's kickoff unread) is not automatic either.
+    const unfilled = [...out.values()].filter((f) => f.resolution.type !== "deterministic" || !f.deadline).length;
+    return { c, out, unfilled };
+  };
+  let best = assign(holes);
+  if (best.unfilled > 0 && holes.length > 1 && holes.length <= MAX_JOINT_HOLES) {
+    for (const order of permutations(holes)) {
+      const tried = assign(order);
+      if (tried.unfilled < best.unfilled) best = tried;
+      if (best.unfilled === 0) break;
+    }
   }
+
+  const findings: Finding[] = [];
+  for (const p of problems) findings.push(isHard(p) ? best.out.get(p)! : judge(p, best.c));
   return findings;
 }
 

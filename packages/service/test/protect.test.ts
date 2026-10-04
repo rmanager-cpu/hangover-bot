@@ -35,7 +35,7 @@ test("a starter ruled OUT inside T-90..T-4 is replaced automatically, verified a
   assert.equal(a.summary, "Start Jaylen Wright at RB instead of De'Von Achane");
   assert.equal(a.reason, "Achane was ruled OUT");
   assert.equal(a.deadline, KICKOFF);
-  assert.equal(a.findingKey, `5:starter_out:${ACHANE}`);
+  assert.equal(a.findingKey, `5:hole:${ACHANE}`);
 
   assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_COMPLETED"]);
   const receipt = s.store.activity[0]!;
@@ -163,7 +163,7 @@ test("a questionable starter ESPN projects for zero is a hole: replaced inside t
   assert.equal(sum.executed, 1);
   assert.deepEqual(s.espn.writes, [{ moves: SWAP, period: 5 }]);
   const a = s.store.actions[0]!;
-  assert.equal(a.findingKey, `5:starter_zero:${ACHANE}`);
+  assert.equal(a.findingKey, `5:hole:${ACHANE}`);
   assert.equal(a.reason, "ESPN projects Achane for zero points");
   assert.equal(s.store.activity[0]!.body, "ESPN projects Achane for zero points. Moved Jaylen Wright from bench to RB. Achane is on your bench. Done at 12:00 PM ET.");
 });
@@ -382,7 +382,8 @@ test("a proposal nobody answered is marked expired once its deadline passes", as
   entry(s.espn.roster, WRIGHT).player.locked = true;
   await s.run();
   assert.deepEqual(s.store.actions.map((a) => [a.kind, a.status]), [["propose", "expired"], ["notify", "done"]]);
-  assert.equal(s.store.activity.at(-1)!.body, "Nobody on your bench can play RB. Fix it in the ESPN app before 4:25 PM ET.");
+  // Wright can play RB, but his game has started: not "nobody".
+  assert.equal(s.store.activity.at(-1)!.body, "Everyone on your bench who can play RB is out, projected for zero, or already playing. Fix it in the ESPN app before 4:25 PM ET.");
 });
 
 // ---- writes that do not land

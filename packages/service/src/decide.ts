@@ -6,10 +6,12 @@ import { evaluate, IR, isStarting, type Move, type Player, type Roster, type Set
 import {
   announce,
   connect,
+  declinedHoles,
   errorText,
   failed,
   isSignedOut,
   keepRoster,
+  leaveUnconfirmed,
   noteWrite,
   readTeamPatiently,
   settingsFor,
@@ -67,8 +69,12 @@ function invalid(moves: Move[], roster: Roster, now: Date): Refusal | undefined 
  * read and still have these exact moves as one of its fixes. Otherwise approving it could
  * bench a starter who has since been cleared, or start one who has since been ruled out.
  */
-function stillNeeded(action: ActionRow, roster: Roster, now: Date, settings: Settings): Refusal | undefined {
-  const f = evaluate(roster, now, settings).find((x) => x.key === action.findingKey);
+async function stillNeeded(store: Store, action: ActionRow, roster: Roster, now: Date, settings: Settings): Promise<Refusal | undefined> {
+  // As the checker sees it: a hole the user declined does not hold on to its bench player.
+  const first = evaluate(roster, now, settings);
+  const release = await declinedHoles(store, action.connectionId, first, roster.period);
+  const found = release.size ? evaluate(roster, now, settings, release) : first;
+  const f = found.find((x) => x.key === action.findingKey);
   if (!f) return { status: "superseded", error: "not_needed", message: NOT_NEEDED };
   const r = f.resolution;
   const fixes = r.type === "deterministic" ? [r.candidate] : r.type === "judgment" ? r.candidates : [];
@@ -117,7 +123,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     const fresh = await readTeamPatiently(deps, espn, conn);
     who = playersIn(fresh);
     const at = deps.now();
-    const refused = invalid(action.moves, fresh, at) ?? stillNeeded(action, fresh, at, await settingsFor(deps, conn));
+    const refused = invalid(action.moves, fresh, at) ?? (await stillNeeded(store, action, fresh, at, await settingsFor(deps, conn)));
     if (refused) {
       const lost = await fromPending(store, action.id, { status: refused.status });
       // The lineup moved on since the last check; Home should show it as it is.
@@ -147,8 +153,9 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     // ESPN shows the change: it happened, whatever went wrong recording it.
     if (verified !== undefined) return { ok: true, status: "done", message: verified };
     try {
-      // Asked ESPN but could not read back: unconfirmed is failed, and never retried.
-      if (wrote) await failed(deps, conn, action, who, undefined, { error: errorText(e) }, deps.now());
+      // Asked ESPN but could not read back: still in flight, and never sent again. The next
+      // check reads ESPN and says whether it landed (protect settle()).
+      if (wrote) await leaveUnconfirmed(deps, action, e);
       if (isSignedOut(e)) {
         await signedOut(deps, conn, now, e);
         return no("needs_reauth", wrote ? "I asked ESPN for the change but couldn't check it: ESPN signed HangoverBot out. Check your lineup in the ESPN app, then sign in again." : SIGN_IN_AGAIN);
@@ -157,7 +164,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
       // The store is failing too; the answer below is still true.
     }
     return wrote
-      ? no("error", "I asked ESPN for the change but couldn't read your team back to check it. Check your lineup in the ESPN app.")
+      ? no("error", "I asked ESPN for the change but couldn't read your team back to check it. I'll look again on the next check and tell you whether it went through.")
       : no("error", "I couldn't read your team from ESPN just now. Nothing was changed. Try again in a minute.");
   }
 }

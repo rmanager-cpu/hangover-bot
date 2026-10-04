@@ -329,8 +329,18 @@ automatic move into a proposal.
 - Missing credentials, and a read whose team is not the connection's (`WrongTeamError`), are
   treated like `AuthError`: `needs_reauth`, told once. A `needs_reauth` connection is still
   checked, every 5 minutes and silently (a passing refusal costs minutes, not the window),
-  and a good read makes it `active` again. `paused` is skipped.
-- On an `error` outcome the next check is at most 5 minutes away.
+  sooner on the last whole read's kickoff cadence (every minute inside T-10, Oct 4), and a
+  good read makes it `active` again. `paused` is skipped.
+- On an `error` outcome the next check is at most 5 minutes away, and on the last whole
+  read's kickoff cadence when that is sooner (`ops.retryAt`, `Store.lastRoster`, Oct 4).
+- (Oct 4) The automatic window is judged at the cron tick the check belongs to, so the T-4
+  check acts. A write ESPN could not be read back on stays `approved` with
+  `result.unconfirmed`, and the next check settles it at once (done with a receipt, or failed).
+  A fill undone moments after it was made is made again (only a write in flight, or one that
+  finished after this run's fresh read began, stops it). When the fresh read before a write
+  gives the same hole a different automatic fix, that fix is made. A pending proposal whose
+  "automatically at" time has passed is withdrawn when the step becomes a question, and the
+  question is asked. Holes the user declined are passed to `evaluate` as `release`.
 - (Oct 3) An `execute` row still `approved` after 3 minutes belongs to a run that died
   mid-write: the next check settles it from its own read (receipt if ESPN shows the change,
   ACTION_FAILED if not), and it counts against the day meanwhile. Status changes that race
@@ -353,7 +363,8 @@ automatic move into a proposal.
 
 **Database and functions.**
 - `dueConnections` returns `active` and `needs_reauth` connections and leases them (sets
-  `next_check_at` 5 minutes ahead), so two overlapping cron runs cannot take the same league.
+  `next_check_at` 160 seconds ahead; 5 minutes until Oct 4, which could carry a dead run's
+  connection past T-4), so two overlapping cron runs cannot take the same league.
   `check` passes it a clock 30 s ahead, so a row due on the minute boundary is not missed by
   the milliseconds between the tick and the function's own clock. It stops starting
   connections after 90 s and hands the rest back.

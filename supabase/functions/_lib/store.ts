@@ -37,11 +37,14 @@ const CONNECTION_COLUMNS =
   "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,write_verified_at";
 
 /**
- * How long a run holds the connections it took. Longer than any one run can last, so
- * the next minute's run cannot take the same connection while this one is still on it.
- * saveCheck replaces it with the real next check; a run that dies leaves it to expire.
+ * How long a run holds the connections it took. Longer than any one run can last (the
+ * 150 s wall clock), so the next minute's run cannot take the same connection while this
+ * one is still on it, and longer than the service's 3 minutes for a write left in flight
+ * once the due slack is added. No longer: a run that dies leaves it to expire, and inside
+ * T-10 every minute it stands is a minute of the window (it was 5 minutes until Oct 4).
+ * saveCheck replaces it with the real next check.
  */
-const LEASE_MS = 5 * 60_000;
+const LEASE_MS = 160_000;
 
 // A paused league is never checked. One waiting for a fresh sign-in still is, every few
 // minutes and silently (service ops.signedOut), in case ESPN's refusal was a passing one.
@@ -221,6 +224,14 @@ export function createStore(db: SupabaseClient): AppStore {
 
     async saveRoster(connectionId, roster, readAt) {
       must(await db.from("connections").update({ last_roster: roster, last_roster_at: readAt }).eq("id", connectionId), "save roster");
+    },
+
+    async lastRoster(connectionId) {
+      const row = must<{ last_roster: Roster | null } | null>(
+        await db.from("connections").select("last_roster").eq("id", connectionId).maybeSingle(),
+        "last roster",
+      );
+      return row?.last_roster ?? null;
     },
 
     async actionsFor(connectionId, findingKey, period) {
