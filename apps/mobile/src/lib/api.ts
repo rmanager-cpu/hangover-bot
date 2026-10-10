@@ -17,7 +17,7 @@ export class ApiError extends Error {
   }
 }
 
-const OFFLINE = "Can't reach HangoverBot. Check your connection and try again.";
+const OFFLINE = "Can't reach RosterBots. Check your connection and try again.";
 
 async function call<T>(name: string, body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });

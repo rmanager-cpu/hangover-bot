@@ -1,4 +1,4 @@
-// Copied from packages/connectors/src/espn/client.ts by scripts/build-functions.ts. Edit the original.
+// Copied from packages/connectors/src/espn\client.ts by scripts/build-functions.ts. Edit the original.
 // The ESPN connector. Reads are the v3 league API Megacast used all season; the
 // write is the ROSTER transaction the ESPN site sends when you move a player, and
 // is UNPROVEN (see docs/MEGACAST-AUDIT.md). The caller always re-reads after a write.

@@ -9,15 +9,15 @@ const TURBO_ORANGE = "#FF7A00";
 const APP_ID = "com.turbolabs.hangoverbot";
 
 // The project the owner created on expo.dev. EAS refuses to build unless the slug
-// matches that project's slug; the name people see is still HangoverBot.
+// matches that project's slug; the name people see is still RosterBots.
 const EAS_PROJECT_ID = "ffa6f3e6-8c06-4fc3-a893-5605dd208191";
 const EAS_SLUG = "rosterbuddies-fkijb1junjqxswiiv33pi";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "HangoverBot",
+  name: "RosterBots",
   slug: EAS_SLUG,
-  scheme: "hangoverbot",
+  scheme: "rosterbots",
   version: "0.1.0",
   orientation: "portrait",
   platforms: ["ios", "android"],

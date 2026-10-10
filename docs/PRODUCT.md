@@ -1,4 +1,4 @@
-# HangoverBot: product
+# RosterBots: product
 
 **The spec is `HANDOFF-2026-10-02.docx`** (TurboLabs product + engineering handoff, Oct 2
 2026). `HANDOFF-2026-10-02.txt` is a plain-text extraction of it for searching. Where
@@ -7,8 +7,9 @@ is in `DECISIONS.md`. The handoff itself is not edited.
 
 The short version:
 
-- **Working name** HangoverBot. **System name** RosterBots (`@rosterbots/*`). **Parent**
-  TurboLabs. The product name stays evergreen; "2026 Season" is marketing, not a name.
+- **Name** RosterBots: Hangover Protection (`@rosterbots/*`; renamed from HangoverBot:
+  Roster Protection Oct 10 2026, `DECISIONS.md`). **Parent** TurboLabs. The product name
+  stays evergreen; "2026 Season" is marketing, not a name.
 - **Promise:** connect your league, choose authority, go live your life.
 - **Position:** AI-enabled fantasy lineup protection. Roster insurance, not a research
   dashboard. **V1 is reactive:** it rescues a roster from a time-sensitive problem; it

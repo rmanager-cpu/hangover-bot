@@ -104,7 +104,7 @@ export async function settingsFor(deps: Deps, conn: ConnectionRow): Promise<Sett
 
 /**
  * The first automatic move in a league waits for one change the user made through
- * HangoverBot (the test swap, or an approval) to show on a fresh read (owner, Oct 3). Per
+ * RosterBots (the test swap, or an approval) to show on a fresh read (owner, Oct 3). Per
  * connection and for good, whatever the connector declares about its write: a league the
  * Saturday test swap never touched gets proposals, not moves.
  */

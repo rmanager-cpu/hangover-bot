@@ -15,9 +15,9 @@ const looksLikeEmail = (e: string) => /^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(e.trim(
 function authMessage(e: { message?: string; code?: string; status?: number } | null, step: "email" | "code"): string {
   const m = (e?.message ?? "").toLowerCase();
   // shouldCreateUser: false answers an unknown email with "Signups not allowed for otp".
-  if (e?.code === "otp_disabled" || m.includes("signups not allowed")) return "No HangoverBot account has that email yet. Claim your account in Settings instead.";
+  if (e?.code === "otp_disabled" || m.includes("signups not allowed")) return "No RosterBots account has that email yet. Claim your account in Settings instead.";
   if (m.includes("security purposes") || e?.status === 429) return "Too many codes asked for. Wait a minute, then try again.";
-  if (step === "code") return "That code didn't work. Check the newest email from HangoverBot, or send a new code.";
+  if (step === "code") return "That code didn't work. Check the newest email from RosterBots, or send a new code.";
   if (m.includes("invalid") && m.includes("email")) return "That email address doesn't look right.";
   return "Couldn't send the code. Check your connection and try again.";
 }
@@ -79,7 +79,7 @@ export default function SignIn() {
 
   return (
     <Screen>
-      <Header title="Sign in" subtitle="Sign in to a HangoverBot account you claimed before. Its league, protection and history come with it." style={{ marginBottom: space.sm }} />
+      <Header title="Sign in" subtitle="Sign in to a RosterBots account you claimed before. Its league, protection and history come with it." style={{ marginBottom: space.sm }} />
       <Muted style={{ marginBottom: space.xl }}>No password. We email you a 6-digit code. Anything set up on this phone so far is replaced.</Muted>
 
       {error ? <Banner tone="warn" body={error} /> : null}

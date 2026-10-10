@@ -1,6 +1,6 @@
-// "What we read from ESPN": the team exactly as HangoverBot read it, laid out like the ESPN
+// "What we read from ESPN": the team exactly as RosterBots read it, laid out like the ESPN
 // app's My Team so the two can be compared line by line, plus the Test swap that proves
-// HangoverBot can change the lineup and read the change back.
+// RosterBots can change the lineup and read the change back.
 
 import type { ReadSummary } from "@rosterbots/service";
 import { router, useLocalSearchParams } from "expo-router";
@@ -190,7 +190,7 @@ export default function WhatWeRead() {
         <Card style={{ marginTop: space.xl }}>
           <H2>Test swap</H2>
           <Body style={{ marginTop: space.sm }}>
-            Prove HangoverBot can change your ESPN lineup. Pick two players whose games haven't started, for example a WR and your FLEX. I swap them on ESPN, read your team back to check, and you can swap them straight back.
+            Prove RosterBots can change your ESPN lineup. Pick two players whose games haven't started, for example a WR and your FLEX. I swap them on ESPN, read your team back to check, and you can swap them straight back.
           </Body>
           <Button title="Start a test swap" arrow onPress={() => setSwap({ step: "picking", picked: [] })} style={{ marginTop: space.lg }} />
         </Card>

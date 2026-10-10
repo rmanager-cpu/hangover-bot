@@ -103,7 +103,7 @@ test("approval while signed out of ESPN leaves the suggestion waiting and asks f
   const s = await proposed();
   s.espn.read = "auth";
   const r = await decideAction(s.deps, "user-1", s.id, "approve");
-  assert.deepEqual(r, { ok: false, error: "needs_reauth", message: "ESPN signed HangoverBot out. Sign in to ESPN again, then try once more." });
+  assert.deepEqual(r, { ok: false, error: "needs_reauth", message: "ESPN signed RosterBots out. Sign in to ESPN again, then try once more." });
   assert.equal(s.store.actions[0]!.status, "pending");
   assert.equal(s.store.connections.get("conn-1")!.status, "needs_reauth");
   assert.equal(s.store.activity.at(-1)!.title, "Sign in to ESPN again");

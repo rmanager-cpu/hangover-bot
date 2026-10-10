@@ -460,7 +460,7 @@ test("an AuthError marks the connection needs_reauth, says so once, and stops", 
   assert.equal(sum.notified, 1);
   assert.equal(s.store.checks.at(-1)!.patch.status, "needs_reauth");
   assert.deepEqual(s.store.activity.map((x) => [x.type, x.title]), [["ACTION_REQUIRED", "Sign in to ESPN again"]]);
-  assert.equal(s.store.activity[0]!.body, "ESPN signed HangoverBot out, so I can't watch Trust The Process right now. Open the app and sign in to ESPN again.");
+  assert.equal(s.store.activity[0]!.body, "ESPN signed RosterBots out, so I can't watch Trust The Process right now. Open the app and sign in to ESPN again.");
   assert.equal(s.push.sent.length, 1);
   assert.equal(s.store.actions.length, 0);
   assert.equal(s.espn.writes.length, 0);

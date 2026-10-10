@@ -164,7 +164,7 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
     case HELD_JUDGMENT:
       return "Something about this option has changed since I said I'd do it, so I won't do it on my own. It's your call.";
     case HELD_UNPROVEN:
-      return "I haven't yet seen a change from HangoverBot go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, or approve this one, and then I can make moves like this on my own.";
+      return "I haven't yet seen a change from RosterBots go through on ESPN in this league. Do the test swap on the What we read from ESPN screen, or approve this one, and then I can make moves like this on my own.";
     default:
       return "I won't do this one on my own.";
   }
@@ -258,9 +258,9 @@ function lead(moves: Move[]): Move | undefined {
 
 /**
  * The line on the receipt for the change that unlocks automatic moves in a league: the
- * first one the user made through HangoverBot that ESPN then showed.
+ * first one the user made through RosterBots that ESPN then showed.
  */
-export const PROVED = "That's the first change from HangoverBot that ESPN has shown in this league, so Bench Protection may now make moves here on its own.";
+export const PROVED = "That's the first change from RosterBots that ESPN has shown in this league, so Bench Protection may now make moves here on its own.";
 
 export function receipt(reason: string | null, moves: Move[], who: Lookup, now: Date, proof?: string): Notice {
   const m = lead(moves);
@@ -293,11 +293,11 @@ export function signIn(teamName: string | null, wrongTeam: boolean): Notice {
   const team = teamName ?? "your team";
   const body = wrongTeam
     ? `The ESPN account you're signed in with doesn't manage ${team}. Sign in to ESPN again with the account that does.`
-    : `ESPN signed HangoverBot out, so I can't watch ${team} right now. Open the app and sign in to ESPN again.`;
+    : `ESPN signed RosterBots out, so I can't watch ${team} right now. Open the app and sign in to ESPN again.`;
   return { type: "ACTION_REQUIRED", title: "Sign in to ESPN again", body };
 }
 
-export const SIGN_IN_AGAIN = "ESPN signed HangoverBot out. Sign in to ESPN again, then try once more.";
+export const SIGN_IN_AGAIN = "ESPN signed RosterBots out. Sign in to ESPN again, then try once more.";
 
 /** A proposal whose problem ESPN no longer shows. */
 export const NOT_NEEDED = "This isn't needed any more: ESPN no longer shows the problem it was for. Nothing was changed.";

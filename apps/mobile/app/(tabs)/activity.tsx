@@ -1,4 +1,4 @@
-// Everything HangoverBot did or noticed, newest first, with proposals waiting for an answer
+// Everything RosterBots did or noticed, newest first, with proposals waiting for an answer
 // at the top. Receipts are the server's own words.
 
 import { useFocusEffect } from "expo-router";

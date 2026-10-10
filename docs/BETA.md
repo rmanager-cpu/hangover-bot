@@ -41,7 +41,7 @@ missing projection is not zero). On top of that, the first-weekend guardrails (`
    proposal when the fresh read taken just before a write looks off.
 4. Kickoff unknown for the players a move touches: proposal.
 5. **The first automatic move in a league waits for the user's own proof** (owner, Oct 3):
-   one change made through HangoverBot (the Saturday test swap, or an approved proposal)
+   one change made through RosterBots (the Saturday test swap, or an approved proposal)
    must have shown on a fresh read in that league (`connections.write_verified_at`). Until
    then every automatic move is a proposal that says to do the test swap or approve. The
    receipt for that first change says it is the one that unlocks automatic moves. A test
@@ -91,7 +91,7 @@ export interface ConnectionRow {
   status: ConnectionStatus;
   authority: Authority; benchSwaps: boolean; replacementOrder: string[]; maxAutoMovesPerDay: number;
   lastCheckedAt: string | null; nextCheckAt: string | null;
-  /** When a change the user made through HangoverBot was last seen on a fresh read here; null until then. */
+  /** When a change the user made through RosterBots was last seen on a fresh read here; null until then. */
   writeVerifiedAt: string | null;
 }
 
@@ -272,7 +272,7 @@ Expo (latest SDK), TypeScript, expo-router. Package / bundle id `com.turbolabs.h
 Brand from the handoff: Midnight `#070A24`, Deep navy `#0C102F`, Turbo purple `#6726E8`,
 Electric purple `#7B2FF7`, Turbo orange `#FF7A00`, Action blue `#2962F3`, Paper `#F6F7FB`.
 
-Flow: anonymous Supabase session on first launch → Welcome ("HangoverBot. Fantasy help for
+Flow: anonymous Supabase session on first launch → Welcome ("RosterBots. Fantasy help for
 real life." / **Sync a League**) → provider list (ESPN; others "Coming soon") → **ESPN sign-in
 in a WebView**; when an `espn_s2` cookie exists, read `SWID` + `espn_s2` from the native cookie
 store (`@react-native-cookies/cookies`, WebKit store on iOS), falling back to `document.cookie`

@@ -159,7 +159,7 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
       if (wrote) await leaveUnconfirmed(deps, action, e);
       if (isSignedOut(e)) {
         await signedOut(deps, conn, now, e);
-        return no("needs_reauth", wrote ? "I asked ESPN for the change but couldn't check it: ESPN signed HangoverBot out. Check your lineup in the ESPN app, then sign in again." : SIGN_IN_AGAIN);
+        return no("needs_reauth", wrote ? "I asked ESPN for the change but couldn't check it: ESPN signed RosterBots out. Check your lineup in the ESPN app, then sign in again." : SIGN_IN_AGAIN);
       }
     } catch {
       // The store is failing too; the answer below is still true.
@@ -233,7 +233,7 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       // The store is failing too; the answer below is still true.
     }
     if (isSignedOut(e)) {
-      return no("needs_reauth", wrote ? "I asked ESPN for the swap but couldn't check it: ESPN signed HangoverBot out. Check your lineup in the ESPN app, then sign in again." : SIGN_IN_AGAIN);
+      return no("needs_reauth", wrote ? "I asked ESPN for the swap but couldn't check it: ESPN signed RosterBots out. Check your lineup in the ESPN app, then sign in again." : SIGN_IN_AGAIN);
     }
     return wrote
       ? no("error", "I asked ESPN for the swap but couldn't read your team back to check it. Check your lineup in the ESPN app.")

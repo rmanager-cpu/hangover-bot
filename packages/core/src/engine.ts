@@ -1,7 +1,7 @@
 // The rules engine. Roster in, findings out; finding in, one step out.
 //
 // Pure: no clock, no network, no randomness. The worker passes `now`. Everything
-// HangoverBot does to a user's team starts here, so every rule is a test in
+// RosterBots does to a user's team starts here, so every rule is a test in
 // test/engine.test.ts.
 
 import {

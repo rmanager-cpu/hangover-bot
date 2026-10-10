@@ -159,7 +159,7 @@ test("before any change has been seen landing on ESPN, nothing is automatic and 
   await s.run();
   const p = s.store.actions[0]!;
   assert.deepEqual([p.kind, p.status, p.autoAt], ["propose", "pending", null]);
-  assert.match(s.store.activity[0]!.body, /^Start Jaylen Wright at RB instead\? Tap to approve\. I haven't yet seen a change from HangoverBot go through on ESPN/);
+  assert.match(s.store.activity[0]!.body, /^Start Jaylen Wright at RB instead\? Tap to approve\. I haven't yet seen a change from RosterBots go through on ESPN/);
 
   s.clock.set(T - 45 * MIN);
   await s.run();

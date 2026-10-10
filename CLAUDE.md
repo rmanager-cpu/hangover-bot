@@ -1,4 +1,4 @@
-# HangoverBot (RosterBots)
+# RosterBots: Hangover Protection
 
 The spec is `docs/HANDOFF-2026-10-02.docx` (searchable as `.txt`). `docs/DECISIONS.md` is
 what has been decided since and where the code reads the handoff cautiously. Read both

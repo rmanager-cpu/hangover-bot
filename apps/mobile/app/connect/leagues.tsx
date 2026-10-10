@@ -73,7 +73,7 @@ export default function Leagues() {
   if (!credentialId) {
     return (
       <Screen>
-        <Header title="Sign in to ESPN first" subtitle="So HangoverBot can read your team." />
+        <Header title="Sign in to ESPN first" subtitle="So RosterBots can read your team." />
         <Button title="Sign in to ESPN" arrow onPress={() => router.replace("/connect/espn")} />
       </Screen>
     );

@@ -193,11 +193,11 @@ Under **Authentication**:
    anonymous. Without it the app cannot start a session at all.
 2. **Email** provider: **Confirm email: on**, **Secure email change: on**, **Email OTP
    length: 6** (the default; check it is not 8).
-3. **Emails** → **Templates** → **Change email address**: subject `Your HangoverBot code`,
+3. **Emails** → **Templates** → **Change email address**: subject `Your RosterBots code`,
    body from `supabase/templates/email_change.html`. It must contain `{{ .Token }}`: the
    claim screen asks for the 6-digit code (`updateUser({ email })` then
    `verifyOtp({ type: "email_change" })`), and the default template sends only a link.
-4. **Emails** → **Templates** → **Magic Link**: subject `Your HangoverBot sign-in code`,
+4. **Emails** → **Templates** → **Magic Link**: subject `Your RosterBots sign-in code`,
    body from `supabase/templates/magic_link.html`, with `{{ .Token }}` for the same
    reason: signing back in to a claimed account (a reinstall, a second phone) uses
    `signInWithOtp` then `verifyOtp({ type: "email" })`, which sends this template.

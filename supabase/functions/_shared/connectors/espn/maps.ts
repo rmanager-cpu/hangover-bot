@@ -1,4 +1,4 @@
-// Copied from packages/connectors/src/espn/maps.ts by scripts/build-functions.ts. Edit the original.
+// Copied from packages/connectors/src/espn\maps.ts by scripts/build-functions.ts. Edit the original.
 // ESPN's numbers, translated. Ported from rr-draft-megacast (server/players.mjs,
 // server/league.mjs), where each of these was read off the live API.
 

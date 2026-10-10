@@ -99,10 +99,10 @@ export default function Home() {
             );
           })
         ) : (
-          <Muted>HangoverBot hasn't read your team yet.</Muted>
+          <Muted>RosterBots hasn't read your team yet.</Muted>
         )}
         <Divider style={{ marginTop: space.sm }} />
-        <Row title="What we read from ESPN" detail={roster ? "Your team as HangoverBot sees it, and the test swap" : "Read it now"} onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} last />
+        <Row title="What we read from ESPN" detail={roster ? "Your team as RosterBots sees it, and the test swap" : "Read it now"} onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} last />
       </Card>
 
       <Card>
@@ -141,7 +141,7 @@ export default function Home() {
       ) : null}
 
       {push.state.status === "denied" ? (
-        <Banner body="Alerts are off for HangoverBot on this phone, so you'll only see news when you open the app." action={{ title: "Turn on alerts", onPress: () => push.enable(true) }} />
+        <Banner body="Alerts are off for RosterBots on this phone, so you'll only see news when you open the app." action={{ title: "Turn on alerts", onPress: () => push.enable(true) }} />
       ) : push.state.status === "unavailable" ? (
         <Banner body={push.state.reason} />
       ) : null}
@@ -168,7 +168,7 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
   if (conn.status === "needs_reauth") {
     return (
       <>
-        <Headline tone="red" title="Signed out of ESPN" line="ESPN signed HangoverBot out." />
+        <Headline tone="red" title="Signed out of ESPN" line="ESPN signed RosterBots out." />
         <Card tone="warn">
           <Body>Sign in to ESPN again so I can keep watching {team}. Until then I can't see or fix your lineup.</Body>
           <Button title="Sign in to ESPN" arrow large onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })} style={{ marginTop: space.lg }} />

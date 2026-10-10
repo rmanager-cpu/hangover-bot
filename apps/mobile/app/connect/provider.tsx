@@ -26,7 +26,7 @@ export default function Provider() {
           </View>
         </Option>
       ))}
-      <Muted style={s.note}>You sign in to ESPN on the next screen, inside the app. HangoverBot never sees your password.</Muted>
+      <Muted style={s.note}>You sign in to ESPN on the next screen, inside the app. RosterBots never sees your password.</Muted>
     </Screen>
   );
 }

@@ -35,7 +35,7 @@ export default function ReplacementOrder() {
   if (!conn.lastRoster) {
     return (
       <Screen>
-        <Header title="Replacement order" subtitle="HangoverBot hasn't read your team yet. Open “What we read from ESPN” first, then come back." />
+        <Header title="Replacement order" subtitle="RosterBots hasn't read your team yet. Open “What we read from ESPN” first, then come back." />
       </Screen>
     );
   }

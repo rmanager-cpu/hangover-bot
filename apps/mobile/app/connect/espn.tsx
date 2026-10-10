@@ -1,7 +1,7 @@
 // ESPN sign-in inside the app. The user signs in on ESPN's own page in a WebView; once ESPN
 // has set its session cookie, the app reads SWID and espn_s2 from the native cookie store
 // and hands them to espn-connect, once. They are never shown, logged or saved here, and
-// the WebView's cookies are cleared afterwards. HangoverBot never sees the password.
+// the WebView's cookies are cleared afterwards. RosterBots never sees the password.
 
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -27,7 +27,7 @@ const POLL_MS = 2000;
 // and writes the account's SWID and espn_s2 as separate steps, so a single look can land
 // between them and hand over the visitor's SWID.
 const FALLBACK_JS = `(function () {
-  if (window.__hangoverbot) return;
+  if (window.__rosterbots) return;
   function pick(name) {
     var parts = (document.cookie || "").split(";");
     for (var i = 0; i < parts.length; i++) {
@@ -42,10 +42,10 @@ const FALLBACK_JS = `(function () {
     if (!swid || !espnS2) { last = ""; return; }
     var pair = swid + "|" + espnS2;
     if (pair !== last) { last = pair; return; }
-    clearInterval(window.__hangoverbot);
+    clearInterval(window.__rosterbots);
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: "espn-session", swid: swid, espnS2: espnS2 }));
   }
-  window.__hangoverbot = setInterval(look, ${POLL_MS});
+  window.__rosterbots = setInterval(look, ${POLL_MS});
   look();
 })();
 true;`;
@@ -119,7 +119,7 @@ export default function EspnSignIn() {
         await forgetEspnSession();
         if (reauth) {
           await data.refresh().catch(() => {});
-          Alert.alert("Signed in", "ESPN accepted the new sign-in. HangoverBot is watching your league again.");
+          Alert.alert("Signed in", "ESPN accepted the new sign-in. RosterBots is watching your league again.");
           if (router.canGoBack()) router.back();
           else router.replace("/settings");
         } else {
@@ -197,7 +197,7 @@ export default function EspnSignIn() {
     <SafeAreaView style={s.screen} edges={["bottom", "left", "right"]}>
       <View style={s.intro}>
         <Body>Sign in with your ESPN email and password.</Body>
-        <Muted>HangoverBot keeps the sign-in ESPN gives this screen, encrypted on its server. It never sees your password.</Muted>
+        <Muted>RosterBots keeps the sign-in ESPN gives this screen, encrypted on its server. It never sees your password.</Muted>
         {uri === LOGIN_URL ? (
           <Pressable accessibilityRole="button" onPress={() => setUri(FALLBACK_URL)} hitSlop={8}>
             <Muted style={s.link}>Page not loading? Open ESPN Fantasy instead</Muted>

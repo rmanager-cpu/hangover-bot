@@ -26,7 +26,7 @@ export default function Settings() {
     const leagues = data.connections.length === 1 ? "your league" : `your ${data.connections.length} leagues`;
     Alert.alert(
       "Forget your ESPN sign-in?",
-      `HangoverBot stops watching ${leagues}, deletes the ESPN sign-in it kept, and forgets your lineup history. Your ESPN account itself is not touched. You can sign in to ESPN again any time.`,
+      `RosterBots stops watching ${leagues}, deletes the ESPN sign-in it kept, and forgets your lineup history. Your ESPN account itself is not touched. You can sign in to ESPN again any time.`,
       [
         { text: "Keep it", style: "cancel" },
         {
@@ -50,7 +50,7 @@ export default function Settings() {
   const watching = conn.status === "active";
   const statusLine =
     conn.status === "needs_reauth"
-      ? "ESPN signed HangoverBot out. Sign in again below."
+      ? "ESPN signed RosterBots out. Sign in again below."
       : conn.status === "paused"
         ? "Paused. I'm not checking this league."
         : conn.lastCheckedAt
@@ -102,7 +102,7 @@ export default function Settings() {
             ios_backgroundColor={color.inkLine}
           />
         </View>
-        <Row title="What we read from ESPN" detail="Your team as HangoverBot sees it, and the test swap" onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} />
+        <Row title="What we read from ESPN" detail="Your team as RosterBots sees it, and the test swap" onPress={() => router.push({ pathname: "/read/[id]", params: { id: conn.id } })} />
         <Row title="Protection" value={authority} onPress={() => router.push({ pathname: "/protection", params: { id: conn.id } })} />
         <Row
           title="Replacement order"
@@ -134,12 +134,12 @@ export default function Settings() {
       <Card>
         <Row
           title="Sign in to ESPN again"
-          detail="When ESPN signs HangoverBot out, or you changed your ESPN password"
+          detail="When ESPN signs RosterBots out, or you changed your ESPN password"
           tone={conn.status === "needs_reauth" ? "warn" : undefined}
           onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })}
         />
         <Row title="Watch another league" onPress={() => router.push("/connect/leagues")} />
-        <Row title="Forget my ESPN sign-in" detail="Stops watching every league and deletes the sign-in HangoverBot kept" tone="warn" onPress={saving ? undefined : forgetEspn} last />
+        <Row title="Forget my ESPN sign-in" detail="Stops watching every league and deletes the sign-in RosterBots kept" tone="warn" onPress={saving ? undefined : forgetEspn} last />
       </Card>
 
       <Label>Account</Label>
@@ -162,9 +162,9 @@ export default function Settings() {
       <Label>About</Label>
       <Card tone="dark">
         <Wordmark width={180} />
-        <Muted style={{ marginTop: space.sm }}>HangoverBot: Roster Protection. Fantasy help for real life.</Muted>
+        <Muted style={{ marginTop: space.sm }}>RosterBots: Hangover Protection. Fantasy help for real life.</Muted>
         <Body style={{ marginTop: space.md }}>
-          HangoverBot reads your ESPN team with the sign-in you gave it in this app, and never sees your ESPN password. It changes your lineup only as your protection setting allows, and tells you every time it does.
+          RosterBots reads your ESPN team with the sign-in you gave it in this app, and never sees your ESPN password. It changes your lineup only as your protection setting allows, and tells you every time it does.
         </Body>
         <Muted style={{ marginTop: space.md }}>Version {Constants.expoConfig?.version ?? "unknown"} · beta · by TurboLabs</Muted>
       </Card>

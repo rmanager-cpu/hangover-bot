@@ -1,4 +1,4 @@
-# HangoverBot phone app (beta)
+# RosterBots phone app (beta)
 
 Expo (SDK 57), TypeScript, expo-router. Package and bundle id `com.turbolabs.hangoverbot`.
 The contract it is built to is the "Mobile" section of `docs/BETA.md`.

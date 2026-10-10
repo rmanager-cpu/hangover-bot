@@ -33,7 +33,7 @@ export function SessionProvider(props: { children: ReactNode }) {
       // A saved session that couldn't be refreshed (offline, say) is still this user's. Starting
       // a new anonymous one here would orphan their league, so wait for a retry instead.
       if (stored) {
-        if (live) setState({ status: "error", message: "Couldn't reach HangoverBot. Check your connection and try again." });
+        if (live) setState({ status: "error", message: "Couldn't reach RosterBots. Check your connection and try again." });
         return;
       }
       const { data: signedIn, error } = await supabase.auth.signInAnonymously();
@@ -45,16 +45,16 @@ export function SessionProvider(props: { children: ReactNode }) {
         const code = (error as { code?: string } | null)?.code;
         const message =
           code === "anonymous_provider_disabled"
-            ? "HangoverBot's server isn't accepting new sign-ins yet (anonymous sign-ins are off in Supabase). Nothing is wrong with your phone."
+            ? "RosterBots's server isn't accepting new sign-ins yet (anonymous sign-ins are off in Supabase). Nothing is wrong with your phone."
             : error?.message
-              ? `Couldn't start HangoverBot: ${error.message}`
-              : "Couldn't start HangoverBot. Check your connection and try again.";
+              ? `Couldn't start RosterBots: ${error.message}`
+              : "Couldn't start RosterBots. Check your connection and try again.";
         setState({ status: "error", message });
       } else {
         setState({ status: "ready", user: signedIn.user });
       }
     })().catch(() => {
-      if (live) setState({ status: "error", message: "Couldn't start HangoverBot. Check your connection and try again." });
+      if (live) setState({ status: "error", message: "Couldn't start RosterBots. Check your connection and try again." });
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {

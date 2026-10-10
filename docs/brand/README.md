@@ -1,9 +1,17 @@
-# HangoverBot brand
+# RosterBots brand
 
-Owner-supplied, Oct 3 2026. This is the brand; the app matches it, not the other way round.
+Owner-supplied, Oct 3 2026. Renamed from HangoverBot: Roster Protection on Oct 10 2026
+(owner: "I feel weird about having hangover in the title"); see `docs/DECISIONS.md`. This
+is the brand; the app matches it, not the other way round.
 
-**Official line:** **HangoverBot: Roster Protection**. "Roster Protection" is the subtitle.
-The one-word product name is HangoverBot. "by TurboLabs" sits under the wordmark.
+**Official line:** **RosterBots: Hangover Protection**. "Hangover Protection" is the subtitle.
+The one-word product name is RosterBots. "by TurboLabs" sits under the wordmark.
+
+**Not yet true of the artwork below:** every source file still draws the old wordmark
+(HANGOVER over BOT) and the icon's ribbon still reads "HANGOVERBOT" / "ROSTER PROTECTION".
+New art from the owner is needed before the app icon, splash, wordmark or any store
+screenshot can match this name; until then the sections below describe what the files
+actually show, not the new official line.
 
 ## Marks
 
@@ -53,7 +61,8 @@ peeking in from the right on Home, pill status chips.
 Two deliberate departures from the sheet:
 
 - **Spelling.** The sheet reads "HANGOVER BOTS" (plural). The owner's official line is
-  **HangoverBot: Roster Protection**, singular. The app uses the singular until the
+  **HangoverBot: Roster Protection** (the sheet predates the Oct 10 rename), singular.
+  The app uses the singular until the
   owner says otherwise.
 - **No third-party logos.** The sheet shows the ESPN, Yahoo, Sleeper and MFL marks on the
   provider rows. Those are their trademarks; Apple 4.1(c)/5.2.1, Google's impersonation
@@ -68,7 +77,7 @@ Two deliberate departures from the sheet:
 | 02-sync-provider | "Sync a league. Choose where your team lives." provider cards, Manual setup | Same: ESPN active, others coming soon. |
 | 07-choose-league | "Choose your league. We found 2 leagues on ESPN." cards with teams / format / record | Record and format come from ESPN; show what the fan profile gives. |
 | 04-choose-team | "Choose your team." | Only when ESPN does not say which team is the member's. |
-| 03-authority | "What should HangoverBot do if a starter is ruled OUT?" Tell me / Ask me first / Fix it automatically; Replacement source: Bench only / Bench + free agents | Maps to Alerts / Ask Me / Bench Protection. "Bench + free agents" is AI Rescue scope: shown disabled, "coming soon", in the beta. |
+| 03-authority | "What should RosterBots do if a starter is ruled OUT?" Tell me / Ask me first / Fix it automatically; Replacement source: Bench only / Bench + free agents | Maps to Alerts / Ask Me / Bench Protection. "Bench + free agents" is AI Rescue scope: shown disabled, "coming soon", in the beta. |
 | 06-keep-it-safe | "Keep it safe." toggles: only OUT/inactive, never trades, never FAAB without asking, never drop without asking; Sunday lineup alerts | In the beta these are statements of fact, not switches: the beta cannot trade, bid or drop at all. Render them as fixed checkmarks with the same copy, plus the notifications toggle. |
 | 05-home | "You're covered", Protection ON · Bench only, team card with week and next lock, watched starters with status pills, Last action, View activity / Manage protection; tabs Home · Team · Activity · Settings | Matches the contract's Home. Add the "What we read from ESPN" entry under Team. |
 

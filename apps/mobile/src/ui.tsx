@@ -81,20 +81,20 @@ export function Loading(props: { label?: string }) {
 // Marks.
 
 /**
- * The official lockup, HangoverBot: Roster Protection. Sized from the window, not from
+ * The official lockup, RosterBots: Hangover Protection. Sized from the window, not from
  * its parent: inside a centred column a percentage width has nothing to resolve against,
  * and the image fell back to its full pixel size, three screens wide (seen Oct 3).
  */
 export function Lockup(props: { width?: number; style?: StyleProp<ImageStyle> }) {
   const window = useWindowDimensions();
   const w = props.width ?? Math.min(window.width - space.xl * 2, 420);
-  return <Image source={LOCKUP.source} style={[{ width: w, height: w / LOCKUP.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot: Roster Protection" accessibilityIgnoresInvertColors />;
+  return <Image source={LOCKUP.source} style={[{ width: w, height: w / LOCKUP.aspect }, props.style]} resizeMode="contain" accessibilityLabel="RosterBots: Hangover Protection" accessibilityIgnoresInvertColors />;
 }
 
 /** The wordmark with "by TurboLabs", small, for inner screens and the navigation header. */
 export function Wordmark(props: { width?: number; style?: StyleProp<ImageStyle> }) {
   const w = props.width ?? 150;
-  return <Image source={WORDMARK.source} style={[{ width: w, height: w / WORDMARK.aspect }, props.style]} resizeMode="contain" accessibilityLabel="HangoverBot by TurboLabs" accessibilityIgnoresInvertColors />;
+  return <Image source={WORDMARK.source} style={[{ width: w, height: w / WORDMARK.aspect }, props.style]} resizeMode="contain" accessibilityLabel="RosterBots by TurboLabs" accessibilityIgnoresInvertColors />;
 }
 
 /** Navigation header: Midnight, no shadow, the wordmark where a title would go. */

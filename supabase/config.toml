@@ -21,14 +21,14 @@ otp_expiry = 3600
 # The claim uses updateUser({ email }) then verifyOtp({ type: "email_change" }), so the
 # change-email message must carry the code, not just a link.
 [auth.email.template.email_change]
-subject = "Your HangoverBot code"
+subject = "Your RosterBots code"
 content_path = "./supabase/templates/email_change.html"
 
 # Signing back in to a claimed account (a new phone, a reinstall) uses
 # signInWithOtp({ shouldCreateUser: false }) then verifyOtp({ type: "email" }), which sends
 # the magic-link message. It must carry the code too.
 [auth.email.template.magic_link]
-subject = "Your HangoverBot sign-in code"
+subject = "Your RosterBots sign-in code"
 content_path = "./supabase/templates/magic_link.html"
 
 # verify_jwt is off for every function, on purpose. The gateway's check knows only the

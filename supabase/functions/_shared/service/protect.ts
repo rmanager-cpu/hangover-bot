@@ -88,7 +88,7 @@ interface Check {
   /** A write failed in this check, or earlier this period: nothing more is automatic this week. */
   failedNow: boolean;
   failedEarlier: boolean;
-  /** No change the user made through HangoverBot has been seen landing in this league yet. */
+  /** No change the user made through RosterBots has been seen landing in this league yet. */
   unproven: boolean;
   /** Holes the user declined this period: their fixes do not claim bench players (core evaluate). */
   release: ReadonlySet<string>;

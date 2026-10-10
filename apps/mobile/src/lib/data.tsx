@@ -61,7 +61,7 @@ const ACTION_COLUMNS = "id,connection_id,finding_key,period,kind,status,moves,su
 const ACTIVITY_COLUMNS = "id,connection_id,type,title,body,data,created_at";
 
 // Remembers which league Home shows on this phone. A convenience only.
-const SELECTED_KEY = "hangoverbot.selectedConnection";
+const SELECTED_KEY = "rosterbots.selectedConnection";
 
 type Raw = Record<string, unknown>;
 const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
@@ -118,7 +118,7 @@ function toActivity(r: Raw): ActivityItem {
 /** Postgres and the network, in words a person can act on. */
 export function dbMessage(error: { message?: string } | null | undefined): string {
   const m = error?.message ?? "";
-  if (!m || /network|fetch|timed? ?out/i.test(m)) return "Can't reach HangoverBot. Check your connection and try again.";
+  if (!m || /network|fetch|timed? ?out/i.test(m)) return "Can't reach RosterBots. Check your connection and try again.";
   return m.charAt(0).toUpperCase() + m.slice(1) + (m.endsWith(".") ? "" : ".");
 }
 

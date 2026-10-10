@@ -20,9 +20,9 @@ const isTaken = (e: { message?: string; code?: string } | null): boolean => {
 
 function authMessage(e: { message?: string; code?: string; status?: number } | null, step: "email" | "code"): string {
   const m = (e?.message ?? "").toLowerCase();
-  if (isTaken(e)) return "That email already belongs to a HangoverBot account. Sign in to it instead, or use a different email.";
+  if (isTaken(e)) return "That email already belongs to a RosterBots account. Sign in to it instead, or use a different email.";
   if (m.includes("security purposes") || e?.status === 429) return "Too many codes asked for. Wait a minute, then try again.";
-  if (step === "code") return "That code didn't work. Check the newest email from HangoverBot, or send a new code.";
+  if (step === "code") return "That code didn't work. Check the newest email from RosterBots, or send a new code.";
   if (m.includes("invalid") && m.includes("email")) return "That email address doesn't look right.";
   return "Couldn't send the code. Check your connection and try again.";
 }

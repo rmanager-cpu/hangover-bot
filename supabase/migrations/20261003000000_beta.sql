@@ -44,7 +44,7 @@ create table public.connections (
   next_check_at timestamptz not null default now(),
   last_roster jsonb,
   last_roster_at timestamptz,
-  -- When a change the user made through HangoverBot (the test swap, or an approval) was
+  -- When a change the user made through RosterBots (the test swap, or an approval) was
   -- last seen on a fresh read. The first automatic move in a league waits for it.
   write_verified_at timestamptz,
   created_at timestamptz not null default now(),

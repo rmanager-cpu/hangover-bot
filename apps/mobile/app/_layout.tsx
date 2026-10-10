@@ -120,7 +120,7 @@ function NotConfigured() {
     <Centered>
       <Lockup />
       <Gap />
-      <Body style={{ textAlign: "center" }}>This build isn't connected to a HangoverBot server yet.</Body>
+      <Body style={{ textAlign: "center" }}>This build isn't connected to a RosterBots server yet.</Body>
       <Gap size={8} />
       <Muted style={{ textAlign: "center" }}>
         Put the Supabase URL and anon key into eas.json (EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY) and build again.
