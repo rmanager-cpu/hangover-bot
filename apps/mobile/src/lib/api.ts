@@ -55,6 +55,8 @@ export const api = {
   read: (connectionId: string) => call<ReadSummary>("read", { connectionId }),
   decide: (actionId: string, decision: "approve" | "decline") => call<DecisionResult>("decide", { actionId, decision }),
   swap: (connectionId: string, playerIdA: string, playerIdB: string) => call<SwapResult>("swap", { connectionId, playerIdA, playerIdB }),
+  /** Permanent. The server deletes the signed-in account and everything attached to it. */
+  deleteAccount: () => call<{ ok: boolean }>("delete-account", {}),
 };
 
 export const messageOf = (e: unknown): string => (e instanceof ApiError ? e.message : e instanceof Error && e.message ? e.message : OFFLINE);

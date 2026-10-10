@@ -40,6 +40,10 @@ Two more routes, for the second phone or the reinstall:
 - **Forget my ESPN sign-in** (Settings): deletes the user's `credentials` row under RLS.
   The database cascades to the leagues, their actions and activity, and a trigger removes
   the cookies from Vault. The app returns to Welcome.
+- **Delete my account** (Settings): calls the `delete-account` Edge Function, which deletes
+  the caller's own `auth.users` row (the five tables, including `credentials`, cascade from
+  it). The app signs out and starts a fresh anonymous session, the same as first launch.
+  Google Play's account-deletion requirement; works for an unclaimed account too.
 
 The Protection screen's promise is the code's: automatic moves only between 90 and 4
 minutes before kickoff, and the first one in a league only after a change the user made

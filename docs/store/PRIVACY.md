@@ -164,9 +164,14 @@ RosterBots stops checking your lineup from the next check (a check already under
 
 ### 8.2 Deleting your whole account
 
-To delete your RosterBots account and everything attached to it (user ID, email address, ESPN session, league data, activity and push token), email **[PLACEHOLDER: delete@ email address]** from the address you claimed the account with, with the subject "Delete my RosterBots account". If you never claimed the account, tell us the league name and team name shown in Settings so we can find it [VERIFY: Settings shows no account ID today; add the account ID to the About card so requests can be matched reliably]. [VERIFY: the audit found no in-app "Delete my account" control and no server path that deletes the account. Google Play requires, for any app that lets users create an account, an in-app path to request deletion (an in-app link to the web page is acceptable) plus a public web page that references the app or developer name exactly as it appears on the store listing, with the deletion path prominent; that URL goes in Play Console > App content > Data safety > Data deletion. Add both, then replace this paragraph with the in-app path and the web URL.]
+Settings > **Delete my account**. This permanently deletes your account and everything attached to it: your encrypted ESPN session, every league connection, your activity and receipts, and your push token. It works whether or not you ever claimed your account by email. Your ESPN account itself is not touched. This cannot be undone.
 
-We will confirm by email and complete the deletion within [PLACEHOLDER: e.g. 30] days. Deleting the account deletes every record attached to it; our database is built so that removing the account removes everything else with it, including the encrypted ESPN session [VERIFY: confirm on the hosted database; the vault clean-up is best-effort by design and the schema has only run locally so far]. [VERIFY: whether anything must be kept for legal, security or dispute reasons; if so, say what and for how long, as Google requires.]
+If you don't have the app, or can't open it, you can request the same deletion at
+**[PLACEHOLDER: public URL for legal/delete-account.html once hosted]**. [VERIFY: confirm
+the deletion is complete on the hosted database the first time it is used; the cascade and
+the Vault clean-up trigger have only run in PGlite, never against a real project.]
+[VERIFY: whether anything must be kept for legal, security or dispute reasons after a
+deletion request; if so, say what and for how long, as Google requires.]
 
 Deleting your RosterBots account does not change anything on ESPN. Lineup moves already made on ESPN stay as they are, and your ESPN account is untouched.
 

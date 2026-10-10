@@ -251,6 +251,7 @@ Deno. Shared code is copied from `packages/*/src` into `supabase/functions/_shar
 | `decide` | user JWT | `{actionId, decision}` → `DecisionResult` |
 | `swap` | user JWT | `{connectionId, playerIdA, playerIdB}` → `SwapResult` |
 | `check` | `x-cron-secret` | runs `protectConnection` for up to 25 due connections → `{checked, deferred, results: CheckSummary[]}`; 503 `not_configured` while `CRON_SECRET` is unset |
+| `delete-account` | user JWT | `{}` → `{ok: true}`. Deletes the caller's own `auth.users` row; the five tables cascade from it (`credentials`'s own trigger drops the Vault secret), so one call removes everything: ESPN session, leagues, moves, receipts, push token. Works for an unclaimed (anonymous) account too. Google Play's account-deletion requirement, `docs/store/`. |
 
 "User JWT" is checked **by the function** (`_lib/auth.ts`, `auth.getUser` on the bearer
 token), not by the gateway: `verify_jwt` is off for all six in `config.toml` and on
@@ -283,7 +284,7 @@ needs a claimed account) → Claim (email + 6-digit code: `updateUser({email})` 
 `verifyOtp({type:'email_change'})`) → Home ("YOU'RE COVERED" or "ACTION NEEDED", next kickoff,
 watched starters, protection level, last receipt) · Activity (receipts; proposals with
 Approve / Decline) · Settings (protection, replacement order with up/down, sign in to ESPN
-again, **Forget my ESPN sign-in**, About).
+again, **Forget my ESPN sign-in**, **Delete my account**, About).
 
 **Sign in to a claimed account** (Welcome, Settings, and the claim screen when the email
 is taken): email + 6-digit code, `signInWithOtp({email, options:{shouldCreateUser:false}})`

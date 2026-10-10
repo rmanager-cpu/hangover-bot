@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, Switch, View } from "react-native";
+import { api, messageOf } from "../../src/lib/api";
 import { dbMessage, useData } from "../../src/lib/data";
 import { agoText, AUTHORITY } from "../../src/lib/format";
 import { usePush } from "../../src/lib/push";
@@ -12,10 +13,11 @@ import { Banner, Body, Card, H2, Label, Loading, Muted, Row, Screen, Wordmark } 
 
 export default function Settings() {
   const data = useData();
-  const { user, claimed } = useSession();
+  const { user, claimed, retry } = useSession();
   const push = usePush();
   const conn = data.connection;
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!conn) return <Loading />;
@@ -40,6 +42,40 @@ export default function Settings() {
             if (e) return setError(dbMessage(e));
             await data.refresh().catch(() => {});
             router.replace("/welcome");
+          },
+        },
+      ],
+    );
+  };
+
+  // The server deletes the auth user; every table cascades from it (including the Vault
+  // secret for an ESPN session, by its own trigger), so one call removes everything. Then
+  // the phone starts over: signed out, and a fresh anonymous session takes its place, the
+  // same as a first launch.
+  const deleteAccount = () => {
+    Alert.alert(
+      "Delete your RosterBots account?",
+      claimed
+        ? `This permanently deletes the account signed in as ${user?.email}: every league you're watching, your ESPN sign-in, your settings, activity and receipts, and this phone's push notifications. Your ESPN account itself is not touched. This can't be undone.`
+        : "This permanently deletes this RosterBots account: every league you're watching, your ESPN sign-in, your settings, activity and receipts, and this phone's push notifications. Your ESPN account itself is not touched. This can't be undone.",
+      [
+        { text: "Keep my account", style: "cancel" },
+        {
+          text: "Delete my account",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            setError(null);
+            try {
+              await api.deleteAccount();
+            } catch (e) {
+              setDeleting(false);
+              return setError(messageOf(e));
+            }
+            await supabase.auth.signOut().catch(() => {});
+            // Tears this screen down: Gate shows Loading while a fresh anonymous session
+            // starts, then the index route lands on Welcome since it has no leagues.
+            retry();
           },
         },
       ],
@@ -145,13 +181,20 @@ export default function Settings() {
       <Label>Account</Label>
       <Card>
         {claimed ? (
-          <Row title="Claimed" value={user?.email ?? undefined} last />
+          <Row title="Claimed" value={user?.email ?? undefined} />
         ) : (
           <>
             <Row title="Claim your account" detail="Needed for Bench Protection to act on its own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} />
-            <Row title="Sign in to an account you claimed before" detail="New phone, or a reinstall" onPress={() => router.push("/signin")} last />
+            <Row title="Sign in to an account you claimed before" detail="New phone, or a reinstall" onPress={() => router.push("/signin")} />
           </>
         )}
+        <Row
+          title="Delete my account"
+          detail="Permanently deletes everything RosterBots has: leagues, your ESPN sign-in, settings, activity and receipts"
+          tone="warn"
+          onPress={deleting || saving ? undefined : deleteAccount}
+          last
+        />
       </Card>
 
       <Label>Alerts</Label>

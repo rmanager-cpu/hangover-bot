@@ -63,3 +63,7 @@ import_map = "./functions/swap/deno.json"
 [functions.check]
 verify_jwt = false
 import_map = "./functions/check/deno.json"
+
+[functions.delete-account]
+verify_jwt = false
+import_map = "./functions/delete-account/deno.json"
