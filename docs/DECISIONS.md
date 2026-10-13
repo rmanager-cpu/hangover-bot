@@ -59,6 +59,10 @@ reading; the owner may overrule any of them.
 | **Does a failed test swap lock automatic moves beyond its week?** | Yes, until a change of the user's lands again (Oct 3 design, `safety.test.ts`). |
 | **More than 3 unlocked starters OUT at once: a bad read, or a bad week?** | A bad read: nothing automatic until a read looks right. |
 | **A bench D/ST projected below zero for a D/ST on bye.** | Not moved in (a bye scores 0, the projection less); the notice says the bench options are out, projected for zero, or playing. |
+| **Sign in before ESPN?** (owner, Oct 10: "there should be an auth-ish level before that".) Signing in first means no ESPN session is left under an anonymous account nobody can reach, deletion requests can be matched by email, and there is one kind of user instead of two. It reverses the Oct 2 anonymous-first flow. Open: email code, Google, or both. Email needs a real sender first (Supabase's built-in one reaches only the organisation's members) and none is listed in `STACK.md`. | Anonymous-first, as built. |
+| **Deploy `delete-account`.** In the code since Oct 10, not on the live project, which still has only the original six functions. Tapping Delete my account shows an error until it is deployed. | Not deployed (owner, Oct 13: hold). |
+| **Delete my account is unreachable without a league.** Settings only exists once a league is synced, so someone who never syncs one cannot delete their account in the app. Signing in first would fix it. | The public page (`legal/delete-account.html`) covers it once hosted. |
+| **The wordmark, icon and splash still read HANGOVER BOT.** Image files; the Oct 10 rename changed text only. | New art from the owner. |
 
 ## Risks
 
