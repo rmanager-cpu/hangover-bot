@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    // The shared packages import their own files with .ts extensions.
+    "allowImportingTsExtensions": true,
+    // Makes every type from @rosterbots/* an `import type`, so Metro never bundles them.
+    "verbatimModuleSyntax": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "expo-env.d.ts"]
+}

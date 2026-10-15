@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "proTeams": [
+      { "id": 16, "abbrev": "MIN", "byeWeek": 9, "proGamesByScoringPeriod": { "5": [ { "date": 1791133200000, "homeProTeamId": 16, "awayProTeamId": 8 } ] } },
+      { "id": 24, "abbrev": "LAC", "byeWeek": 5, "proGamesByScoringPeriod": {} }
+    ]
+  }
+}

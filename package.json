@@ -1,0 +1,29 @@
+{
+  "name": "rosterbots",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "node --test \"packages/*/test/*.test.ts\" \"scripts/*.test.ts\"",
+    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/service && tsc -p scripts && npm run typecheck --workspace apps/mobile",
+    "functions:build": "node scripts/build-functions.ts",
+    "functions:check": "node scripts/build-functions.ts --check",
+    "espn:check": "node scripts/espn-check.ts",
+    "functions:bundle": "node scripts/bundle-functions.ts",
+    "functions:compile": "npm run functions:bundle && sh scripts/compile-functions.sh"
+  },
+  "dependencies": {
+    "@rosterbots/core": "0.0.0",
+    "@rosterbots/connectors": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "^5.9.0"
+  }
+}

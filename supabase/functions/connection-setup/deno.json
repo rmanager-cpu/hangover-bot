@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@rosterbots/core": "../_shared/core/index.ts",
+    "@rosterbots/connectors": "../_shared/connectors/index.ts",
+    "@rosterbots/football-data": "../_shared/football-data/index.ts",
+    "@rosterbots/service": "../_shared/service/index.ts",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2"
+  },
+  "lock": false
+}

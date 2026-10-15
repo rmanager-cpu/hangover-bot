@@ -1,0 +1,35 @@
+{
+  "scoringPeriodId": 5,
+  "status": { "latestScoringPeriod": 5 },
+  "settings": {
+    "name": "Live free or die hard RR4L",
+    "rosterSettings": { "lineupSlotCounts": { "0": 1, "2": 2, "4": 2, "6": 1, "16": 1, "17": 1, "20": 7, "21": 1, "23": 1, "24": 0 } }
+  },
+  "teams": [
+    { "id": 11, "name": "Who's the Man?", "owners": ["{OTHER-MEMBER}"], "roster": { "entries": [] } },
+    {
+      "id": 2,
+      "name": "Trust The Process",
+      "owners": ["{OWNER-SWID}", "{MEGA-CAST-SWID}"],
+      "roster": {
+        "entries": [
+          { "playerId": 4262921, "lineupSlotId": 4, "playerPoolEntry": { "lineupLocked": false, "player": {
+            "id": 4262921, "fullName": "Justin Jefferson", "defaultPositionId": 3, "proTeamId": 16,
+            "eligibleSlots": [3, 4, 5, 23, 7, 20, 21], "injuryStatus": "OUT", "injured": true,
+            "stats": [ { "statSourceId": 0, "scoringPeriodId": 5, "appliedTotal": 0 }, { "statSourceId": 1, "scoringPeriodId": 5, "appliedTotal": 17.2 } ] } } },
+          { "playerId": 4610523, "lineupSlotId": 20, "playerPoolEntry": { "lineupLocked": false, "player": {
+            "id": 4610523, "fullName": "Ladd McConkey", "defaultPositionId": 3, "proTeamId": 24,
+            "eligibleSlots": [3, 4, 5, 23, 7, 20, 21], "injuryStatus": "ACTIVE",
+            "stats": [ { "statSourceId": 1, "scoringPeriodId": 5, "appliedTotal": 12.4 } ] } } },
+          { "playerId": -16016, "lineupSlotId": 16, "playerPoolEntry": { "lineupLocked": true, "player": {
+            "id": -16016, "fullName": "Vikings D/ST", "defaultPositionId": 16, "proTeamId": 16,
+            "eligibleSlots": [16, 20, 21] } } },
+          { "playerId": 9999, "lineupSlotId": 11, "playerPoolEntry": { "player": { "id": 9999, "fullName": "Some Linebacker", "defaultPositionId": 11 } } },
+          { "playerId": 3054211, "lineupSlotId": 20, "playerPoolEntry": { "player": {
+            "id": 3054211, "fullName": "Mystery Status", "defaultPositionId": 2, "proTeamId": 16,
+            "eligibleSlots": [2, 3, 23, 20, 21], "injuryStatus": "SOMETHING_NEW" } } }
+        ]
+      }
+    }
+  ]
+}

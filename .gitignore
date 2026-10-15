@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.expo/
+out/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.bundle/
+supabase/.bundle-min/

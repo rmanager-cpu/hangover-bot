@@ -1,0 +1,872 @@
+<!-- Plain-text extraction of HANDOFF-2026-10-02.docx with its tracked changes accepted, for search. The .docx is the original; diagrams and tables lost their layout here. -->
+
+HANGOVERBOT / ROSTERBOTS
+Product + Engineering Handoff
+AI-enabled fantasy lineup protection
+TurboLabs · Working Specification · October 2, 2026
+Status: Ready for architecture + initial build. Open decisions remain explicitly marked.
+
+Handoff intent
+This document is meant to be buildable. It freezes what has actually been decided, preserves open questions instead of inventing answers, and gives engineering enough structure to begin the shell, domain model, event system, rules engine, connector interface, onboarding, and AI-routing layer.
+
+Working product name
+HangoverBot
+System / internal name
+RosterBots
+Parent brand
+TurboLabs
+Core promise
+Connect your league. Choose authority. Go live your life.
+Primary position
+AI-enabled fantasy lineup protection
+Launch surfaces
+iOS + Android + responsive web; browser extension likely supporting surface
+Core V1 boundary
+Reactive roster protection and injury-driven rescue; not a fully autonomous fantasy GM
+
+1. Executive summary
+
+HangoverBot is a deliberately narrow fantasy-football utility designed to prevent users from losing a matchup because they missed an injury, slept through inactives, forgot to set a lineup, or were otherwise unavailable when a time-sensitive roster problem happened.
+The product should feel more like roster insurance than a fantasy research dashboard. Normal software watches league and football state continuously. Deterministic rules solve obvious cases. AI is called only when the situation actually requires judgment. A separate permission engine decides what may be executed automatically.
+Product sentence
+Connect a fantasy league, tell HangoverBot how much authority it has, and let it protect the roster when real life gets in the way.
+
+Working positioning
+AI-enabled fantasy lineup protection
+Fantasy help for real life.
+QUESTIONABLE — Injury Status. Life Decisions.
+Product principles
+Narrow beats sprawling: do not become a generic fantasy analytics suite in V1.
+Rules first, AI second: deterministic software handles eligibility, locks, IR rules, clear bench swaps, and permissions.
+AI is event-driven: no constant model polling and no open-ended “anything interesting?” loops.
+Every write is revalidated and auditable before execution.
+Trust is a UI requirement: users receive clear receipts for every automated action.
+Provider differences are normalized behind capabilities rather than leaking throughout the product.
+2. Launch surfaces
+
+The launch target is broader than mobile-only. Build one shared product system with mobile as the primary consumer surface and web as the configuration / desktop surface.
+Surface
+V1
+Purpose
+iPhone
+Yes
+Primary consumer experience
+Android
+Yes
+Primary consumer experience
+Responsive web
+Yes
+Desktop use, configuration, support, activity
+Browser extension
+Likely
+Provider/session support where browser context is useful
+iPad/tablet
+Yes via responsive app
+No separate product
+Native Windows
+No
+Web covers V1
+Native macOS
+No
+Web covers V1
+Suggested monorepo
+rosterbots/
+  apps/
+    mobile/             # Expo / React Native
+    web/                # Next.js
+    extension/          # Manifest V3 browser extension
+    worker/             # background/event processing
+  packages/
+    core/               # domain types + rules
+    ai/                 # routing + structured prompts
+    connectors/         # fantasy provider adapters
+    football-data/      # injury/news/projection normalization
+    ui/                 # shared tokens/components
+    config/
+
+Preferred implementation language throughout: TypeScript. This reduces duplicated domain logic between mobile, web, worker, extension, and connector packages.
+3. Onboarding and primary navigation
+
+Onboarding should feel like league connection, not account creation. The user should get to a protected state quickly and only encounter identity friction when it creates clear value.
+Step
+Screen
+Behavior
+1
+Welcome
+HangoverBot — Fantasy help for real life. Primary CTA: Sync a League.
+2
+Provider
+Choose fantasy host.
+3
+Connect
+Provider-specific authentication/session flow.
+4
+League
+Choose one of the discovered leagues.
+5
+Team
+Select team if it is not deterministically known.
+6
+Authority
+Alert Me / Ask Me / Bench Protection / AI Rescue.
+7
+Rules
+Replacement preference, drop hierarchy, free-agent permissions, IR behavior, notifications.
+8
+Home
+Primary state: YOU’RE COVERED.
+Home should stay small
+Next relevant kickoff
+Watched starters
+Current protection level
+Unresolved alert, if any
+Last action / receipt
+Manage protection
+Do not turn Home into a scores/news/analytics dashboard. The product promise is protection, not information density.
+Navigation
+Preferred V1 navigation: Home · Activity · Settings, with team/rules accessible from Home. A separate Team tab is acceptable if implementation testing shows the settings become too buried.
+4. Authority levels
+
+Level
+Definition
+1 — Alerts
+Watch and notify only. Never modifies the roster.
+2 — Ask Me
+Identify the problem, propose a move, and require user approval.
+3 — Bench Protection
+Automatically repair affected lineup slots using players already on the roster. No free-agent add, waiver claim, or FAAB transaction.
+4 — AI Rescue (working name)
+Use AI when judgment is required; may use IR, choose bench replacements, evaluate injury-created opportunity, and add/drop immediately available free agents when the user explicitly enables those permissions. Waiver/FAAB claims remain recommendation-only in V1.
+Naming note
+“Full AI Optimization” sounds like an autonomous fantasy general manager. “AI Rescue” better matches the product: powerful intervention in response to a defined injury, lineup, or game-time event. Final consumer label remains open.
+
+5. V1 scope boundary
+
+RosterBots is intentionally reactive. It protects a user from time-sensitive roster failure; it does not independently run the team all season.
+V1 may do
+Monitor roster/player status
+Warn before kickoff
+Repair an affected lineup
+Use IR for non-season-ending injuries when appropriate
+Auto-drop a confirmed season-ending player
+Evaluate immediate free agents when AI Rescue is enabled
+Add an immediate free agent when explicitly authorized
+Suggest waiver targets and FAAB amounts
+Explain exactly what it changed
+V1 does not do
+Initiate or accept trades
+Submit waiver claims
+Submit FAAB bids
+Continuously churn the roster because projections moved
+Draft the team
+Autonomously redesign long-term roster strategy
+Make transactions with no triggering roster/injury/game-time event
+6. How AI wakes up: event-driven architecture
+
+AI never wakes itself up. Normal code monitors structured state and emits events. The rules engine first determines whether the event is relevant, whether a deterministic action exists, and whether any actual judgment remains.
+FOOTBALL DATA + FANTASY PROVIDER STATE
+                  |
+                  v
+             EVENT MONITOR
+                  |
+                  v
+              RULES ENGINE
+             /            \
+     deterministic      judgment required
+          action              |
+             \               v
+              +-----------> AI ROUTER
+                          |
+                          v
+                  PERMISSION ENGINE
+                          |
+                          v
+                       EXECUTOR
+
+Initial trigger classes
+Trigger
+Meaning
+Immediate status event
+Rostered player changes state: active/questionable/doubtful/out/IR; official inactive; suspension; confirmed season-ending injury.
+Scheduled game-time event
+Checks relative to the actual player kickoff time. The check calls the rules engine, not automatically the model.
+Opportunity event
+An injury or role change materially changes the value of another player, especially where that player is available in a connected league.
+User event
+User explicitly taps Optimize Now / Evaluate Now.
+Suggested kickoff scheduler
+Potential checks: T-180, T-90, T-30, and T-10 minutes. These are rules-engine wakeups. If a starter is healthy and lineup state is valid, the result is zero AI calls.
+Core cost rule
+Never poll a model with “anything interesting?” Poll structured data. Only state transitions and scheduled roster checks can create AI work.
+
+7. Injury, IR, and season-ending rules
+
+Confirmed season-ending injury
+Product decision: a confirmed season-ending injury triggers automatic drop in an automation-enabled mode. This is a hard V1 rule, not an AI strategy choice.
+CONFIRMED SEASON ENDING
+        |
+        v
+     AUTO DROP
+        |
+        v
+  OPEN ROSTER SPOT
+        |
+        v
+REPLACEMENT EVALUATION
+
+Preferred confirmation hierarchy: structured football-data flag first; otherwise an explicit trusted report; if the source is unstructured text, a cheap AI classification call may normalize it into season_ending=true/false/uncertain. Once confirmed, the drop itself is deterministic and does not require AI judgment.
+Non-season-ending injury
+IR ELIGIBLE?
+   | yes
+   v
+OPEN IR SLOT?
+   | yes
+   v
+MOVE TO IR
+   |
+   v
+OPEN ROSTER SPOT
+   |
+   v
+REPLACEMENT EVALUATION
+
+If no legal IR move exists, the normal drop-priority and protection rules apply. The permission engine owns those constraints; AI cannot override them.
+8. Drop hierarchy and protected players
+
+The user gets an explicit reverse-priority system for roster sacrifice. This makes automatic behavior legible and predictable.
+NEVER DROP
+  Player A
+  Player B
+
+DROP LAST
+  Player C
+  Player D
+
+DROP FIRST
+  Player E
+  Player F
+
+HARD OVERRIDE
+  Confirmed season-ending player -> automatic drop
+
+Permission toggles
+Automatic bench swaps — ON/OFF
+IR moves — ON/OFF
+Automatic immediate free-agent adds — ON/OFF
+Automatic drops — ON/OFF
+Maximum automatic transactions per day/week — OPEN
+Confirmation threshold for low-confidence AI plan — OPEN
+9. Bench replacement logic without AI
+
+A normal inactive-to-bench swap should usually be a deterministic calculation. The rules engine should not spend AI tokens to answer a question already encoded in eligibility, locks, projections, and user ordering.
+Filter to legal slot eligibility.
+Exclude players whose games are locked or started.
+Apply a user’s explicit replacement order if configured.
+Apply strategy preference if enough data exists.
+Otherwise use the highest projected eligible player.
+Possible strategy modes
+Mode
+Definition
+Projected
+Highest conventional projection.
+My Order
+User-specified ranked choices; deterministic.
+Upside
+Requires ceiling/distribution or equivalent volatility data.
+Safe
+Requires floor/distribution or equivalent reliability data.
+Do not fake “upside” or “safe” from a single mean projection. The football-data decision must provide the required inputs before those options ship.
+10. Free agents, waivers, and FAAB
+
+RosterBots must model player acquisition state explicitly. A player being visible in the free-agent pool does not mean the same transaction path is available in every league.
+FREE_AGENT_NOW
+ON_WAIVERS
+LOCKED
+UNAVAILABLE
+
+Immediate free agent
+If AI Rescue identifies a desirable player who is immediately addable, and the user enabled automatic FA adds, RosterBots may validate and execute the add/drop flow.
+Waiver / FAAB player
+V1 stops before claim submission. It may recommend the add, the drop, a suggested FAAB range, or waiver priority strategy, then notify the user. The user submits the claim.
+V1 boundary
+Immediate free-agent transactions can be automatic. Waiver and FAAB claims are recommendation-only.
+
+11. AI Injury + Waiver Watch
+
+AI is not only a Sunday feature. A major injury on Tuesday can create a waiver opportunity that disappears by Wednesday. Injury Watch should trigger when roster-relevant news materially changes player value.
+INJURY EVENT
+     |
+     v
+UNDERSTAND SEVERITY / ROLE CHANGE
+     |
+     v
+IDENTIFY BENEFICIARIES
+     |
+     v
+CHECK LEAGUE AVAILABILITY
+     |
+     v
+COMPARE TO USER'S ROSTER FIT
+     |
+     v
+RECOMMEND OR EXECUTE WITHIN PERMISSIONS
+
+The key question is not “who is the injured player’s backup?” It is “who became more valuable because this happened, and is that player a better use of this roster spot than the alternatives?” The correct answer may be a direct backup, a committee member, or an unrelated available player with superior opportunity.
+12. AI routing and cost architecture
+
+Use multiple model tiers. The event monitor and most rules execution should have zero model cost. Cheap classification and simple ranking should use the least expensive model that performs reliably; harder roster judgment escalates only when needed.
+Model
+Input / 1M
+Output / 1M
+RosterBots role
+Claude Haiku 4.5
+$1.00
+$5.00
+Classification, simple ranking, high-volume low-stakes decisions
+Claude Sonnet 5.5
+$2.00
+$10.00
+Substantive injury + roster + free-agent decisions
+Claude Opus 5.5
+$4.00
+$20.00
+Rare difficult escalation / benchmarking
+These figures are Anthropic's Claude API list rates as of September 2026 (model IDs claude-haiku-4-5, claude-sonnet-5-5, claude-opus-5-5) used for planning in this handoff. Model pricing and availability should be configuration, not hard-coded product copy. The Phase 5 benchmark should also measure a single model at low effort against this three-tier cascade before committing to it.
+Routing
+CLEAR STRUCTURED RULE
+  -> no AI
+
+UNSTRUCTURED STATUS CLASSIFICATION
+  -> Haiku
+
+SMALL RANKING / SIMPLE JUDGMENT
+  -> Haiku
+
+MEANINGFUL ROSTER + INJURY + FREE-AGENT DECISION
+  -> Sonnet
+
+LOW-CONFIDENCE / EXCEPTIONAL CASE
+  -> Opus rarely, or require user review
+
+Illustrative economics
+Example
+Model
+Illustrative tokens
+Approx. model cost
+Injury blurb classifier
+Haiku 4.5
+1,000 input + 100 output
+$0.0015
+Simple candidate ranking
+Haiku 4.5
+1,500 input + 300 output
+$0.0030
+Substantive roster decision
+Sonnet 5.5
+2,000 input + 500 output/reasoning
+$0.009
+More involved roster decision
+Sonnet 5.5
+3,000 input + 1,000 output/reasoning
+$0.016
+Large escalation
+Opus 5.5
+2,000 input + 3,000 output/reasoning
+$0.068
+Thinking tokens are billed as output tokens, so set the effort level explicitly for each route (low for classification). Actual production cost must be measured from API usage, not inferred from perceived “thinking time.”
+Per-season target
+Engineering target
+Normal AI-enabled user should stay around or below roughly $1 of inference per season under disciplined event routing. This is a target to validate with the benchmark, not a pricing promise.
+
+13. Canonical AI decision packet
+
+The model should receive a compact normalized packet containing only information required to make the decision. Never send an entire provider payload, the full player universe, or long articles when structured summaries exist.
+{
+  "event": {
+    "type": "PLAYER_OUT",
+    "player_id": "abc",
+    "severity": "SEASON_ENDING"
+  },
+  "league": {
+    "scoring": "PPR",
+    "roster_slots": ["QB","RB","RB","WR","WR","TE","FLEX"],
+    "acquisition_type": "FAAB"
+  },
+  "team": {
+    "lineup": [],
+    "bench": [],
+    "ir": []
+  },
+  "user_rules": {
+    "strategy": "UPSIDE",
+    "never_drop": [],
+    "drop_priority": [],
+    "automatic_free_agent_adds": true
+  },
+  "candidates": [
+    {
+      "player_id": "...",
+      "availability": "FREE_AGENT_NOW",
+      "projection": 11.4,
+      "role_change": "LIKELY_INCREASE"
+    }
+  ]
+}
+
+Structured model output
+{
+  "decision": "ADD_FREE_AGENT",
+  "add_player_id": "1234",
+  "drop_player_id": "5678",
+  "lineup_moves": [
+    {"player_id": "1234", "to_slot": "RB2"}
+  ],
+  "confidence": 0.88,
+  "reason_codes": [
+    "STARTER_SEASON_ENDING_INJURY",
+    "NEW_WORKLOAD_OPPORTUNITY",
+    "BEST_AVAILABLE_ROSTER_FIT"
+  ]
+}
+
+14. Fantasy-provider connector architecture
+
+The user wants broad host coverage. Do not build provider assumptions into core business logic. Each connector declares capabilities, and the UI exposes only the authority levels/actions that connector supports.
+interface FantasyConnector {
+  connect(): Promise<ConnectionResult>;
+  refreshConnection(): Promise<void>;
+
+  getLeagues(): Promise<League[]>;
+  getLeagueSettings(leagueId: string): Promise<LeagueSettings>;
+  getTeam(leagueId: string, teamId: string): Promise<FantasyTeam>;
+  getRoster(...): Promise<Roster>;
+  getLineup(...): Promise<Lineup>;
+  getFreeAgents(...): Promise<Player[]>;
+  getAcquisitionRules(...): Promise<AcquisitionRules>;
+
+  setLineup?(...): Promise<TransactionResult>;
+  addFreeAgent?(...): Promise<TransactionResult>;
+  dropPlayer?(...): Promise<TransactionResult>;
+  moveToIR?(...): Promise<TransactionResult>;
+
+  capabilities(): ConnectorCapabilities;
+}
+
+Capability flags
+READ_LEAGUE
+READ_ROSTER
+READ_SCORING
+READ_FREE_AGENTS
+READ_PLAYER_AVAILABILITY
+READ_LINEUP_LOCKS
+WRITE_LINEUP
+ADD_FREE_AGENT
+DROP_PLAYER
+MOVE_TO_IR
+VERIFY_TRANSACTION
+Waiver submission is intentionally excluded from the V1 connector contract. Provider-specific failures should be feature-flagged and isolated so one capability can be disabled without taking down the entire app.
+15. Football data layer
+
+This is one of the most important unresolved engineering dependencies. RosterBots needs a reliable normalized football-data source so AI does not need to search the open internet for routine events.
+Player identity mapping
+NFL team and position
+Game schedule and kickoff
+Injury status
+Official inactive status
+IR designation
+Season-ending indicator when available
+Depth chart
+News / structured event feed
+Projections
+Floor/ceiling or distribution data if Safe/Upside modes ship
+Workload / role-change signals if available
+Open decision
+Select the football data vendor(s) based on reliability, latency, projection quality, injury/news structure, depth-chart coverage, commercial cost, and identifier mapping.
+
+16. Transaction safety and state machine
+
+The model proposes a plan. Normal code reloads state, checks authority and legality, then executes. Model output never directly touches a provider connector.
+DETECTED
+  -> REFRESHING
+  -> RULES_EVALUATION
+  -> AI_PENDING (optional)
+  -> PLAN_READY
+  -> VALIDATING
+  -> EXECUTING
+  -> VERIFYING
+  -> COMPLETED
+
+Safe exits
+NEEDS_USER
+STALE_STATE
+PLAYER_UNAVAILABLE
+LINEUP_LOCKED
+CONNECTION_ERROR
+TRANSACTION_REJECTED
+Pre-write validation
+Reload current roster
+Reload candidate availability
+Verify lock state
+Verify authority level and toggle permissions
+Verify never-drop/drop-order constraints
+Verify roster limits and acquisition rules
+Execute
+Read roster back
+Confirm final state
+Write receipt and audit event
+Never blindly retry roster writes. If a target disappears or the user manually changed the team, discard the stale plan and reevaluate from fresh state.
+17. AI deduplication, observability, and cost controls
+
+Deduplicate equivalent events
+AI_EVENT_KEY =
+  league_id +
+  team_id +
+  player_id +
+  status_version +
+  roster_version +
+  candidate_pool_version
+
+If an identical logical state was already resolved, do not call AI again. Duplicate injury notifications should not become duplicate inference spend or duplicate transactions.
+Log every model call
+Model + reasoning effort
+Trigger/event type
+Input tokens
+Cached input tokens
+Output tokens
+Reasoning tokens
+Latency
+Estimated cost
+Decision confidence
+Decision result
+Whether user approved or overrode it
+Whether the transaction ultimately succeeded
+Hard cost rules
+Send the relevant candidate set, not the full league player universe.
+Use structured outputs.
+Keep user-facing explanations short.
+Set output limits.
+Reuse/cache stable prompt prefixes.
+Never rerun when material state did not change.
+Avoid web-search calls inside routine decisions.
+Keep model IDs and routing rules server-side so they can change without app releases.
+18. Account and identity architecture
+
+The desired UX is “sync your league, that is onboarding.” The implementation still needs an internal user identity for multi-device state, purchases, web access, notifications, provider connections, activity history, and recovery.
+INSTALL
+  -> create anonymous internal user
+  -> sync league
+  -> select team
+  -> configure protection
+  -> use app
+
+LATER / WHEN NECESSARY
+  -> claim account with Apple / Google / email magic link
+
+Benefits of an internal account
+Restore settings after reinstall
+Use iOS, Android, and web with the same configuration
+Associate multiple fantasy-provider connections
+Map purchases/entitlements across surfaces
+Persist activity receipts and audit history
+Recover sessions and troubleshoot support issues
+Map push-notification devices safely
+Open decision
+Choose the moment when an anonymous user must claim an account. A natural threshold is before purchase or before enabling unattended write authority.
+
+19. Notifications and activity receipts
+
+Core push types
+STATUS_CHANGED
+ACTION_REQUIRED
+ACTION_RECOMMENDED
+ACTION_COMPLETED
+ACTION_FAILED
+WAIVER_OPPORTUNITY
+PREGAME_WARNING
+Receipt examples
+Bench rescue
+Player A was ruled OUT at 12:31 PM. Player B moved from FLEX to RB2. Player C moved from bench to FLEX. Completed 12:32 PM.
+
+AI free-agent rescue
+Player A was confirmed out for the season. Dropped Player A. Added Player B. Started Player B at RB2. Why: strongest available opportunity that matched your configured strategy.
+
+The UI should show concise user-facing reasons. Full model traces and technical context remain internal observability data.
+20. Backend data model
+
+Minimum entities for V1:
+users
+identities
+devices
+provider_connections
+leagues
+fantasy_teams
+league_settings
+players
+nfl_games
+player_status
+player_news
+projections
+roster_snapshots
+roster_entries
+protection_settings
+drop_priorities
+replacement_priorities
+events
+ai_decisions
+action_plans
+transactions
+activity_log
+entitlements
+push_tokens
+connector_capabilities
+feature_flags
+Version stamps
+At minimum: roster_version · status_version · rules_version · candidate_pool_version. AI plans reference these so stale work can be rejected before execution.
+21. Recommended implementation stack
+
+Layer
+Recommendation
+Mobile
+Expo + React Native + TypeScript
+Web
+Next.js + TypeScript
+Backend/Auth/DB
+Supabase + Postgres
+Background processing
+Reliable Node/TypeScript worker + scheduler
+Push
+APNs + FCM, through Expo initially
+AI
+Anthropic Claude API (Messages API) with structured outputs
+Crash/error
+Sentry or equivalent
+Browser extension
+Manifest V3 + TypeScript
+Purchases remain open: RevenueCat is faster for cross-platform entitlement plumbing; direct StoreKit/Google Billing provides more first-hand platform-learning value. Decide intentionally based on the experiment goal.
+22. Analytics and experiment instrumentation
+
+Because this project is partly a shipping/marketing learning exercise, funnel analytics are product requirements, not cleanup work.
+Funnel events
+STORE_VIEW
+INSTALL
+OPEN
+SYNC_STARTED
+PROVIDER_CONNECTED
+LEAGUE_SELECTED
+AUTHORITY_SELECTED
+NOTIFICATIONS_ENABLED
+PURCHASE_STARTED
+PURCHASE_COMPLETED
+FIRST_TRIGGER
+FIRST_RECOMMENDATION
+FIRST_AUTOMATIC_ACTION
+
+Product metrics
+Provider sync success rate
+Transaction success rate
+False-trigger rate
+Time from status event to action
+AI calls per user
+AI cost per user / season
+Suggestion approval rate
+Manual override rate
+Automation-disable rate
+Weekly active users
+Retention
+Crash-free sessions
+Support incidents
+Marketing metrics
+Cost per store visit
+Cost per install
+Cost per purchase
+Conversion by creative
+Conversion by platform
+23. Pricing and monetization — intentionally unresolved
+
+The experiment should launch with a paid value proposition, but exact packaging should wait until the AI benchmark and connector capability matrix are measured.
+Current conceptual structure
+Base purchase around $4.99: league sync, monitoring, alerts, Ask Me, activity history, and possibly deterministic Bench Protection. Whether Bench Protection is included in base remains open.
+AI upgrade / season unlock: AI Injury + Waiver Watch, AI Rescue, roster-fit analysis, and automatic immediate free-agent evaluation/transactions within user permissions. Exact price remains open.
+Advertising
+Do not ship banner or interstitial advertising in V1. It adds visual noise, privacy/SDK complexity, and muddies the experiment. Paid acquisition advertising and later sponsorship/affiliate options are separate and can be tested without degrading the core app.
+24. Brand and visual system
+
+HangoverBot should inherit TurboLabs/TurboTips visual DNA without looking like a hospitality admin tool. The references supplied with this handoff establish the family resemblance: dark navy foundation, bright orange energy, vivid purple as the principal digital accent, clean white surfaces, rounded cards, and direct high-contrast typography.
+Approximate working palette — confirm in production
+Token
+Approx. hex
+Use
+Midnight
+#070A24
+Primary background / navigation
+Deep navy
+#0C102F
+Cards on dark surfaces
+Turbo purple
+#6726E8
+Primary digital accent
+Electric purple
+#7B2FF7
+Gradient / highlight
+Turbo orange
+#FF7A00
+Energy accent / primary campaign detail
+Action blue
+#2962F3
+Secondary management/action accent
+Paper
+#F6F7FB
+Light app surfaces
+Product tone
+Marketing can be irreverent and lean into the name. Transactional UI should be calmer. The joke gets attention; reliable behavior earns permission to touch a fantasy roster.
+Marketing: “QUESTIONABLE — Injury Status. Life Decisions.”
+Product: “Your starter was ruled OUT. I moved your highest-ranked eligible bench player into RB2.”
+Friendly recurring line, used sparingly: “Got you, bro.”
+RosterBuddy remains a possible mascot name but is not required for V1. The robot can exist visually without a formal proper name.
+25. Anthropic model attribution and product branding
+
+Anthropic attribution is optional for an API-powered app. The app does not need a “Powered by Claude” badge to use the API. If the product chooses to credit the underlying model provider, keep HangoverBot/TurboLabs clearly primary, be precise about what is powered by Claude, and avoid implying that Anthropic created or endorses the app.
+Recommended implementation
+No Anthropic or Claude branding on the main HangoverBot home screen. If desired, place a small line in Settings → About such as “AI features powered by Claude.” This gives transparent credit without making the model provider part of the consumer brand.
+
+Do not put Anthropic, Claude, or a model name into the app/product/company name. If a specific model is mentioned in technical documentation, keep it accurate and updateable because routing may change.
+Reference: Anthropic's brand and trademark guidelines (confirm the current page on anthropic.com before launch)
+26. Existing Megacast work to reuse
+
+Treat the existing rr-draft-megacast project as a source of ESPN integration knowledge and proven session/browser mechanics, not as the HangoverBot application itself.
+The prior project had a local environment file, a login/session workflow, league scripts, ESPN handling, and live practice-draft validation. For the new build, audit the following first:
+package.json
+scripts/login.mjs
+scripts/league-info.mjs
+ESPN adapter/client modules
+.env.example
+session persistence and refresh behavior
+player/team ID normalization
+request/response fixtures
+Implementation rule
+Create HangoverBot as a new product repository / monorepo. Extract or adapt reusable connector logic; do not make the broadcast codebase the product foundation.
+
+27. Critical V1 test matrix
+
+Scenario
+Setup
+Expected result
+Obvious bench rescue
+Starter OUT; one eligible bench replacement
+0 AI calls; legal swap; receipt
+Multiple bench replacements
+Three eligible; user has explicit order
+0 AI calls; respect user order
+Season-ending injury
+Confirmed season-ending; automation enabled
+Auto-drop; open slot; replacement evaluation
+Normal IR injury
+IR eligible; open IR
+Move to IR; do not drop; open slot
+Immediate free agent
+Best candidate immediately addable; auto-add enabled
+Validate; add; repair lineup; receipt
+Waiver player
+Best candidate is on waivers
+Recommend add/drop + FAAB/priority; no claim submitted
+Stale candidate
+Candidate acquired by another manager before execution
+Abort; refresh; reevaluate safely
+Player locks
+Replacement game begins before execution
+Do not attempt illegal write; reevaluate
+Duplicate injury feed
+Same status report arrives repeatedly
+One logical event; no duplicate AI spend/write
+Provider unavailable
+Read/write temporarily fails
+No blind writes; safe retry strategy; user informed when needed
+Manual user change
+Roster changes after plan generated
+Version mismatch; discard stale plan; reevaluate
+Cross-device
+Configure on one surface, open another
+Same leagues, rules, history, entitlement
+28. V1 definition of done
+
+Install on iOS or Android.
+Connect at least one supported fantasy provider and select a league/team.
+Choose an authority level and configure simple protection rules.
+Receive meaningful injury/game-time alerts.
+Automatically make a legal bench replacement when authorized.
+Call AI only for an actually ambiguous/meaningful roster decision.
+Allow an immediate free-agent add in AI Rescue when authorized.
+Recommend waiver/FAAB action without autonomously submitting the claim.
+Show a clear activity receipt for every action.
+Review/manage the same configuration from the web.
+Purchase and restore the relevant entitlement.
+Survive app/server restarts without losing protection state.
+Log enough data to measure reliability, AI usage, and per-user cost.
+Scope guard
+Anything beyond this list requires a concrete reason. The V1 should remain a small, trustworthy utility rather than expanding into a full fantasy platform.
+
+29. Open questions
+
+Final HangoverBot vs RosterBots naming relationship.
+Whether RosterBuddy becomes the official mascot name.
+Paid download vs 2026 non-renewing access.
+Whether deterministic Bench Protection is included in the base $4.99 product.
+AI add-on price and whether it is season-scoped.
+One league vs multiple/unlimited leagues at each price level.
+Football injury/news/projection data provider(s).
+Exact data and algorithm behind Safe vs Upside replacement preferences.
+Provider-by-provider launch capability matrix.
+Exact moment an anonymous user must claim an account.
+RevenueCat vs direct StoreKit / Google Billing.
+Final consumer label for AI Optimize / AI Rescue.
+Whether dynasty/keeper formats are first-release scope.
+Maximum automatic transactions per day/week.
+Minimum AI confidence for unattended immediate free-agent transactions.
+Whether Claude Opus 5.5 exists in production routing or only benchmark/admin escalation.
+Whether sponsorship is tested during the 2026 season.
+Whether to show a small “AI features powered by Claude” credit in Settings → About.
+30. Recommended build order
+
+Phase
+Exit target
+Phase 0 — Domain spike
+Define normalized league/team/roster/player/action types. Prove one provider read flow end-to-end. Select football data source shortlist.
+Phase 1 — Product shell
+Expo mobile + Next web + Supabase auth/database + anonymous-user identity + shared design tokens.
+Phase 2 — Rules engine
+Eligibility, lock state, bench repair, IR behavior, season-ending auto-drop, drop priorities, event deduplication.
+Phase 3 — Event monitor
+Football status ingest, roster relevance lookup, kickoff scheduler, notification pipeline.
+Phase 4 — Provider writes
+Lineup swap, IR, add/drop, write verification, transaction receipts, feature flags.
+Phase 5 — AI benchmark
+Run controlled scenarios against Claude Haiku 4.5 / Sonnet 5.5 / Opus 5.5 and a single model at low effort; measure quality, tokens, latency, and cost.
+Phase 6 — AI Rescue
+Structured decision packet, routing, confidence gates, permission engine, free-agent rescue, waiver recommendations.
+Phase 7 — Commerce + analytics
+Purchases/entitlements, funnel analytics, crash reporting, cost dashboard.
+Phase 8 — Store hardening
+Screenshots, privacy disclosures, support path, TestFlight/Play internal testing, release checklist.
+
+A. Brand reference assets
+
+The following supplied TurboLabs and TurboTips assets are embedded for visual reference. They are references for family resemblance, not a requirement to reproduce every UI detail literally.
+TurboLabs primary mark
+
+Reference cues: white forward-leaning TURBO wordmark, turbine/impeller device, vivid purple LABS label, and orange speed/energy accent. HangoverBot should feel like it belongs under the same parent brand without simply swapping the word “TIPS” for “BOT.”
+TurboTips UI system reference
+
+Reference cues: midnight/navy shell; bright purple action state; orange Turbo energy accent; white/light content cards; clear hierarchy; rounded cards and controls; mobile-first simplicity paired with a more information-dense management web surface.
+HangoverBot adaptation
+Keep the dark/navy foundation and purple/orange identity.
+Use fewer cards and metrics than TurboTips; HangoverBot should feel lighter and more consumer-oriented.
+Primary state should be reassuring: YOU’RE COVERED.
+Reserve orange for energy, campaign language, warnings, and decisive actions rather than flooding every screen.
+Use purple for primary interactive states and AI-enabled/protection accents.
+Avoid sports-league/team marks in generic product mockups; use neutral player/team presentation until licensed data/asset strategy is finalized.
+B. Current Anthropic references used in this handoff
+
+Claude models overview: https://platform.claude.com/docs/en/about-claude/models/overview
+Claude API pricing: https://platform.claude.com/docs/en/about-claude/pricing
+Effort and thinking: https://platform.claude.com/docs/en/build-with-claude/effort
+Pricing/model information is time-sensitive. Treat model selection and cost tables as configuration and re-check before production launch or any public pricing commitment.

@@ -1,0 +1,69 @@
+# Supabase CLI configuration. Local development reads all of it; the hosted project
+# takes the [functions.*] settings on `supabase functions deploy`. The auth settings
+# here are for local runs: docs/DEPLOY.md sets them on the hosted project.
+
+project_id = "hangoverbot"
+
+[auth]
+enabled = true
+# The app starts every user as an anonymous session; claiming the account by email
+# code is what unlocks automatic moves.
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+# The claim screen asks for a 6-digit code.
+otp_length = 6
+otp_expiry = 3600
+
+# The claim uses updateUser({ email }) then verifyOtp({ type: "email_change" }), so the
+# change-email message must carry the code, not just a link.
+[auth.email.template.email_change]
+subject = "Your RosterBots code"
+content_path = "./supabase/templates/email_change.html"
+
+# Signing back in to a claimed account (a new phone, a reinstall) uses
+# signInWithOtp({ shouldCreateUser: false }) then verifyOtp({ type: "email" }), which sends
+# the magic-link message. It must carry the code too.
+[auth.email.template.magic_link]
+subject = "Your RosterBots sign-in code"
+content_path = "./supabase/templates/magic_link.html"
+
+# verify_jwt is off for every function, on purpose. The gateway's check knows only the
+# legacy JWT secret; this project uses the newer API keys (sb_publishable_ / sb_secret_)
+# and may sign sessions with the newer keys too, and then the gateway would refuse valid
+# sessions with "Invalid JWT" before the function ever ran. Each user function checks the
+# caller itself (_lib/auth.ts requireUser: auth.getUser on the bearer token, 401
+# unauthorized otherwise), and check takes x-cron-secret, so nothing is lost by turning
+# the gateway check off and a whole class of Saturday failures is avoided.
+# Each function reads its own deno.json, written by scripts/build-functions.ts.
+[functions.espn-connect]
+verify_jwt = false
+import_map = "./functions/espn-connect/deno.json"
+
+[functions.connection-setup]
+verify_jwt = false
+import_map = "./functions/connection-setup/deno.json"
+
+[functions.read]
+verify_jwt = false
+import_map = "./functions/read/deno.json"
+
+[functions.decide]
+verify_jwt = false
+import_map = "./functions/decide/deno.json"
+
+[functions.swap]
+verify_jwt = false
+import_map = "./functions/swap/deno.json"
+
+# Called by pg_cron, which has no user JWT at all. It checks x-cron-secret itself.
+[functions.check]
+verify_jwt = false
+import_map = "./functions/check/deno.json"
+
+[functions.delete-account]
+verify_jwt = false
+import_map = "./functions/delete-account/deno.json"
