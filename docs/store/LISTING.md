@@ -45,7 +45,7 @@ Developer name field: `TurboLabs` (9). [VERIFY] the developer-name character lim
 **3,937 characters with LF line endings (3,978 with CRLF: Play counts Unicode characters, so paste with LF).** Only 63 characters of room remain; cut before adding. Replace `CONTACT_EMAIL` before pasting.
 
 ```
-RosterBots: Roster Protection, by TurboLabs.
+RosterBots: Hangover Protection, by TurboLabs.
 
 Fantasy help for real life. RosterBots watches the starters on your ESPN fantasy football team and makes sure a player who cannot play is not still in your lineup when his game kicks off.
 
