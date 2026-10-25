@@ -137,7 +137,7 @@ a `deno.json` that maps only `@supabase/supabase-js`. Deploy those two files per
 to the engine needs both `check` and `decide` redeployed together: an approval re-runs the
 engine and refuses a proposal the other engine would not make.
 
-For each of `espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`, read
+For each of `espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`, `delete-account`, read
 `supabase/.bundle/<name>/manifest.json`, read every file it lists, and call:
 
 ```

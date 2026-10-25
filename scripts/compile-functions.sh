@@ -6,8 +6,10 @@
 # its deno.json as the import map, verify_jwt false (docs/DEPLOY.md).
 set -e
 cd "$(dirname "$0")/.."
-for fn in check connection-setup decide espn-connect read swap; do
-  B="$PWD/supabase/.bundle/$fn"
+# Every function the bundler wrote, so a new one is never left out.
+for B in "$PWD"/supabase/.bundle/*/; do
+  B="${B%/}"
+  fn="$(basename "$B")"
   O="supabase/.bundle-min/$fn"
   mkdir -p "$O"
   npx -y esbuild "$B/index.ts" --bundle --format=esm --platform=neutral --target=esnext \
