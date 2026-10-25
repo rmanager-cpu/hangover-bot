@@ -97,10 +97,11 @@ unreachable from the build and fix sessions.
    **cookies and SWIDs stripped**, and take `WRITE_LINEUP` out of `unverified` once a real
    swap has been seen.
 
-**Pending owner decisions** (record answers in `docs/DECISIONS.md`): that adds, drops and IR
-are recommendation-only too, and the kickoff-check cutoffs. "Live" is decided: the owner's
-own league this season. Do not change AI Rescue's execution behaviour until the autonomy line
-is confirmed; the beta does not offer it.
+**Pending owner decisions** (record answers in `docs/DECISIONS.md`): the AI provider
+(Anthropic recorded, GLM 5.3 preferred; build provider-neutral meanwhile), who AI Native may
+drop, and the in-app names for the three levels. Decided Oct 25: three levels, Alert Me, Auto
+Protect (automatic from T-90) and AI Native (acts at T-15, may add and drop on its own). "Live"
+is decided: the owner's own league this season.
 
 Not started: `packages/ai`, `packages/ui`, `apps/web`, `apps/worker`, `apps/extension`,
 Sentry.
