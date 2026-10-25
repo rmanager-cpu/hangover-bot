@@ -1,2 +1,2 @@
-# hangover-bot
-HangOver Bot
+# Roster-bot
+Roster Bot
