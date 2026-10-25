@@ -5,8 +5,9 @@ const MIDNIGHT = "#070A24";
 const ICON_NAVY = "#000523";
 const TURBO_ORANGE = "#FF7A00";
 
-// Permanent once in App Store Connect (DECISIONS.md, 2026-10-02).
-const APP_ID = "com.turbolabs.hangoverbot";
+// Permanent once in Google Play or App Store Connect: the owner's domain, rosterbots.com,
+// backwards (DECISIONS.md, 2026-10-25).
+const APP_ID = "com.rosterbots.app";
 
 // The project the owner created on expo.dev. EAS refuses to build unless the slug
 // matches that project's slug; the name people see is still RosterBots.

@@ -1,6 +1,6 @@
 # Google Play submission drafts (generated 2026-10-09)
 
-Drafts for the first Google Play submission of RosterBots (`com.turbolabs.hangoverbot`,
+Drafts for the first Google Play submission of RosterBots (`com.rosterbots.app`,
 version 0.1.0, Expo SDK 57), written from the code on branch `claude/vigilant-fermat-qooyqm`
 at `ec56b08` (which carries every Oct 4 fix, including the two app-side commits `34af318`
 and `5c25887`) and from Google Play, Expo and Disney pages fetched the same day. They are

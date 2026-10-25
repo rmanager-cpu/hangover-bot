@@ -1,4 +1,4 @@
-# Google Play Data safety form: RosterBots (com.turbolabs.hangoverbot 0.1.0)
+# Google Play Data safety form: RosterBots (com.rosterbots.app 0.1.0)
 
 Basis: the code audit of branch `claude/vigilant-fermat-qooyqm` at `ec56b08`, which includes every Oct 4 commit, re-read file by file on 2026-10-09. The two Oct 4 commits that touch `apps/mobile` are display-only: `5c25887` adds an on-screen problem row in `apps/mobile/src/lib/roster.ts` ("ESPN projects {name} for zero points") and `34af318` changes Home copy before the first check. Neither adds collection, storage or transfer, so no answer below depends on which Oct 4 state is built. Form structure and definitions were re-read on 2026-10-09 from https://support.google.com/googleplay/android-developer/answer/10787469 and https://support.google.com/googleplay/android-developer/answer/13327111.
 

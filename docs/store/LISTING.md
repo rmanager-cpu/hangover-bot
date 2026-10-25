@@ -2,7 +2,7 @@
 
 Drafted 2026-10-09 and re-checked against the code the same day: `docs/PRODUCT.md`, `docs/BETA.md` (Mobile section and automation rule), `docs/DECISIONS.md` (through the Oct 4 decisions), `docs/brand/README.md`, `apps/mobile/README.md`, `apps/mobile/app.config.ts`, the in-app copy in `apps/mobile/app/protection.tsx`, `apps/mobile/app/(tabs)/settings.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/activity.tsx`, `apps/mobile/src/Proposals.tsx`, and the service paths `packages/service/src/decide.ts` and `protect.ts`. Every claim below is one the beta code keeps; nothing promises AI, free agents, other hosts, or iOS. Character counts were measured by script (ASCII only, so Play's count will match).
 
-Package: `com.turbolabs.hangoverbot` · versionName `0.1.0` · Expo SDK 57 · Free · no ads · no in-app purchases.
+Package: `com.rosterbots.app` · versionName `0.1.0` · Expo SDK 57 · Free · no ads · no in-app purchases.
 
 Play limits confirmed on 2026-10-09 from support.google.com/googleplay/android-developer: app name 30, short description 80, full description 4,000 (answer/9859152); release notes 500 Unicode characters per language (answer/9859348); icon 512x512 32-bit PNG max 1024 KB, feature graphic 1024x500 JPEG/24-bit PNG no alpha and **required**, screenshots 320-3840 px per side with the long side at most 2x the short side, 2 minimum, 8 per device type, at least four at 1080 px recommended (answer/9866151); five tags maximum and Sports is an application category with "fantasy team management" as an example (answer/9859673); title "must be 30 characters or less", no emoji or repeated special characters, no ranking or deal wording, no anonymous testimonials (metadata policy, answer/9898842).
 
@@ -42,7 +42,7 @@ Developer name field: `TurboLabs` (9). [VERIFY] the developer-name character lim
 
 ## 3. Full description (limit 4,000; plain text, no markup)
 
-**3,937 characters with LF line endings (3,978 with CRLF: Play counts Unicode characters, so paste with LF).** Only 63 characters of room remain; cut before adding. Replace `CONTACT_EMAIL` before pasting.
+**3,940 characters with LF line endings (Play counts Unicode characters, so paste with LF).** 60 characters of room remain; cut before adding.
 
 ```
 RosterBots: Hangover Protection, by TurboLabs.
@@ -86,7 +86,7 @@ NOT A RESEARCH APP
 RosterBots does not run your team, rank players or work the waiver wire. It does one thing: it keeps a player who cannot play out of your lineup when you are not looking.
 
 EARLY ACCESS
-Version 0.1.0 is a beta, first used in a single league. Things can go wrong; every outcome is receipted and nothing is hidden from you. Questions and feedback: CONTACT_EMAIL.
+Version 0.1.0 is a beta, first used in a single league. Things can go wrong; every outcome is receipted and nothing is hidden from you. Questions and feedback: support@rosterbots.com.
 ```
 
 Where each claim comes from (so the text can be re-checked when the code changes):
@@ -129,7 +129,7 @@ Alternates: `First beta: in-app ESPN sign-in, roster check, test swap, Sunday be
 
 - **App category:** Sports (Application, not Game). Confirmed: Google's category list gives "fantasy team management" as a Sports example.
 - **Tags** (maximum five, confirmed): pick from whatever the Console offers. [VERIFY] the names: "Fantasy sports", "Football", "Sports", "Tools", "Productivity" are guesses; Google's page lists no tag names and the last three appear there only as categories.
-- **Store listing contact email (required, shown on the listing: confirmed):** `CONTACT_EMAIL` — use a TurboLabs or app-specific address the owner is happy to have public, not the personal Gmail.
+- **Store listing contact email (required, shown on the listing: confirmed):** `support@rosterbots.com` (forwards to the owner; never the personal Gmail).
 - **Website (optional but recommended):** the same host as the privacy policy page once it exists (none exists today: `docs/brand/README.md:98`).
 - **Privacy policy URL:** required before any closed/open/production track; not in the repo yet. Out of scope of this draft but blocks the listing.
 - **Ads:** No. **In-app purchases:** None. **Contains ads declaration:** No.
@@ -193,14 +193,13 @@ Promo video (YouTube URL): optional ("not required", confirmed), skip. TV / Wear
 ## 7. Play Console fields outside the listing that this draft touches
 
 - **Developer name:** TurboLabs.
-- **Contact email:** `CONTACT_EMAIL` (public, confirmed).
+- **Contact email:** `support@rosterbots.com` (public, confirmed).
 - **App access / Sign-in details:** the listing says sign-in happens on ESPN's own page inside the app; the reviewer will need an ESPN account with a league (not covered here).
 - **Privacy policy and Data deletion URL:** not in the repo; required before closed testing. The full description's "Forget my ESPN sign-in" line describes credential deletion (credentials, leagues, moves, receipts and the Vault secret), not account deletion: the push-token row and the auth user survive. Do not reword it to claim account deletion until that control exists.
 
 ## 8. Notes for the owner
 
-- **Contact email** is the placeholder `CONTACT_EMAIL` throughout; replace it with a real
-  address before pasting (not a personal inbox you don't want public).
+- **Contact email** is `support@rosterbots.com`, in the description too.
 - **"A beta, first used in a single league"** in the full description is written for the
   moment of upload, after your own league has used the app on a phone. As of this draft the
   app has never run on a real phone (an emulator build exists); reword if you list before that.

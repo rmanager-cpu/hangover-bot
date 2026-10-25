@@ -1,6 +1,6 @@
 # RosterBots phone app (beta)
 
-Expo (SDK 57), TypeScript, expo-router. Package and bundle id `com.turbolabs.hangoverbot`.
+Expo (SDK 57), TypeScript, expo-router. Package and bundle id `com.rosterbots.app`.
 The contract it is built to is the "Mobile" section of `docs/BETA.md`.
 
 The app never talks to ESPN on its own and never holds an ESPN credential after sign-in. It

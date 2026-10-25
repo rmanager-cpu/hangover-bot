@@ -1,6 +1,6 @@
 # RosterBots: Play Console declarations draft (2026-10-09, corrected)
 
-Scope: the four content items the task asked for. Everything else in App content (privacy policy URL, Data safety, account deletion, target audience) is listed in the other agents' research and is only cross-referenced here. Package `com.turbolabs.hangoverbot`, version 0.1.0, Expo SDK 57, branch `claude/vigilant-fermat-qooyqm` at `ec56b08`.
+Scope: the four content items the task asked for. Everything else in App content (privacy policy URL, Data safety, account deletion, target audience) is listed in the other agents' research and is only cross-referenced here. Package `com.rosterbots.app`, version 0.1.0, Expo SDK 57, branch `claude/vigilant-fermat-qooyqm` at `ec56b08`.
 
 Play Console path for every section below: **Play Console > (your app) > Policy and programs > App content** (Google's pages print it as both "Policy > App content" and "Policy and programs > App content"; the Dashboard "Set up your app" checklist links to the same forms).
 

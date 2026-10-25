@@ -14,7 +14,7 @@ inside the app (none exists yet: docs/brand/README.md:98).
 **Effective date:** [PLACEHOLDER: date this page goes live]
 **Last updated:** [PLACEHOLDER]
 
-This is the privacy policy for the RosterBots mobile app (Android package `com.turbolabs.hangoverbot`), made by TurboLabs. It explains what we collect, why, where it goes, how long we keep it, and how to delete it. It is written in plain English on purpose. If anything here is unclear, email us at the address in the Contact section.
+This is the privacy policy for the RosterBots mobile app (Android package `com.rosterbots.app`), made by TurboLabs. It explains what we collect, why, where it goes, how long we keep it, and how to delete it. It is written in plain English on purpose. If anything here is unclear, email us at the address in the Contact section.
 
 RosterBots is not affiliated with, endorsed by, or sponsored by ESPN, The Walt Disney Company, or the NFL.
 
@@ -24,7 +24,7 @@ RosterBots is not affiliated with, endorsed by, or sponsored by ESPN, The Walt D
 
 RosterBots is made by **TurboLabs** [VERIFY: Google Play's User Data policy is satisfied because this page names the app; the open question is which legal name stands behind "TurboLabs". For a personal Play developer account Google shows the account holder's legal name on the listing, so state that name here too if it differs].
 
-Privacy contact: **[PLACEHOLDER: privacy@ email address]**
+Privacy contact: **privacy@rosterbots.com**
 Postal address: [VERIFY: whether a postal address is required where you operate; Google Play shows a full address only for monetising accounts]
 
 ---
@@ -214,7 +214,7 @@ We will post changes on this page and update the date at the top. If a change me
 ## 13. Contact
 
 **TurboLabs**
-Privacy questions and deletion requests: **[PLACEHOLDER: email address]**
+Privacy questions and deletion requests: **privacy@rosterbots.com**
 [VERIFY: postal address, if required]
 
 ---

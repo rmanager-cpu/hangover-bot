@@ -269,7 +269,7 @@ carry `ok`. `season` defaults to 2026.
 
 ## Mobile (`apps/mobile`)
 
-Expo (latest SDK), TypeScript, expo-router. Package / bundle id `com.turbolabs.hangoverbot`.
+Expo (latest SDK), TypeScript, expo-router. Package / bundle id `com.rosterbots.app` (was `com.turbolabs.hangoverbot` until Oct 25).
 Brand from the handoff: Midnight `#070A24`, Deep navy `#0C102F`, Turbo purple `#6726E8`,
 Electric purple `#7B2FF7`, Turbo orange `#FF7A00`, Action blue `#2962F3`, Paper `#F6F7FB`.
 
