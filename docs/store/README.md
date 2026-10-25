@@ -21,10 +21,11 @@ proposals that are not implemented in code, and the children/your-rights section
 depend on where the owner and users are). `DATA-SAFETY.md` should be checked by the same
 person so the form and the policy say the same thing.
 
-Not covered by these drafts and needed before closed testing (none exists in the code):
-a hosted privacy-policy page and an in-app link to it, a prominent disclosure-and-consent
-screen before the ESPN WebView, an in-app "Delete my account" plus a public deletion-request
-page, and Supabase custom SMTP (or invited tester emails) so claim codes arrive.
+Still needed before closed testing: the privacy policy hosted at a public address with an
+in-app link to it, the deletion page (`legal/delete-account.html`) hosted, and a real email
+sender for Supabase (or invited tester emails) so claim codes arrive. Done since these drafts:
+the in-app Delete my account (Oct 10) and the disclosure-and-consent screen before the ESPN
+sign-in (Oct 25, `apps/mobile/src/EspnConsent.tsx`).
 
 ## Owner's Play Console checklist
 

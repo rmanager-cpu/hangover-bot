@@ -9,6 +9,7 @@ import { Alert, BackHandler, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
 import type { WebViewHttpErrorEvent } from "react-native-webview/lib/WebViewTypes";
+import { EspnConsent } from "../../src/EspnConsent";
 import { api, ApiError, messageOf } from "../../src/lib/api";
 import { useData } from "../../src/lib/data";
 import { forgetEspnSession, readEspnSession, type EspnSession } from "../../src/lib/espnSession";
@@ -76,16 +77,22 @@ export default function EspnSignIn() {
   const [uri, setUri] = useState(LOGIN_URL);
   const [webKey, setWebKey] = useState(0);
   const [canGoBack, setCanGoBack] = useState(false);
+  // Nothing of ESPN's loads, and nothing is read, until the user taps Agree (EspnConsent).
+  const [agreed, setAgreed] = useState(false);
   const [phase, setPhase] = useState<Phase>({ kind: "preparing" });
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const busy = useRef(false);
 
   // Start signed out, so an expired session left on the phone is never handed over as new.
+  useEffect(() => {
+    if (!agreed) return;
+    forgetEspnSession().finally(() => setPhase({ kind: "signing-in" }));
+  }, [agreed]);
+
   // And leave signed out: a handover that failed for a passing reason keeps ESPN's session
   // in the store while this screen is up, so going back must not leave it on the phone.
   useEffect(() => {
-    forgetEspnSession().finally(() => setPhase({ kind: "signing-in" }));
     return () => {
       forgetEspnSession().catch(() => {});
     };
@@ -191,6 +198,14 @@ export default function EspnSignIn() {
     if (e.nativeEvent.statusCode >= 400 && loginFailed(e.nativeEvent.url)) setUri(FALLBACK_URL);
   };
 
+  if (!agreed) {
+    return (
+      <EspnConsent
+        onAgree={() => setAgreed(true)}
+        onDecline={() => (router.canGoBack() ? router.back() : router.replace("/welcome"))}
+      />
+    );
+  }
   if (phase.kind === "preparing") return <Loading />;
 
   return (

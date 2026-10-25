@@ -11,7 +11,10 @@ reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functi
 
 1. First launch: an anonymous Supabase session, nothing to fill in.
 2. Welcome, **Sync a League**, then the host list (ESPN; the rest say "Coming soon").
-3. **ESPN sign-in inside the app.** ESPN's own login page in a WebView
+3. **ESPN sign-in inside the app.** First a disclosure screen (`src/EspnConsent.tsx`, Google Play's
+   prominent disclosure): what the ESPN session is, how it is kept and used, and **Agree and
+   continue**; nothing of ESPN's loads before that tap, and it is shown on every sign-in. Then
+   ESPN's own login page in a WebView
    (`https://www.espn.com/login`, or `https://fantasy.espn.com/football/` if that page won't
    load). Every 2 seconds the app looks in the native cookie store for `espn_s2` (the WebKit
    store on iOS). When it is there, `SWID` and `espn_s2` go to `espn-connect`, once. They are

@@ -72,7 +72,7 @@ Related App content declarations (not part of Data safety but asked on the same 
 
 1. Publish the privacy policy page (public HTML, names TurboLabs/RosterBots, a contact email that accepts deletion requests, names Supabase, Expo, Google FCM, ESPN/Disney, retention including technical logs, "Forget my ESPN sign-in"). Enter it in App content > Privacy policy and link it in the app (Welcome under "Sync a League" and Settings > About).
 2. **Delete account shipped 2026-10-10** (in-app: Settings > "Delete my account"; the `delete-account` Edge Function). Still needed: host `legal/delete-account.html` at a public URL and enter it in Data deletion, and run the cascade and Vault trigger once against the hosted project to confirm they behave as the migration says.
-3. Add the disclosure-and-Agree screen before the ESPN WebView (User Data policy, flag A).
+3. **Disclosure-and-Agree screen shipped 2026-10-25** (`apps/mobile/src/EspnConsent.tsx`), shown before ESPN's page loads on every sign-in (User Data policy, flag A). Keep its wording in step with the privacy policy.
 4. Confirm the merged AndroidManifest permissions on the first AAB (Play Console > App bundle explorer > Permissions). Expected: INTERNET (Expo template) and RECEIVE_BOOT_COMPLETED (expo-notifications, confirmed on docs.expo.dev); VIBRATE and POST_NOTIFICATIONS [VERIFY, not stated on Expo's page]. None are in Play's sensitive list, so no Permissions declaration is expected unless the build adds something unexpected.
 5. Then fill Data safety with sections 1 to 4 above, checking section 3's question labels against the live form.
 

@@ -274,8 +274,9 @@ Brand from the handoff: Midnight `#070A24`, Deep navy `#0C102F`, Turbo purple `#
 Electric purple `#7B2FF7`, Turbo orange `#FF7A00`, Action blue `#2962F3`, Paper `#F6F7FB`.
 
 Flow: anonymous Supabase session on first launch → Welcome ("RosterBots. Fantasy help for
-real life." / **Sync a League**) → provider list (ESPN; others "Coming soon") → **ESPN sign-in
-in a WebView**; when an `espn_s2` cookie exists, read `SWID` + `espn_s2` from the native cookie
+real life." / **Sync a League**) → provider list (ESPN; others "Coming soon") → **disclosure
+and consent** (Google Play's prominent disclosure; Agree and continue, on every sign-in) →
+**ESPN sign-in in a WebView**; when an `espn_s2` cookie exists, read `SWID` + `espn_s2` from the native cookie
 store (`@react-native-cookies/cookies`, WebKit store on iOS), falling back to `document.cookie`
 → `espn-connect` → league list (manual league-id entry if lookup failed) → `connection-setup`
 → **What we read** (players, slots, statuses, kickoffs, locks, plus **Test swap**) →
