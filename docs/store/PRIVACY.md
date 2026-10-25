@@ -24,7 +24,7 @@ RosterBots is not affiliated with, endorsed by, or sponsored by ESPN, The Walt D
 
 RosterBots is made by **TurboLabs** [VERIFY: Google Play's User Data policy is satisfied because this page names the app; the open question is which legal name stands behind "TurboLabs". For a personal Play developer account Google shows the account holder's legal name on the listing, so state that name here too if it differs].
 
-Privacy contact: **privacy@rosterbots.com**
+Privacy contact: **support@rosterbots.com**
 Postal address: [VERIFY: whether a postal address is required where you operate; Google Play shows a full address only for monetising accounts]
 
 ---
@@ -214,7 +214,7 @@ We will post changes on this page and update the date at the top. If a change me
 ## 13. Contact
 
 **TurboLabs**
-Privacy questions and deletion requests: **privacy@rosterbots.com**
+Privacy questions and deletion requests: **support@rosterbots.com**
 [VERIFY: postal address, if required]
 
 ---
