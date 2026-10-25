@@ -24,7 +24,7 @@ fall back to:
 
 `RosterBots` — 10 characters
 
-Developer name field: `TurboLabs` (9). [VERIFY] the developer-name character limit (not on the pages fetched; commonly 50). Google still shows the owner's legal name on a personal account.
+Developer name field: `Turbo Devs` (10). [VERIFY] the developer-name character limit (not on the pages fetched; commonly 50). Google still shows the owner's legal name on a personal account.
 
 ---
 
@@ -42,10 +42,10 @@ Developer name field: `TurboLabs` (9). [VERIFY] the developer-name character lim
 
 ## 3. Full description (limit 4,000; plain text, no markup)
 
-**3,940 characters with LF line endings (Play counts Unicode characters, so paste with LF).** 60 characters of room remain; cut before adding.
+**3,941 characters with LF line endings (Play counts Unicode characters, so paste with LF).** 59 characters of room remain; cut before adding.
 
 ```
-RosterBots: Hangover Protection, by TurboLabs.
+RosterBots: Hangover Protection, by Turbo Devs.
 
 Fantasy help for real life. RosterBots watches the starters on your ESPN fantasy football team and makes sure a player who cannot play is not still in your lineup when his game kicks off.
 
@@ -192,7 +192,7 @@ Promo video (YouTube URL): optional ("not required", confirmed), skip. TV / Wear
 
 ## 7. Play Console fields outside the listing that this draft touches
 
-- **Developer name:** TurboLabs.
+- **Developer name:** Turbo Devs.
 - **Contact email:** `support@rosterbots.com` (public, confirmed).
 - **App access / Sign-in details:** the listing says sign-in happens on ESPN's own page inside the app; the reviewer will need an ESPN account with a league (not covered here).
 - **Privacy policy and Data deletion URL:** not in the repo; required before closed testing. The full description's "Forget my ESPN sign-in" line describes credential deletion (credentials, leagues, moves, receipts and the Vault secret), not account deletion: the push-token row and the auth user survive. Do not reword it to claim account deletion until that control exists.

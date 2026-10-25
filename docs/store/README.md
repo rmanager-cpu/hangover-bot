@@ -41,7 +41,7 @@ cited official page; **likely** means the page does not address the exact case.
 2. **Verify identity**: have a government ID photo on the phone, a card in the same legal
    name, and verify the contact phone and email by one-time code. Budget up to 5 days before
    the first upload is accepted for review. Expect the owner's **legal name**, country and
-   developer email to be shown publicly on the listing; "TurboLabs" can be the display name
+   developer email to be shown publicly on the listing; "Turbo Devs" can be the display name
    but does not replace the legal name on a personal account.
    Source: https://support.google.com/googleplay/android-developer/answer/13628312 (verified)
 3. **Verify an Android device**: Console Home page task "Verify that you have access to an
@@ -74,7 +74,7 @@ cited official page; **likely** means the page does not address the exact case.
    Source: https://support.google.com/googleplay/android-developer/answer/10787469 (verified)
 9. **Account deletion**: ship an in-app "Delete my account" path (an in-app link to the web
    page is acceptable) and host a public deletion-request page naming RosterBots or
-   TurboLabs as on the listing; enter its URL in the Data deletion section of the Data
+   Turbo Devs as on the listing; enter its URL in the Data deletion section of the Data
    safety form. "Forget my ESPN sign-in" alone does not satisfy this (the auth user and the
    push-token row survive). The app is treated as in scope because the email claim creates
    an OTP-verified account; the anonymous session is not an exemption Google offers.

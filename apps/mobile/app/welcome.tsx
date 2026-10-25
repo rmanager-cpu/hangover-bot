@@ -1,10 +1,8 @@
-// The front door, as the brand sheet draws it: the lockup, the line, the robot, and one
-// orange button. The three promises sit behind "How it works" so the screen stays short.
+// The front door: the lockup (it carries the robot), the line, and one orange button. The three promises sit behind "How it works" so the screen stays short.
 
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import { ROBOT_FLYING } from "../src/brand";
+import { StyleSheet, Text, View } from "react-native";
 import { CheckDisc } from "../src/icons";
 import { color, font, space } from "../src/theme";
 import { Body, Button, Card, Divider, Label, Lockup, Muted, Screen, Title } from "../src/ui";
@@ -24,8 +22,7 @@ export default function Welcome() {
     <Screen edges={["top", "bottom", "left", "right"]}>
       <Lockup style={s.lockup} />
       <Title style={s.headline}>Fantasy help for real life.</Title>
-      <Body style={s.tagline}>We watch your lineup and let you know when players are ruled out, so you can make moves before it's too late.</Body>
-      <Image source={ROBOT_FLYING.source} style={s.robot} resizeMode="contain" accessibilityIgnoresInvertColors />
+      <Body style={[s.tagline, { marginBottom: space.xl }]}>We watch your lineup and let you know when players are ruled out, so you can make moves before it's too late.</Body>
 
       <Card>
         <Button title="Sync a League" arrow large onPress={() => router.push("/connect/provider")} />
@@ -65,7 +62,6 @@ const s = StyleSheet.create({
   lockup: { marginTop: space.lg, marginBottom: space.xl },
   headline: { textAlign: "center", fontSize: 30 },
   tagline: { textAlign: "center", color: color.muted, fontSize: 17, lineHeight: 24, marginTop: space.sm, paddingHorizontal: space.sm },
-  robot: { width: "100%", height: 180, marginVertical: space.lg },
   supports: { flexDirection: "row", alignItems: "center", marginTop: space.xl },
   supportsLabel: { marginBottom: 0, marginHorizontal: space.md },
   names: { flexDirection: "row", justifyContent: "center", flexWrap: "wrap", marginTop: space.md },

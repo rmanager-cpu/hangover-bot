@@ -209,7 +209,7 @@ export default function Settings() {
         <Body style={{ marginTop: space.md }}>
           RosterBots reads your ESPN team with the sign-in you gave it in this app, and never sees your ESPN password. It changes your lineup only as your protection setting allows, and tells you every time it does.
         </Body>
-        <Muted style={{ marginTop: space.md }}>Version {Constants.expoConfig?.version ?? "unknown"} · beta · by TurboLabs</Muted>
+        <Muted style={{ marginTop: space.md }}>Version {Constants.expoConfig?.version ?? "unknown"} · beta · by Turbo Devs</Muted>
       </Card>
     </Screen>
   );

@@ -4,11 +4,13 @@
 // components in ui.tsx pick the right one from the surface they sit on.
 
 export const color = {
-  midnight: "#070A24",
+  midnight: "#0B1020",
   navy: "#0C102F",
   purple: "#6726E8",
   electric: "#7B2FF7",
-  orange: "#FF7A00",
+  orange: "#FF8A00",
+  // The Oct 25 brand sheet's fourth colour. Not used by any screen yet.
+  cyan: "#2DE2F3",
   paper: "#F6F7FB",
   white: "#FFFFFF",
   green: "#22C55E",

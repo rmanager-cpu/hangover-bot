@@ -8,7 +8,7 @@ is in `DECISIONS.md`. The handoff itself is not edited.
 The short version:
 
 - **Name** RosterBots: Hangover Protection (`@rosterbots/*`; renamed from HangoverBot:
-  Roster Protection Oct 10 2026, `DECISIONS.md`). **Parent** TurboLabs. The product name
+  Roster Protection Oct 10 2026, `DECISIONS.md`). **Parent** Turbo Devs (TurboLabs until Oct 25). The product name
   stays evergreen; "2026 Season" is marketing, not a name.
 - **Promise:** connect your league, choose authority, go live your life.
 - **Position:** AI-enabled fantasy lineup protection. Roster insurance, not a research

@@ -1,9 +1,10 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-// Brand (docs/brand/README.md). The icons are the owner's flying robot on the brand navy.
-const MIDNIGHT = "#070A24";
-const ICON_NAVY = "#000523";
-const TURBO_ORANGE = "#FF7A00";
+// Brand (docs/brand/README.md, the Oct 25 RosterBots sheet). The icon is the owner's square art
+// on its own navy; Midnight and Orange are the sheet's palette.
+const MIDNIGHT = "#0B1020";
+const ICON_NAVY = "#010436";
+const TURBO_ORANGE = "#FF8A00";
 
 // Permanent once in Google Play or App Store Connect: the owner's domain, rosterbots.com,
 // backwards (DECISIONS.md, 2026-10-25).

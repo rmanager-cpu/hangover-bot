@@ -1,19 +1,49 @@
 # RosterBots brand
 
-Owner-supplied, Oct 3 2026. Renamed from HangoverBot: Roster Protection on Oct 10 2026
-(owner: "I feel weird about having hangover in the title"); see `docs/DECISIONS.md`. This
-is the brand; the app matches it, not the other way round.
+The owner's RosterBots brand, Oct 25 2026 (sheet: `rosterbots/brand-sheet.png`). It replaces
+the HangoverBot art of Oct 3, kept below and in `logos/`, `mascot/` and `icons/` for the record.
+This is the brand; the app matches it, not the other way round.
 
-**Official line:** **RosterBots: Hangover Protection**. "Hangover Protection" is the subtitle.
-The one-word product name is RosterBots. "by TurboLabs" sits under the wordmark.
+**Official line:** **RosterBots: Hangover Protection**. The one-word product name is RosterBots.
+The company is **Turbo Devs** ("by TURBO DEVS" on the lockup; previously TurboLabs). Site:
+rosterbots.com.
 
-**Not yet true of the artwork below:** every source file still draws the old wordmark
-(HANGOVER over BOT) and the icon's ribbon still reads "HANGOVERBOT" / "ROSTER PROTECTION".
-New art from the owner is needed before the app icon, splash, wordmark or any store
-screenshot can match this name; until then the sections below describe what the files
-actually show, not the new official line.
+## Marks (Oct 25)
 
-## Marks
+- **Robot:** white and navy, round dark visor, two orange upturned-crescent eyes (a smile), an
+  orange ball antenna, carrying a football and pointing, orange speed streaks behind.
+- **Lockup** (`rosterbots/lockup-by-turbo-devs.png`, 2172×724, transparent): the robot,
+  ROSTERBOTS (ROSTER white, BOTS orange, italic chrome) and "by TURBO DEVS". The app's
+  `assets/brand/rosterbots-lockup.png` is it trimmed and 1400 wide; it serves as the small
+  header wordmark too until a smaller one is drawn.
+- **Icon art** (`rosterbots/icon-art.png`, 1254×1254, on navy `#010436`): the robot in an
+  orange ring with ROSTERBOTS. It is the app icon and Android's adaptive foreground at 1024;
+  the ring sits inside the middle 66% that every Android mask keeps.
+- **Robot peek** (`assets/brand/robot-peek.png`): the robot's head cut from the lockup, beside
+  "You're covered" on Home.
+- **Splash:** the lockup on Midnight.
+- **Not yet drawn:** a robot-only icon (the sheet shows one), a white robot-head silhouette for
+  Android notifications (`assets/notification-icon.png` is still the old one), the 1024×500
+  Play banner, and a monochrome lockup file (the sheet shows one).
+- **Make the app images** with `powershell -NoProfile -File apps/mobile/scripts/brand-assets.ps1`
+  (Windows, nothing to install).
+
+## Palette (Oct 25 sheet)
+
+| Token | Hex | Use |
+|---|---|---|
+| Midnight | `#0B1020` | screen background |
+| White | `#F7F8FA` | text and light cards |
+| Orange | `#FF8A00` | primary buttons, selected state, BOTS |
+| Cyan | `#2DE2F3` | accent (in `theme.ts`, not used by a screen yet) |
+
+The app's `theme.ts` carries Midnight, Orange and Cyan from this sheet. Its purples (below)
+predate it; the sheet has none, so they go when the screens are rebuilt in the Oct 25 mockups'
+modern look.
+
+## The HangoverBot art (Oct 3, superseded)
+
+### Marks
 
 - **Wordmark:** HANGOVER in purple chrome over BOT in orange chrome, italic, fast; the
   robot head trails orange speed lines to the right. "by TURBOLABS" beneath, small.
@@ -35,7 +65,7 @@ actually show, not the new official line.
   `#010420`. The app's `assets/icon.png` and `adaptive-icon.png` are copies. The flying
   robot (`mascot/flying-thumbs-up.png`) is the splash figure, not the icon.
 
-## Palette (from the mockups; matches the handoff's section 24)
+### Palette (from the mockups; matches the handoff's section 24)
 
 | Token | Hex | Use |
 |---|---|---|
