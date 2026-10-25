@@ -99,7 +99,8 @@ unreachable from the build and fix sessions.
 
 **Pending owner decisions** (record answers in `docs/DECISIONS.md`): the in-app names for
 the three levels. AI provider decided Oct 25: Anthropic, Claude Sonnet, model id in config. The AI level's contract is `docs/AI-NATIVE.md`. Decided Oct 25: three levels, Alert Me, Auto
-Protect (automatic from T-90) and AI Native (acts at T-15, may add, and drop only from the user's cut list). "Live"
+Protect (automatic from T-90) and AI Native (Claude Sonnet 5.5: fixes holes at T-15, may add and drop only players marked
+Droppable and only within the No-Cray Rules; Roster Advice, one tap, never automatic). "Live"
 is decided: the owner's own league this season.
 
 Not started: `packages/ai`, `packages/ui`, `apps/web`, `apps/worker`, `apps/extension`,
