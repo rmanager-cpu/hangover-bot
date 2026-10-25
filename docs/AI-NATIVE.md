@@ -76,8 +76,8 @@ lineup write and the read that verifies them: one to two minutes at worst.
 
 ## Open
 
-- **AI provider:** Anthropic is recorded in `STACK.md`; the owner prefers GLM 5.3. Built
-  provider-neutral until it is settled. The privacy policy and Data safety form must name it.
+- **AI provider: decided Oct 25,** Anthropic, Claude Sonnet, model id in configuration so a
+  cheaper model is a config change. The privacy policy and Data safety form must name Anthropic.
 - **Post-game waiver suggestions** after an injury: one-tap, later phase.
 - **Depth charts** for "the backup RB": ESPN's own player data first; a football data
   provider later if it is not enough.
