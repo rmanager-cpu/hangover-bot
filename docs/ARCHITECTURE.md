@@ -3,7 +3,29 @@
 Read `PRODUCT.md` and the handoff first; `DECISIONS.md` says where this departs from it. The one sentence that shapes everything here: **the rules engine
 is in charge; AI is a specialist that gets called when needed.**
 
-## Shape
+## As built: the beta
+
+```
+ Phone app (Expo) ──own rows, RLS──▶ Supabase Postgres (5 tables, Vault)
+   └──▶ Edge Functions: espn-connect, connection-setup,         ▲
+        read, decide, swap, delete-account ─────────────────────┤
+ pg_cron, every minute ──▶ check ──▶ ESPN (read, lineup write)  │
+                             ├──────────────────────────────────┘
+                             └──▶ Expo push ──▶ phone
+```
+
+The beta has no worker, web app or extension. Supabase Cron calls the `check` Edge Function
+every minute; it runs `protectConnection` (`packages/service`) for each league that is due.
+Phone actions that need ESPN (sign-in handover, league setup, a fresh read, approving a
+proposal, the test swap) are Edge Functions that check the caller's session themselves.
+`packages/service` runs in Node for the tests and in Deno in the functions, from committed
+copies in `supabase/functions/_shared`. The functions, tables and requests are listed in
+`BETA.md`; the deploy is `DEPLOY.md`.
+
+The shape below is the target after the beta. The engine, the loop and the data rules apply
+to both.
+
+## Target shape (after the beta)
 
 ```
   extension ──(ESPN cookies, once)──▶ web /api/connections/espn ──▶ Supabase (Vault)
@@ -42,16 +64,22 @@ starting slot, with its fix if the rules have one:
 
 | Finding | Hard or soft | Deterministic fix |
 |---|---|---|
-| `empty_slot` | hard | the first eligible bench player, ranked |
-| `starter_on_bye` | hard | the first eligible bench player, ranked |
-| `starter_out` (OUT, IR, suspended) | hard | the first eligible bench player, ranked |
+| `empty_slot` | hard (a hole) | one bench player in, playing starters shifted to make room |
+| `starter_on_bye` | hard (a hole) | the same |
+| `starter_out` (OUT, IR, suspended) | hard (a hole) | the same |
+| `starter_zero` (ESPN projects 0 points) | hard (a hole) | the same |
 | `starter_doubtful` | soft | none: judgment |
 | `starter_questionable` | soft | none: judgment |
 | `starter_status_unknown` | soft | none: tell the user |
 
-Ranking follows handoff section 9: eligible for the slot, not locked or started, not
-OUT/IR/doubtful; clean players (active, game known) before doubtful ones; then the user's
-replacement order; then the highest projection. The rules have the answer when the top
+A playing starter is never benched and a lineup with no hole is never touched. Who may
+fill a hole (questionable when nobody healthy can, doubtful as the last resort; never
+anyone projected for zero) is in `DECISIONS.md`, Oct 3 and 4.
+
+Ranking follows handoff section 9, as amended Oct 3 and 4: eligible for the slot, not locked
+or started, not OUT/IR, never projected for zero; healthy players before questionable, and
+doubtful only as the last resort; then the user's replacement order; then the highest
+projection. The rules have the answer when the top
 player is clean and is ranked by something real. With no order and no projections it
 is a judgment call. One bench player is never promised to two findings.
 
@@ -73,7 +101,10 @@ Every step has a **deadline**: the earliest kickoff among the players it would m
 proposal nobody answers expires at its deadline and is logged as expired, not silently
 dropped.
 
-## The worker's loop, for one connection
+## The loop, for one connection
+
+In the beta this is `protectConnection`, run by the `check` Edge Function; later it moves to
+the worker. Step 4 is not in the beta, which makes no AI calls: a judgment step asks the user.
 
 1. Load the connection, its authority settings and its decrypted cookies.
 2. `connector.getRoster()`. A 401/403 is read again after a short pause; a second one
