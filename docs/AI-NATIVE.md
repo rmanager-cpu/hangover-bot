@@ -29,7 +29,7 @@ In-app names are not final. Stored ids stay as they are, so no data migration is
 
 | Level | Stored id | What it does |
 |---|---|---|
-| **Alert Me** | `ask_me` | Pushes you when a starter is in trouble, with a **Fix it** button on the notification itself. Replaces both Alerts and Ask Me; a stored `alerts` reads as `ask_me`. |
+| **Alert Me** | `ask_me` | One option for "tell me" and "ask me first" (owner): pushes you when a starter is in trouble, with a **Fix it** button on the notification itself. A stored `alerts` reads as `ask_me`. |
 | **Auto Protect** | `bench_protection` | Fills a hole from your bench automatically, from 90 minutes before kickoff. |
 | **AI Native** | `ai_rescue` | Everything Auto Protect does, the T-15 step, and Roster Advice. |
 
@@ -80,12 +80,17 @@ write, the verifying read) takes one to two minutes at worst.
   current price before launch.
 - An advice item expires when its moment passes (kickoff, the waiver run).
 
-## The No-Cray Rules (proposed, owner to confirm)
+## The No-Cray Rules (owner, Oct 25)
 
 Enforced in code, not in the prompt. The AI only picks from options the code built, and the
 code throws out anything that breaks a rule. **The goal for every automatic move is one
 thing: a full lineup, every starting slot filled by a player who is playing and projected
 above zero.** Nothing else.
+
+**Making room, in this order** (owner): an open roster spot needs nothing; else, if an IR
+slot is open and a player qualifies for it, he moves to IR; only then a drop, and the drop is
+the **out-for-the-season** droppable player if there is one, else the droppable player with
+the **lowest rest-of-season value**.
 
 1. **Automatic moves only fix a hole.** An add or drop happens on its own only to fill a
    starting slot that would otherwise be empty or score zero at kickoff. Advice waits for
@@ -93,21 +98,29 @@ above zero.** Nothing else.
 2. **Only players you switched to Droppable.** Everyone starts Not droppable, including
    anyone RosterBots adds.
 3. **Never drop a starter who is playing this week.**
-4. **Never drop an injured player** (questionable, doubtful, out, IR). Injuries heal; dropping
-   a hurt star is the classic panic move. Advice may raise it; it never happens on its own.
-5. **Never drop anyone rostered in more than half of ESPN leagues,** Droppable or not.
-6. **The add must be a real upgrade:** projected at least 2 points more this week than the
-   best bench fill, and above zero.
-7. **Never leave a position short:** never drop the only player at a position your lineup
+4. **Never drop a player who will be back:** questionable, doubtful, out this week, or on IR
+   with a return expected. **Out for the season is the first to go** (owner). An automatic
+   season-ending drop needs the provider's own data to say so (a structured flag); a report
+   the AI found on the web makes it a one-tap suggestion, not a move.
+5. **Never drop anyone rostered in more than 65% of ESPN leagues,** Droppable or not, unless
+   he is out for the season (dead leagues keep those around 50%; owner).
+6. **Judge drops on the rest of the season, never this week alone** (owner). A bye or one bad
+   projection never makes a player droppable: he goes on a bye only if he is also the least
+   valuable droppable player, or out for the season. Value is ESPN's rest-of-season
+   projection and percent rostered for now; better rankings later.
+7. **The add must be a real upgrade:** projected at least 2 points more this week than the
+   best bench fill, and above zero, and never worth less for the rest of the season than the
+   player dropped for him (unless that player is out for the season).
+8. **Never leave a position short:** never drop the only player at a position your lineup
    needs.
-8. **Free agents only:** no waiver claims, no FAAB bids, ever.
-9. **No churn:** one add/drop per hole, at most two a week, never drop a player added in the
-   last 7 days, never re-add a player RosterBots dropped this season.
-10. **When in doubt, ask:** anything that fails a rule becomes a one-tap suggestion, never a
+9. **Free agents only:** no waiver claims, no FAAB bids, ever.
+10. **No churn:** one add/drop per hole, at most two a week, never drop a player added in the
+    last 7 days, never re-add a player RosterBots dropped this season.
+11. **When in doubt, ask:** anything that fails a rule becomes a one-tap suggestion, never a
     move.
 
 **Your tap is your call:** a suggestion you approve can drop the player it names. But the AI
-only ever suggests drops that pass rules 3 to 9.
+only ever suggests drops that pass rules 3 to 10.
 
 ## Other rules the code enforces
 
@@ -134,14 +147,14 @@ only ever suggests drops that pass rules 3 to 9.
 
 ## Open
 
-- **The No-Cray thresholds:** 50% rostered (rule 5), 2 points (rule 6), two a week (rule 9).
+- **In-app names for the three levels:** the owner wants new ones.
 - **A "Powered by Claude" mark** waits on Anthropic's approval (`DECISIONS.md`).
 - **Depth charts:** ESPN's player data and web search first; a data provider later if needed.
 - **Data for a late scratch faster than ESPN** (the Odunze case): still unpicked.
 
 ## Build order
 
-1. This contract, confirmed by the owner (the No-Cray Rules especially).
+1. This contract, confirmed by the owner (Oct 25). **AI Native must be in the closed test** (owner: friends test it in a fake league), since a runaway AI is the risk that matters.
 2. `core`: outside candidates, the No-Cray Rules with a test each, the T-15 step. No network.
 3. `packages/ai`: interfaces and a fake; the Anthropic adapter.
 4. ESPN free agents, add/drop and percent rostered, against fixtures until a real read.
