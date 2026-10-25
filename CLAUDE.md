@@ -98,9 +98,9 @@ unreachable from the build and fix sessions.
    swap has been seen.
 
 **Pending owner decisions** (record answers in `docs/DECISIONS.md`): the AI provider
-(Anthropic recorded, GLM 5.3 preferred; build provider-neutral meanwhile), who AI Native may
-drop, and the in-app names for the three levels. Decided Oct 25: three levels, Alert Me, Auto
-Protect (automatic from T-90) and AI Native (acts at T-15, may add and drop on its own). "Live"
+(Anthropic recorded, GLM 5.3 preferred; build provider-neutral meanwhile) and the in-app
+names for the three levels. The AI level's contract is `docs/AI-NATIVE.md`. Decided Oct 25: three levels, Alert Me, Auto
+Protect (automatic from T-90) and AI Native (acts at T-15, may add, and drop only from the user's cut list). "Live"
 is decided: the owner's own league this season.
 
 Not started: `packages/ai`, `packages/ui`, `apps/web`, `apps/worker`, `apps/extension`,
