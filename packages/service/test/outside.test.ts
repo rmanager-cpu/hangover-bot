@@ -340,7 +340,8 @@ test("three minutes before a kickoff, the user hears the lineup is set for it, o
 });
 
 test("the all-clear says what is still wrong, and what is waiting for a tap", async () => {
-  const s = setup({ roster: achaneOut(), at: T - 3 * MIN });
+  // Alert Me: the hole is not RosterBots' to fix, so it is still wrong at T-3. (Auto Protect fixes it in that minute.)
+  const s = setup({ roster: achaneOut(), at: T - 3 * MIN, authority: "ask_me" });
   await s.run();
   const n = s.store.activity.find((x) => x.type === "ALL_CLEAR")!;
   assert.equal(n.title, "Still wrong before 1:00 PM ET");

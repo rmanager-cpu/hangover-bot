@@ -15,9 +15,9 @@ test("no roster: hourly", () => {
   assert.equal(gap(null, T), 60);
 });
 
-test("a kickoff within 10 minutes: every minute, edge included, so T-4 gets a look", () => {
+test("a kickoff within 10 minutes: every minute, edge included, so T-3 gets a look", () => {
   assert.equal(gap(team(), T - 10 * MIN), 1);
-  assert.equal(gap(team(), T - 4 * MIN), 1);
+  assert.equal(gap(team(), T - 3 * MIN), 1);
   assert.equal(gap(team(), T), 1, "a kickoff right now still counts");
 });
 

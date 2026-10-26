@@ -110,13 +110,23 @@ test("hours before kickoff it is a proposal that says when; at T-90 a later chec
   assert.match(s.store.activity[1]!.body, /Done at 11:30 AM ET\.$/);
 });
 
-test("T-9 is still automatic: the window runs to T-4", async () => {
+test("T-9 is still automatic: the window runs to T-3", async () => {
   const s = setup({ roster: achaneOut(), at: T - 9 * MIN });
   assert.equal((await s.run()).executed, 1);
 });
 
-test("after T-4 it is a proposal only, with no promise", async () => {
+test("the Odunze case: a starter ruled out minutes before kickoff, first seen at T-3, is replaced automatically", async () => {
   const s = setup({ roster: achaneOut(), at: T - 3 * MIN });
+  assert.equal((await s.run()).executed, 1);
+  assert.deepEqual(s.espn.writes.map((w) => w.moves), [SWAP]);
+  // The kickoff's all-clear goes out in the same minute, after the move, about the fixed lineup.
+  const types = s.store.activity.map((x) => x.type);
+  assert.deepEqual(types.slice(-2), ["ACTION_COMPLETED", "ALL_CLEAR"]);
+  assert.match(s.store.activity.at(-1)!.body, /is set\.$/);
+});
+
+test("after T-3 it is a proposal only, with no promise", async () => {
+  const s = setup({ roster: achaneOut(), at: T - 2 * MIN });
   await s.run();
   assert.equal(s.espn.writes.length, 0);
   assert.equal(s.store.actions[0]!.autoAt, null);

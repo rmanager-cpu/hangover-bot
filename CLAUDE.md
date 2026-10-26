@@ -19,7 +19,7 @@ is the backend deploy for a session with the Supabase and Expo MCP connectors;
 Built, and passing here with no network:
 
 - `packages/core`: domain types, the rules engine, authority, the account gate, the guardrails
-  (T-90 to T-4, 3 a day, sane read, kickoff known), and **the No-Cray Rules** (`outside.ts`:
+  (T-90 to T-3, 3 a day, sane read, kickoff known), and **the No-Cray Rules** (`outside.ts`:
   free agents as the fix for a hole, room made open spot → IR → drop, a test per rule) and the
   `Judge` / `Advisor` interfaces (`ai.ts`). The AI only ever judges a hole.
 - `packages/ai`: core's Judge and Advisor over the Anthropic SDK (`claude-sonnet-5-5`):

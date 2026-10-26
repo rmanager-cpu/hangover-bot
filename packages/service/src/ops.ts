@@ -310,7 +310,7 @@ export async function announce(
 /**
  * When to look again after ESPN could not be read: within REAUTH_RETRY_MIN minutes, and
  * sooner on the kickoff cadence of the last whole read (every minute inside T-10). A late
- * scratch with one failed read in the last minutes must not wait five and miss T-4.
+ * scratch with one failed read in the last minutes must not wait five and miss T-3.
  */
 export async function retryAt(deps: Deps, conn: ConnectionRow, now: Date, latest: Roster | null = null): Promise<string> {
   let saved: Roster | null = null;

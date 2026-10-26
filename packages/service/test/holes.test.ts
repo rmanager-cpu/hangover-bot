@@ -19,8 +19,8 @@ function player(id: string, name: string, eligibleSlots: Slot[], over: Partial<P
 
 // ---- the window's edges
 
-test("the T-4 check acts, though the function reads the clock a few hundred ms after the tick", async () => {
-  const s = setup({ roster: achaneOut(), at: T - 4 * MIN + 400 });
+test("the T-3 check acts, though the function reads the clock a few hundred ms after the tick", async () => {
+  const s = setup({ roster: achaneOut(), at: T - 3 * MIN + 400 });
   const sum = await s.run();
   assert.equal(sum.executed, 1);
   assert.deepEqual(moved(s), [`${ACHANE}:RB>BENCH,${WRIGHT}:BENCH>RB`]);

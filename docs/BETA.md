@@ -27,10 +27,10 @@ at Bench Protection, for a **claimed** account, with bench swaps on. A bench pla
 projects for zero points is never a candidate, automatic or proposed (owner, Oct 3; a
 missing projection is not zero). On top of that, the first-weekend guardrails (`core.guard`):
 
-1. Only inside the window **T-90 to T-4** minutes (owner, Oct 3: T-4, not T-10, so a late
-   scratch that ESPN shows after T-10, like Odunze's, can still be fixed), where T is the
+1. Only inside the window **T-90 to T-3** minutes (owner, Oct 3: T-4, not T-10; Oct 26: T-3,
+   so a late scratch like Odunze's, ruled out 4 to 7 minutes before kickoff, is still fixed), where T is the
    earliest kickoff among the players the move touches (`finding.deadline`). Before T-90: a
-   proposal that says it will happen automatically at T-90 ("autoAt"). After T-4: a proposal
+   proposal that says it will happen automatically at T-90 ("autoAt"). After T-3: a proposal
    only. The checker looks every minute once any rostered player is within 10 minutes of
    kickoff, so the end of the window gets a look.
 2. At most `maxAutoMovesPerDay` (default 3) automatic moves per connection per UTC day.
@@ -61,7 +61,7 @@ is a proposal.
 
 ```ts
 export interface AutomationPolicy { autoFromMinutes: number; autoUntilMinutes: number; maxAutoMovesPerDay: number }
-export const BETA_AUTOMATION: AutomationPolicy = { autoFromMinutes: 90, autoUntilMinutes: 4, maxAutoMovesPerDay: 3 };
+export const BETA_AUTOMATION: AutomationPolicy = { autoFromMinutes: 90, autoUntilMinutes: 3, maxAutoMovesPerDay: 3 };
 
 // The propose step gains an optional `held`:
 | { do: "propose"; finding: Finding; candidate: Candidate; source: "rules" | "ai"; held?: { reason: string; autoAt?: string } }
@@ -183,7 +183,7 @@ export interface ReadSummary {
 }
 export function summarizeRead(roster: Roster, now: Date): ReadSummary;
 
-/** Cadence: 1 min if any rostered player kicks off within 10 min (16 for AI Native; the window runs to T-4); 2 min within 100 min; 15 min within 12 h; else 60 min. Counted from the minute boundary `now` is in, so the cron tick that follows takes it. */
+/** Cadence: 1 min if any rostered player kicks off within 10 min (16 for AI Native; the window runs to T-3); 2 min within 100 min; 15 min within 12 h; else 60 min. Counted from the minute boundary `now` is in, so the cron tick that follows takes it. */
 export function nextCheckAt(roster: Roster | null, now: Date, everyMinuteWithin?: number): Date;
 
 export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.host/--/api/v2/push/send, channelId "default"
@@ -332,7 +332,7 @@ profiles (public values). `eas.json` profiles: `preview` (Android APK, internal)
 Each of these was chosen while building and is now part of the contract.
 
 **Guardrails (`core`).** The before-T-90 hold reads "too early for an automatic move". Both
-window edges are inside it (exactly T-90 and exactly T-4 still act). `BETA_AUTOMATION` is
+window edges are inside it (exactly T-90 and exactly T-3 still act). `BETA_AUTOMATION` is
 frozen; a per-connection limit is a copy, and `connections.max_auto_moves_per_day` overrides
 the shared default. "Starting slots known" means `starterSlots` is non-empty and every starter
 sits in one of them, no more to a slot than the league has; a wrong rejection only turns an
@@ -358,8 +358,8 @@ automatic move into a proposal.
   good read makes it `active` again. `paused` is skipped.
 - On an `error` outcome the next check is at most 5 minutes away, and on the last whole
   read's kickoff cadence when that is sooner (`ops.retryAt`, `Store.lastRoster`, Oct 4).
-- (Oct 4) The automatic window is judged at the cron tick the check belongs to, so the T-4
-  check acts. A write ESPN could not be read back on stays `approved` with
+- (Oct 4) The automatic window is judged at the cron tick the check belongs to, so the T-3
+  check acts (T-4 until Oct 26). A write ESPN could not be read back on stays `approved` with
   `result.unconfirmed`, and the next check settles it at once (done with a receipt, or failed).
   A fill undone moments after it was made is made again (only a write in flight, or one that
   finished after this run's fresh read began, stops it). When the fresh read before a write
@@ -389,7 +389,7 @@ automatic move into a proposal.
 **Database and functions.**
 - `dueConnections` returns `active` and `needs_reauth` connections and leases them (sets
   `next_check_at` 160 seconds ahead; 5 minutes until Oct 4, which could carry a dead run's
-  connection past T-4), so two overlapping cron runs cannot take the same league.
+  connection past T-3), so two overlapping cron runs cannot take the same league.
   `check` passes it a clock 30 s ahead, so a row due on the minute boundary is not missed by
   the milliseconds between the tick and the function's own clock. It stops starting
   connections after 90 s and hands the rest back.

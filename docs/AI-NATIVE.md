@@ -57,7 +57,7 @@ in Settings. Saving the screen is what turns AI Native on (`connections.droppabl
 | **T-90** | Auto Protect and AI Native fill holes from the bench, automatically. A hole whose bench options all have something to doubt and no projection: AI Native asks the AI which; below it, the user. |
 | **T-15** | **AI Native:** fills any hole the bench couldn't, or replaces RosterBots' own fill with a clearly better free agent. Never touches a player you put in the lineup. |
 | T-15 to T-8 | If the AI times out, or ESPN won't list the free agents, it tries again on the next minute's check (AI Native is checked every minute from T-16). From T-8 the best option is offered for a tap instead. A write ESPN did not apply is a failed write like any other: said once, and nothing more automatic that week. |
-| T-4 | The last automatic move. |
+| T-3 | The last automatic move (owner, Oct 26; T-4 before), so an Odunze-style scratch is still fixed. The all-clear below runs after it in the same check. |
 | **T-3** | **All clear:** a push saying the lineup is set for that kickoff, or what is still wrong (a locked hole included) and how many moves wait for a tap. Every level, once per kickoff. |
 
 Why T-90 still runs for AI Native: if the AI, Anthropic or the ESPN add fails, the lineup is

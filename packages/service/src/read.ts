@@ -21,7 +21,7 @@ export const minuteWindow = (conn: { authority: string }): number => (conn.autho
 
 /**
  * Cadence: 1 min if any rostered player kicks off within `everyMinuteWithin` min (the window
- * runs to T-4, so a late scratch ESPN shows then still gets a look); 2 min within 100 min;
+ * runs to T-3, so a late scratch ESPN shows then still gets a look); 2 min within 100 min;
  * 15 min within 12 h; else 60 min.
  */
 export function nextCheckAt(roster: Roster | null, now: Date, everyMinuteWithin = 10): Date {

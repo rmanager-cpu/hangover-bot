@@ -54,7 +54,7 @@ Two more routes, for the second phone or the reinstall:
   it). The app signs out and starts a fresh anonymous session, the same as first launch.
   Google Play's account-deletion requirement; works for an unclaimed account too.
 
-The Protection screen's promise is the code's: automatic moves only between 90 and 4
+The Protection screen's promise is the code's: automatic moves only between 90 and 3
 minutes before kickoff, and the first one in a league only after a change the user made
 through the app (the test swap) has shown up on ESPN.
 

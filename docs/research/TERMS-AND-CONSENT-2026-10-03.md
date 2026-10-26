@@ -422,7 +422,7 @@ These are worth a second pass. If ESPN itself offers anything like auto-start, t
 > **What it will do**
 > • Step in only when a starter is ruled OUT, on IR, suspended or on bye, or a starting slot is empty.
 > • Use only players already on your roster: the first eligible player in your replacement order, or, if you haven't set one, the player with ESPN's highest projection.
-> • Act only from 90 minutes before kickoff until 4 minutes before (the beta code says 4 since Oct 3; keep this matching what ships). If the move involves two games, it goes by the earlier kickoff. Before that window it tells you what it plans to do and when.
+> • Act only from 90 minutes before kickoff until 3 minutes before (the beta code says 3 since Oct 26, 4 from Oct 3; keep this matching what ships). If the move involves two games, it goes by the earlier kickoff. Before that window it tells you what it plans to do and when.
 > • Make at most 3 automatic moves a day in each league. After that, it asks you.
 > • Check your lineup on ESPN right before each move and again right after. If ESPN doesn't show the change, it tells you and does not try again.
 > • Leave a receipt in Activity for every move, and send an alert if alerts are on.
@@ -462,7 +462,7 @@ These are worth a second pass. If ESPN itself offers anything like auto-start, t
 > Checked on ESPN at 12:32 PM ET: done.
 
 **Notes:**
-- **Window:** match the code. Since Oct 3 the beta says 4 minutes, as above.
+- **Window:** match the code. Since Oct 26 the beta says 3 minutes, as above.
 - **3-a-day cap:** delete that line if the cap is removed after the first weekend.
 - **Fourth checkbox (optional):** if counsel wants it, add "I understand ESPN doesn't endorse HangoverBot and could restrict my ESPN account."
 

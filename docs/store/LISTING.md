@@ -56,7 +56,7 @@ WHAT IT DOES
 - You choose how much it may do:
   Alerts: it watches and tells you. It never changes your lineup.
   Ask Me: when a starter cannot play, it finds the replacement and sends it to you. Nothing changes until you tap Approve.
-  Bench Protection: from 90 to 4 minutes before that game kicks off, it starts the first eligible player from your bench, in your replacement order or else by ESPN's projection, and sends you a receipt. Earlier than that it announces the scheduled move, which you can approve early or decline.
+  Bench Protection: from 90 to 3 minutes before that game kicks off, it starts the first eligible player from your bench, in your replacement order or else by ESPN's projection, and sends you a receipt. Earlier than that it announces the scheduled move, which you can approve early or decline.
 - Every receipt, proposal and failure lands in Activity. Push alerts are optional.
 
 WHAT IT FIXES
@@ -66,7 +66,7 @@ WHAT IT NEVER DOES ON ITS OWN
 - Never benches a starter who is playing. A lineup with no hole is not touched.
 - Never starts a player ESPN projects for zero points.
 - Never makes trades, never bids FAAB, never drops a player, never picks up a free agent. Replacements come from your bench, only.
-- Never moves anyone earlier than 90 minutes or later than 4 minutes before kickoff. Outside that window it asks, or waits.
+- Never moves anyone earlier than 90 minutes or later than 3 minutes before kickoff. Outside that window it asks, or waits.
 - Never makes more than three automatic moves a day in a league, and never retries a move ESPN did not accept. It tells you.
 - Never moves a player for an account you have not claimed. Claiming is an email address and a six-digit code, nothing more.
 - Never acts on a read that looks wrong, or when ESPN has not sent a kickoff time.
@@ -102,7 +102,7 @@ Where each claim comes from (so the text can be re-checked when the code changes
 | Never benches a playing starter, never touches a lineup with no hole | CLAUDE.md rules; DECISIONS 2026-10-03 |
 | Never starts a zero-projection player on its own (the user's test swap is the exception) | DECISIONS 2026-10-03 `viable()` |
 | No trades, FAAB, drops, free agents | `protection.tsx` `RULES`; BETA scope table "Out" |
-| T-90 to T-4 window for automatic moves; an approval is written whenever the user taps | `core.guard` `BETA_AUTOMATION`; `packages/service/src/decide.ts:93-151` (no window, cap or claim check on approve) |
+| T-90 to T-3 window for automatic moves; an approval is written whenever the user taps | `core.guard` `BETA_AUTOMATION`; `packages/service/src/decide.ts:93-151` (no window, cap or claim check on approve) |
 | Max 3 automatic moves per league per UTC day, never retried | BETA automation rule item 2 and the failed-write paragraph |
 | Needs Google sign-in to move a player on its own | DECISIONS 2026-10-02 "No unattended writes for an anonymous user" |
 | Not on a bad read or an unknown kickoff | BETA guardrails 3 and 4 |

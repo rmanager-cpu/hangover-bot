@@ -41,8 +41,8 @@ test("the setup really is an execute step with the deadline at kickoff", () => {
   assert.equal(execute.finding.deadline, KICKOFF);
 });
 
-test("the beta policy is T-90 to T-4, three a day", () => {
-  assert.deepEqual({ ...BETA_AUTOMATION }, { autoFromMinutes: 90, autoUntilMinutes: 4, maxAutoMovesPerDay: 3 });
+test("the beta policy is T-90 to T-3, three a day", () => {
+  assert.deepEqual({ ...BETA_AUTOMATION }, { autoFromMinutes: 90, autoUntilMinutes: 3, maxAutoMovesPerDay: 3 });
   assert.throws(() => {
     (BETA_AUTOMATION as { maxAutoMovesPerDay: number }).maxAutoMovesPerDay = 99;
   }, "a shared default cannot be edited by one connection");
@@ -70,13 +70,14 @@ test("Sunday morning, hours out: autoAt is T-90, not now", () => {
   assert.equal(held(out)?.autoAt, new Date(T - 90 * MIN).toISOString());
 });
 
-test("T-10 and exactly T-4 are inside the window", () => {
+test("T-10, T-4 and exactly T-3 are inside the window", () => {
   assert.equal(guard(execute, ctx({ now: at(T - 10 * MIN) })), execute);
   assert.equal(guard(execute, ctx({ now: at(T - 4 * MIN) })), execute);
+  assert.equal(guard(execute, ctx({ now: at(T - 3 * MIN) })), execute);
 });
 
-test("a millisecond after T-4 is a proposal only, with no autoAt", () => {
-  const out = guard(execute, ctx({ now: at(T - 4 * MIN + 1) }));
+test("a millisecond after T-3 is a proposal only, with no autoAt", () => {
+  const out = guard(execute, ctx({ now: at(T - 3 * MIN + 1) }));
   assert.equal(out.do, "propose");
   assert.deepEqual(held(out), { reason: "too close to kickoff for an automatic move" });
   assert.equal("autoAt" in held(out)!, false);
@@ -182,7 +183,8 @@ test("end to end: the same OUT starter at three times on Sunday", () => {
   assert.equal(held(run(at(T - 4 * 60 * MIN)))?.autoAt, "2026-10-04T15:30:00.000Z");
   assert.equal(run(at(T - 60 * MIN)).do, "execute");
   assert.equal(run(at(T - 5 * MIN)).do, "execute", "a late scratch at T-5 is still fixed");
-  assert.equal(run(at(T - 3 * MIN)).do, "propose");
+  assert.equal(run(at(T - 3 * MIN)).do, "execute", "the Odunze case: seen at T-3, still fixed");
+  assert.equal(run(at(T - 2 * MIN)).do, "propose");
 });
 
 // ---- rosterLooksSane

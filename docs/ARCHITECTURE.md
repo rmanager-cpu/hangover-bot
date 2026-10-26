@@ -122,7 +122,7 @@ same problem is not re-announced every five minutes.
 
 Cadence is per connection and tightens toward kickoff: hourly midweek, every 15 minutes on
 game days, every 2 minutes in the 100 minutes before each kickoff (the inactives window),
-every minute in the last 10 (the automation window ends at T-4).
+every minute in the last 10 (the automation window ends at T-3).
 
 ## Data (Supabase)
 

@@ -12,8 +12,8 @@ export const MIN = 60_000;
 
 /**
  * The cron tick this check belongs to. Checks run on the minute and read the clock a few
- * hundred ms later; the automatic window is judged at the tick, so the T-4 check acts
- * (owner, Oct 3: the window runs to T-4) rather than missing it by the function's lag.
+ * hundred ms later; the automatic window is judged at the tick, so the T-3 check acts
+ * (owner, Oct 26: the window runs to T-3) rather than missing it by the function's lag.
  */
 export const tickOf = (now: Date): Date => new Date(Math.floor(now.getTime() / MIN) * MIN);
 
