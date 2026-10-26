@@ -15,7 +15,8 @@ let ai: AiDeps | undefined | null = null;
  */
 function anthropic(): AiDeps | undefined {
   if (ai !== null) return ai;
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
+  // Trimmed: a pasted secret can carry a space or newline, and the SDK puts the key after "Bearer ".
+  const apiKey = (Deno.env.get("ANTHROPIC_API_KEY") ?? "").trim();
   if (!apiKey) {
     console.log("ai: ANTHROPIC_API_KEY is not set; AI Native runs without AI");
     ai = undefined;

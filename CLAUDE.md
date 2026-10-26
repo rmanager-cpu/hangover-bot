@@ -53,11 +53,12 @@ scripts, mobile), `npm run functions:check`, `npx -y deno@2 check index.ts` in
 `supabase/functions/{check,decide,leagues,connection-setup}`, and in `apps/mobile`
 `EXPO_OFFLINE=1 npx expo export --platform android`.
 
-**Deployed and proven so far:** the Oct 4-5 `check` and `decide`, and the Oct 25
-`delete-account`, `espn-connect`, `connection-setup`, `read`, `swap`; the in-app ESPN sign-in
-and the fan-profile league list worked on the owner's phone. **Not yet deployed:** the Oct 25
-migration, `leagues`, and every function with the AI layer (all eight, `check` and `decide`
-together, outside game windows; `docs/DEPLOY.md` 2b and 4). **Unverified against ESPN:** the
+**Deployed (Oct 25, 8:50 PM ET):** the AI Native migration, `ANTHROPIC_API_KEY`, and the AI
+layer's `check`, `decide` and `leagues`, each verified byte for byte against the local build;
+the first live check of both leagues came back `ok` with the key present. `espn-connect`,
+`connection-setup`, `read`, `swap` and `delete-account` are the earlier Oct 25 versions,
+compatible, to refresh when convenient. Android build `81e28a42` (commit `0dc994e`) carries
+the AI layer's screens. The in-app ESPN sign-in and the league list worked on the owner's phone. **Unverified against ESPN:** the
 free-agent read and the FREEAGENT add/drop (hand-built fixtures), where ESPN places an add,
 and the lineup write itself (still `unverified` in the connector; the Saturday test swap is
 the proof). Push needs Firebase (`google-services.json` as an EAS file variable, FCM V1 key).

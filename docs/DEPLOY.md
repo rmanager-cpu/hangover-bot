@@ -145,13 +145,25 @@ It adds columns and widens two check constraints; no row changes. The app's quer
 the new columns (`connections.droppable`, `actions.transaction`, `actions.sources`), so the
 build that carries the AI layer needs this applied first.
 
-Then the key, once: `create_edge_function_secret` with name `ANTHROPIC_API_KEY` and the
-owner's Anthropic key **(unverified: the tool's parameter names)**. Without it every
-function still runs; AI Native fixes from the bench and asks where it would have added
-(the `check` log says `ai: ANTHROPIC_API_KEY is not set`). `ANTHROPIC_MODEL` is optional
-(default `claude-sonnet-5-5`).
+Then the key, once. `create_edge_function_secret` (name `ANTHROPIC_API_KEY`) is meant to
+open a field for the owner to paste the value into, so it never passes through the session;
+from the VS Code session on Oct 25 it answered `declined` twice without showing one, so the
+owner adds it by hand like `CRON_SECRET`: dashboard → **Edge Functions** → **Secrets** →
+**Add new secret**, Key `ANTHROPIC_API_KEY`, Value the Anthropic key → **Save**. It applies
+on the next request; no redeploy. The name must be exactly that; `_lib/deps.ts` trims the
+value, since a paste can carry a space or newline (Oct 25's did). Without it every function
+still runs; AI Native fixes from the bench and asks where it would have added (the `check`
+log says `ai: ANTHROPIC_API_KEY is not set`; with it, `ai: Anthropic key present`).
+`ANTHROPIC_MODEL` is optional (default `claude-sonnet-5-5`).
 
 ## 4. Deploy the eight functions
+
+**As done on Oct 25 (no CLI token):** for a function too big to send in one piece reliably,
+compile it fully minified with line breaks (`esbuild ... --minify --line-limit=400`), join
+esbuild's in-string line continuations so the file has no backslashes, boot it locally under
+Deno, send it with `deploy_edge_function`, then read it back with `get_edge_function`: a
+result that large is saved to a file, and diffing that file with the local one proves the
+deployed copy is exact. `check` (78 KB) and `decide` (52 KB) went this way and matched.
 
 **As done on Oct 4:** the 24-file bundles below are about 140 KB each, too large to send inline
 in one `deploy_edge_function` call. `npm run functions:compile` turns each bundle into one
