@@ -23,8 +23,8 @@ by hand).
 |---|---|
 | `apply_migration`, `execute_sql`: the schema, the cron job, the Vault secrets | `CRON_SECRET` on the Edge Functions (step 3) |
 | `deploy_edge_function` ×8, `list_edge_functions`, `create_edge_function_secret` for `ANTHROPIC_API_KEY` | Anonymous sign-ins on (step 5) |
-| `get_publishable_keys`: confirm `eas.json` | Two email templates with `{{ .Token }}` (step 5) |
-| `get_advisors`, `query_logs`: check it | Email delivery: invited address or SMTP (step 5) |
+| `get_publishable_keys`: confirm `eas.json` | Google Cloud: consent screen, a Web and an Android client (step 5) |
+| `get_advisors`, `query_logs`: check it | Supabase: the Google provider and manual linking on (step 5) |
 | `build_run`, `build_info`, `build_logs` (Expo), building the **pushed** branch from GitHub | Link the GitHub repo to the EAS project on expo.dev, then install the APK from the build page (step 8) |
 
 The dashboard is `https://supabase.com/dashboard/project/givfmjtlbojhsntceone`. On a phone
@@ -227,26 +227,57 @@ Under **Authentication**:
 
 1. **Sign In / Providers** → **Allow anonymous sign-ins: on.** Every app user starts
    anonymous. Without it the app cannot start a session at all.
-2. **Email** provider: **Confirm email: on**, **Secure email change: on**, **Email OTP
-   length: 6** (the default; check it is not 8).
-3. **Emails** → **Templates** → **Change email address**: subject `Your RosterBots code`,
-   body from `supabase/templates/email_change.html`. It must contain `{{ .Token }}`: the
-   claim screen asks for the 6-digit code (`updateUser({ email })` then
-   `verifyOtp({ type: "email_change" })`), and the default template sends only a link.
-4. **Emails** → **Templates** → **Magic Link**: subject `Your RosterBots sign-in code`,
-   body from `supabase/templates/magic_link.html`, with `{{ .Token }}` for the same
-   reason: signing back in to a claimed account (a reinstall, a second phone) uses
-   `signInWithOtp` then `verifyOtp({ type: "email" })`, which sends this template.
-5. **Email delivery.** Supabase's built-in sender delivers only to members of the Supabase
-   organisation, and only a few an hour **(check the current limits)**. For the owner's
-   own beta: invite the owner's email address to the organisation (**Organization
-   settings** → **Team**), or set up custom SMTP (**Authentication** → **SMTP Settings**).
-   Without one of those nobody can claim an account, and without a claimed account there
-   are no automatic moves.
+2. **Google sign-in**, the only way to claim an account or get it back on a new phone
+   (DECISIONS.md, Oct 26). Steps 5a and 5b below. The email provider and its templates are
+   no longer used: nothing in the app sends an email.
 
-The session can check 1 and 2 afterwards with `get_advisors` (type `security`), which
-flags auth misconfigurations, and with `query_logs` (service `auth`) once the app has
-tried to sign in.
+The session can check 1 afterwards with `get_advisors` (type `security`), which flags auth
+misconfigurations, and with `query_logs` (service `auth`) once the app has tried to sign in.
+
+### 5a. Google Cloud (about 10 minutes, once)
+
+At `https://console.cloud.google.com`, signed in as the owner. Menu names as of Oct 2026
+**(unverified: Google moves them)**.
+
+1. **Project:** the project picker at the top, **New project**, name `RosterBots`, then
+   select it.
+2. **Google Auth Platform** → **Get started**: app name `RosterBots`, user support email
+   the owner's Gmail (the form offers only addresses Google knows), audience **External**,
+   contact email `support@rosterbots.com`. Create.
+3. **Clients** → **Create client** → **Web application**, name `RosterBots Supabase`. No
+   origins or redirect URIs: the app hands Supabase an ID token, so no browser redirect is
+   involved. Create, then copy the **Client ID** and the **Client secret**.
+4. **Clients** → **Create client** → **Android**, name `RosterBots Android (EAS)`:
+   - package name `com.rosterbots.app`
+   - SHA-1 `3E:0A:56:43:F4:E8:F4:D0:B5:02:CB:F6:65:26:B4:8D:90:28:6C:1F`
+
+   That is EAS's signing key for this app id, read from build `81e28a42`'s APK on Oct 26.
+   Every EAS build of `com.rosterbots.app` uses it while EAS keeps the same keystore.
+   Without this client Google answers `DEVELOPER_ERROR` and the app says its Google Cloud
+   setup isn't finished.
+5. **Audience** → **Publish app**, so anyone can sign in, not only listed test users. The
+   app asks only for name and email, which should need no Google review **(unverified)**.
+   If Google asks for verification anyway, add each tester under **Test users** for now.
+6. **Before the Google Play test:** Play signs the app with its own key, so the Play-installed
+   app has a different SHA-1. Copy it from Play Console (**Test and release** → **App
+   integrity** → **App signing**, "App signing key certificate") into a second Android
+   client like step 4, and add that client's id to Supabase's list in 5b.
+
+### 5b. Supabase (2 minutes)
+
+1. **Authentication** → **Sign In / Providers** → **Google**: enable it. **Client IDs**: the
+   Web client's id first, then the Android client's, comma-separated. **Client Secret**:
+   the Web client's secret. **Skip nonce checks**: off (Android sends no nonce; iPhone will
+   need it on). Save.
+2. **Authentication** → **Sign In / Providers**, the user sign-up settings at the top:
+   **Allow manual linking: on** (it is what lets an anonymous account link Google and keep
+   its leagues; off, the app says so). **Allow anonymous sign-ins** stays on.
+3. The Web client's id goes into `apps/mobile/eas.json` as `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+   in both profiles. It is public, so committing it is fine. The secret never leaves Supabase.
+   Then push and build (step 8): the button stays disabled in a build made without the id.
+
+An account claimed by email before Oct 26 is reached by signing in with Google as the same
+Gmail address: Supabase links a Google identity to a confirmed account with that email.
 
 ## 6. Check it works
 

@@ -15,6 +15,12 @@ const APP_ID = "com.rosterbots.app";
 const EAS_PROJECT_ID = "ffa6f3e6-8c06-4fc3-a893-5605dd208191";
 const EAS_SLUG = "rosterbuddies-fkijb1junjqxswiiv33pi";
 
+// Google sign-in needs no plugin on Android: the Web client id reaches the app as
+// EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (eas.json). On iPhone it needs the iOS client's reversed
+// id as a URL scheme, so the plugin joins once there is an iOS client (and Sign in with Apple
+// beside it, Apple's rule).
+const GOOGLE_IOS_URL_SCHEME = process.env.GOOGLE_IOS_URL_SCHEME;
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "RosterBots",
@@ -54,6 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // The service names this channel on every push (ANDROID_CHANNEL); src/lib/push.tsx creates it.
     ["expo-notifications", { icon: "./assets/notification-icon.png", color: TURBO_ORANGE, defaultChannel: "default" }],
     "./plugins/with-cookies-gradle.js",
+    ...(GOOGLE_IOS_URL_SCHEME ? [["@react-native-google-signin/google-signin", { iosUrlScheme: GOOGLE_IOS_URL_SCHEME }] as [string, object]] : []),
   ],
   extra: {
     ...config.extra,

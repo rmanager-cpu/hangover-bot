@@ -6,30 +6,22 @@ project_id = "hangoverbot"
 
 [auth]
 enabled = true
-# The app starts every user as an anonymous session; claiming the account by email
-# code is what unlocks automatic moves.
+# The app starts every user as an anonymous session; signing in with Google is what
+# unlocks automatic moves (DECISIONS.md, Oct 26).
 enable_anonymous_sign_ins = true
+# An anonymous account links Google with linkIdentity, so it stays the same user and keeps
+# its leagues. Off, Supabase refuses the link.
+enable_manual_linking = true
 
-[auth.email]
-enable_signup = true
-enable_confirmations = true
-double_confirm_changes = true
-# The claim screen asks for a 6-digit code.
-otp_length = 6
-otp_expiry = 3600
-
-# The claim uses updateUser({ email }) then verifyOtp({ type: "email_change" }), so the
-# change-email message must carry the code, not just a link.
-[auth.email.template.email_change]
-subject = "Your RosterBots code"
-content_path = "./supabase/templates/email_change.html"
-
-# Signing back in to a claimed account (a new phone, a reinstall) uses
-# signInWithOtp({ shouldCreateUser: false }) then verifyOtp({ type: "email" }), which sends
-# the magic-link message. It must carry the code too.
-[auth.email.template.magic_link]
-subject = "Your RosterBots sign-in code"
-content_path = "./supabase/templates/magic_link.html"
+# The only sign-in. The app gets an ID token from Google's Android picker and hands it to
+# signInWithIdToken or linkIdentity. client_id: the Web client first, then the Android
+# client(s), comma-separated. secret: the Web client's. Set in the dashboard (DEPLOY.md 5b);
+# this file is the record, not the deploy.
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_IDS)"
+secret = "env(GOOGLE_WEB_CLIENT_SECRET)"
+skip_nonce_check = false
 
 # verify_jwt is off for every function, on purpose. The gateway's check knows only the
 # legacy JWT secret; this project uses the newer API keys (sb_publishable_ / sb_secret_)

@@ -139,8 +139,8 @@ export default function Home() {
         <Banner
           tone="warn"
           title="Working as Alert Me"
-          body="Auto Protect and AI Native only move players on their own for a claimed account. Until then I send you each move to tap."
-          action={{ title: "Claim your account", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
+          body="Auto Protect and AI Native only move players on their own once you sign in with Google. Until then I send you each move to tap."
+          action={{ title: "Sign in with Google", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
         />
       ) : null}
 

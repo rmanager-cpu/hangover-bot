@@ -27,12 +27,13 @@ reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functi
 5. **What we read from ESPN**: starters, bench and IR in ESPN's order, with injury tags,
    kickoffs, byes, locks and projections, to compare line by line with the ESPN app. Plus
    the **Test swap**: pick two players, confirm, see the receipt from a fresh read, **Swap back**.
-6. Protection: Alert Me, Auto Protect, AI Native (the last two need a claimed account).
+6. Protection: Alert Me, Auto Protect, AI Native (the last two need Google sign-in).
    Choosing AI Native opens **Droppable players** (`app/droppable.tsx`): every player with a
    Droppable / Not droppable switch, everyone off to start; saving it turns AI Native on.
-7. Claim: email, then the 6-digit code (`updateUser({ email })`, then
-   `verifyOtp({ type: "email_change" })`). Skippable unless Auto Protect or AI Native was chosen.
-   If the email already belongs to an account, the screen offers to sign in to it instead.
+7. **Sign in with Google** (`app/claim.tsx`, `src/lib/google.ts`): Google's own account
+   picker, then `linkIdentity` with the ID token, so this phone's anonymous account becomes a
+   real one and keeps its league. Skippable unless Auto Protect or AI Native was chosen. If
+   that Google account already has a RosterBots account, the screen offers to switch to it.
 8. Home (YOU'RE COVERED or ACTION NEEDED), Activity (receipts; proposals with big Approve and
    Decline), **Roster Advice** (`app/advice.tsx`, AI Native: the AI's suggestions with their
    sources, Do it / Not now), Settings (protection, replacement order, droppable players,
@@ -40,10 +41,11 @@ reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functi
 
 Two more routes, for the second phone or the reinstall:
 
-- **Sign in** (`app/signin.tsx`, from Welcome, Settings, or the claim screen): email, then
-  the 6-digit code from the "Magic Link" email (`signInWithOtp({ shouldCreateUser: false })`,
-  then `verifyOtp({ type: "email" })`). The anonymous account this phone started with is
-  left behind; its ESPN sign-in, if any, is deleted first so nothing keeps running as it.
+- **Sign in with Google from Welcome or Settings**: the same screen. When the Google account
+  already has a RosterBots account, `signInWithIdToken` switches to it, asking first if this
+  phone has a league set up. The anonymous account this phone started with is left behind;
+  its ESPN sign-in, if any, is deleted first so nothing keeps running as it. The button stays
+  disabled in a build made without `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (`eas.json`).
 - **Forget my ESPN sign-in** (Settings): deletes the user's `credentials` row under RLS.
   The database cascades to the leagues, their actions and activity, and a trigger removes
   the cookies from Vault. The app returns to Welcome.

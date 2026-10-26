@@ -44,8 +44,10 @@ Built, and passing here with no network:
 - `apps/mobile`: Expo SDK 57. Anonymous session, the ESPN disclosure then sign-in in a
   WebView, league pick (and "Watch another league" from the stored sign-in's list), "What we
   read from ESPN" with the test swap, the three levels (**Alert Me, Auto Protect, AI Native**),
-  the **Droppable** screen, claim by email code, sign in by email code, Home, Activity with
-  Approve/Decline, **Roster Advice** with Do it / Not now, Settings, account deletion, push.
+  the **Droppable** screen, **Sign in with Google** (links this phone's anonymous account, or
+  switches to the account that Google account already has; no email code since Oct 26), Home,
+  Activity with Approve/Decline, **Roster Advice** with Do it / Not now, Settings, account
+  deletion, push.
 
 The checks, all passing on Oct 25: `npm test` (296, including the `_shared` sync check and
 the bundle check), `npm run typecheck` (core, football-data, connectors, ai, service,
@@ -63,10 +65,17 @@ free-agent read and the FREEAGENT add/drop (hand-built fixtures), where ESPN pla
 and the lineup write itself (still `unverified` in the connector; the Saturday test swap is
 the proof). Push needs Firebase (`google-services.json` as an EAS file variable, FCM V1 key).
 
-**Next, in order:** apply the Oct 25 migration and set `ANTHROPIC_API_KEY`; deploy the eight
-functions; push the branch and `build_run` the Android preview from GitHub; then the closed
-test. After that: Google sign-in for claiming (`DECISIONS.md`, Oct 25), the Fix it button on
-the notification (needs push), the Oct 25 mockups' look, real ESPN captures for the fixtures.
+**Google sign-in (Oct 26): built, not set up, not yet built into an APK.** The code passes the
+checks above; nothing has signed in with Google yet. It needs the owner's Google Cloud and
+Supabase settings (`docs/DEPLOY.md` §5a–5b; the EAS key's SHA-1 is filled in there), then the
+Web client's id in `apps/mobile/eas.json` and a build. Accounts claimed by email before Oct 26
+are reached by signing in with Google as the same Gmail address.
+
+**Next, in order:** the owner's Google setup (§5a–5b); the Web client id into `eas.json`; push
+and `build_run` the Android preview; the owner signs in with Google on the phone; then the
+closed test, after adding Google Play's app-signing SHA-1 as a second Android client. After
+that: the Fix it button on the notification (needs push), the Oct 25 mockups' look, real ESPN
+captures for the fixtures, and refreshing the five older functions.
 
 Not started: `packages/ui`, `apps/web`, `apps/worker`, `apps/extension`, Sentry.
 

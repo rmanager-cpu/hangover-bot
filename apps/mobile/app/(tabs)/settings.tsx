@@ -193,12 +193,13 @@ export default function Settings() {
       <Label>Account</Label>
       <Card>
         {claimed ? (
-          <Row title="Claimed" value={user?.email ?? undefined} />
+          <Row title="Signed in" value={user?.email ?? undefined} onPress={() => router.push("/claim")} />
         ) : (
-          <>
-            <Row title="Claim your account" detail="Needed for Auto Protect and AI Native to act on their own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} />
-            <Row title="Sign in to an account you claimed before" detail="New phone, or a reinstall" onPress={() => router.push("/signin")} />
-          </>
+          <Row
+            title="Sign in with Google"
+            detail="Keeps your leagues on a new phone, and lets Auto Protect and AI Native act on their own"
+            onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })}
+          />
         )}
         <Row
           title="Delete my account"

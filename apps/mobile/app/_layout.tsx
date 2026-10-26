@@ -82,8 +82,7 @@ function Gate() {
         <Stack.Screen name="connect/leagues" options={{ title: "Your league" }} />
         <Stack.Screen name="read/[id]" options={{ title: "What we read from ESPN" }} />
         <Stack.Screen name="protection" options={{ title: "Protection" }} />
-        <Stack.Screen name="claim" options={{ title: "Claim your account" }} />
-        <Stack.Screen name="signin" options={{ title: "Sign in" }} />
+        <Stack.Screen name="claim" options={{ title: "Sign in with Google" }} />
         <Stack.Screen name="order" options={{ title: "Replacement order" }} />
         <Stack.Screen name="droppable" options={{ title: "Droppable players" }} />
         <Stack.Screen name="advice" options={{ title: "Roster Advice" }} />

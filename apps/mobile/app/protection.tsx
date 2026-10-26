@@ -125,8 +125,8 @@ export default function Protection() {
         <Banner
           tone="warn"
           title="Working as Alert Me for now"
-          body={`${AUTHORITY[current].name} only moves players on its own for a claimed account. Until then I send you each move to tap.`}
-          action={{ title: "Claim your account", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
+          body={`${AUTHORITY[current].name} only moves players on its own once you sign in with Google. Until then I send you each move to tap.`}
+          action={{ title: "Sign in with Google", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
         />
       ) : null}
 
@@ -140,7 +140,7 @@ export default function Protection() {
                 <H2 style={{ fontSize: 20 }}>{AUTHORITY[l.id].ask}</H2>
                 <Muted style={{ marginTop: 2 }}>{AUTHORITY[l.id].askDetail}</Muted>
               </View>
-              {saving === l.id ? <Muted>Saving…</Muted> : locked ? <Pill text="Needs a claimed account" tone="orange" /> : null}
+              {saving === l.id ? <Muted>Saving…</Muted> : locked ? <Pill text="Needs Google sign-in" tone="orange" /> : null}
             </View>
             {on
               ? l.details.map((d) => (

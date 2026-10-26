@@ -98,7 +98,7 @@ export function protectionLine(authority: Authority, claimed: boolean, status: s
   if (status === "paused") return "Protection: PAUSED";
   const level = levelOf(authority);
   if (level === "ask_me") return "Protection: Alert Me · Bench only";
-  if (!claimed) return "Protection: Alert Me until you claim your account";
+  if (!claimed) return "Protection: Alert Me until you sign in with Google";
   return level === "ai_rescue" ? "Protection: AI Native · Bench + free agents" : "Protection: Auto Protect · Bench only";
 }
 

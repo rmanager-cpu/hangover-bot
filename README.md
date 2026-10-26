@@ -14,7 +14,7 @@ The beta is an Android app for ESPN leagues, first used in the owner's own leagu
 3. **Choose how much it may do:**
    - **Alert Me:** pushes you when a starter is in trouble, with the fix one tap away.
    - **Auto Protect:** makes the fix itself from your bench, between 90 and 4 minutes before
-     kickoff. Needs a claimed account (email code) and one change of yours already seen on ESPN.
+     kickoff. Needs Google sign-in and one change of yours already seen on ESPN.
    - **AI Native:** Auto Protect, plus free agents at 15 minutes before kickoff when the bench
      couldn't fill a hole, under the No-Cray Rules (`docs/AI-NATIVE.md`), and Roster Advice a
      few times a week, one tap each. You choose who may be dropped; everyone starts Not droppable.

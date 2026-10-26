@@ -12,7 +12,7 @@ built to. Change it before changing an interface.
 | League pick, "what we read from ESPN" screen, test swap | Web app |
 | Alerts, Ask Me (one-tap approve), Bench Protection (automatic) | AI Rescue, any AI call |
 | Scheduled checker, receipts, push | Free agents, drops, IR, waivers |
-| Claim account by email code (required for automation) | Apple/Google sign-in, purchases |
+| Sign in with Google (required for automation; Oct 26) | Sign in with Apple (iPhone), purchases |
 
 AI Rescue is not offered in the beta. A connection that somehow has `ai_rescue` is treated
 as `bench_protection` by the service.
@@ -301,20 +301,21 @@ store (`@react-native-cookies/cookies`, WebKit store on iOS), falling back to `d
 → `espn-connect` → league list (manual league-id entry if lookup failed) → `connection-setup`
 → **What we read** (players, slots, statuses, kickoffs, locks, plus **Test swap**) →
 Protection (Alert Me / Auto Protect / AI Native; the last two need a claimed account; AI
-Native goes through the **Droppable** screen, its opt-in) → Claim (email + 6-digit code:
-`updateUser({email})` then `verifyOtp({type:'email_change'})`) → Home ("YOU'RE COVERED" or
+Native goes through the **Droppable** screen, its opt-in) → **Sign in with Google** (the
+anonymous account is linked: `linkIdentity` with Google's ID token) → Home ("YOU'RE COVERED" or
 "ACTION NEEDED", next kickoff, watched starters, protection level, last receipt, Roster
 Advice when AI Native) · Activity (receipts; proposals with Approve / Decline) · **Advice**
 (the AI's suggestions, Do it / Not now) · Settings (protection, replacement order with
 up/down, droppable players, **Watch another league** from the stored sign-in's list, sign in
 to ESPN again, **Forget my ESPN sign-in**, **Delete my account**, About).
 
-**Sign in to a claimed account** (Welcome, Settings, and the claim screen when the email
-is taken): email + 6-digit code, `signInWithOtp({email, options:{shouldCreateUser:false}})`
-then `verifyOtp({type:'email'})`, so a reinstall or a second phone gets the same account
-back instead of starting a new anonymous one beside it. Before the code is verified, the
-anonymous account's own `credentials` row is deleted, so nothing keeps running as it. The
-"Magic Link" email template must carry `{{ .Token }}` too.
+**Back to an account from another phone or install** (the same screen, from Welcome and
+Settings): when the Google account already has a RosterBots account, `signInWithIdToken`
+signs in to it instead of linking, so a reinstall or a second phone gets the same account
+back rather than a new anonymous one beside it. When this phone has a league set up, the
+screen asks first. The anonymous account's own `credentials` row is deleted before the
+switch, so nothing keeps running as it. Accounts claimed by email before Oct 26 are reached
+with the same Gmail address.
 
 Push: `expo-notifications`, token upserted into `devices`. The app creates the Android
 channel `default` at high importance before asking for a token, and the service names it on

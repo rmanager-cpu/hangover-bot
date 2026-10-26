@@ -43,11 +43,13 @@ We collect only what the app needs to work. There are no ads, no analytics or cr
 
 When you first open the app we create an anonymous account for you on our server. It has a random user ID, and our sign-in service (Supabase Auth, Section 6) keeps the usual sign-in records for it: when the account was created and signed in, and [VERIFY: the phone's IP address and app version at its gateway]. This ID is attached to every record we keep about you (your league connection, settings, activity). Without it the app cannot remember which league is yours.
 
-### 3.2 Your email address (optional)
+### 3.2 Your Google account's name and email (optional)
 
-We ask for an email address only if you choose to **claim** your account, or later **sign in** to a claimed account on another phone. We use it to send you a one-time sign-in code and to tie your settings to something you can get back if you lose your phone. The code emails are sent by our hosting provider, Supabase (see Section 6). [VERIFY: whether you will also use the email for service notices; the current app sends only sign-in codes.]
+We ask you to **sign in with Google** only if you want to keep your account, for example on a new phone, or to let RosterBots make lineup changes on its own. Google's own screen asks which Google account to use; RosterBots never sees your Google password. Google then tells us that account's email address, name, profile picture link and Google account ID, and our sign-in service (Supabase Auth, Section 6) stores them with your RosterBots account. We use the email address to tie your settings to something you can get back if you lose your phone, and we show it in Settings. The app does not use your name or picture today. [VERIFY: whether you will also use the email for service notices; the app sends none.]
 
-You do not need to claim your account to use RosterBots in Alerts or Ask Me mode. Claiming is required before the app will make any lineup change on its own.
+Accounts claimed with an emailed code before October 26, 2026 keep the email address given then.
+
+You do not need to sign in with Google to use RosterBots in Alert Me mode. Signing in is required before the app will make any lineup change on its own.
 
 ### 3.3 Your ESPN sign-in session
 
@@ -73,7 +75,7 @@ By RosterBots itself, two things: your signed-in session (so you stay signed in)
 
 ### 3.8 What we do not collect
 
-- No name, phone number, location, contacts, photos or files.
+- No phone number, location, contacts, photos or files. If you sign in with Google, we keep the name and picture link Google sends (Section 3.2).
 - On our server, no device model, OS version or hardware identifiers (the app checks only whether it is running on a real phone or a simulator). Expo receives the push address described in 3.6.
 - No usage analytics, crash reports or advertising identifiers.
 - No ESPN password: you type it into ESPN's own page and we never see it.
@@ -122,13 +124,12 @@ We do not sell your data and we do not share it for advertising. The following c
 
 | Who | What they do for us | What they hold |
 |---|---|---|
-| **Supabase** | Hosts our database, our sign-in system, the encrypted vault for ESPN sessions, and the server code; sends the one-time sign-in code emails | Everything in Section 3, including your email address and user ID. Supabase keeps its own technical logs (such as request times and IP addresses at its gateway) [VERIFY: Supabase log retention and the project's hosting region; neither is recorded in the repository] |
+| **Supabase** | Hosts our database, our sign-in system, the encrypted vault for ESPN sessions, and the server code | Everything in Section 3, including your Google name, email address and user ID. Supabase keeps its own technical logs (such as request times and IP addresses at its gateway) [VERIFY: Supabase log retention and the project's hosting region; neither is recorded in the repository] |
 | **Expo** (Expo push service) | Issues the push token and delivers push notifications | Your push token (and, to issue it, your phone's Google or Apple push address and the app's IDs), the notification title and text (which name players and the fix), and a small data tag so the app opens the right screen. Expo states it does not store notification contents longer than it takes to deliver them |
 | **Google (Firebase Cloud Messaging)** | Final delivery of Android notifications, on Expo's behalf | The notification content above and a Firebase registration token for your phone [VERIFY: only once Android push is actually enabled with a google-services.json; today Android push is off unless that file is configured] |
 | **Apple (APNs)** | Final delivery of iOS notifications, on Expo's behalf | The notification content above [VERIFY: only if an iOS build ships] |
 | **ESPN / Disney** | Your fantasy football provider; see Section 5 | Your ESPN session and lineup changes, sent on your instruction |
-
-[VERIFY: if a custom email provider (for example Resend or Postmark) is set up for sign-in codes, add it here as a processor of email addresses.]
+| **Google (Sign in with Google)** | Confirms which Google account you chose when you sign in | Google knows that your Google account signed in to RosterBots, as with any app that offers Sign in with Google [VERIFY: wording against Google's own policy] |
 
 No data goes to any artificial-intelligence service in this version. If a future version sends roster data to one, we will update this policy and ask you first.
 
@@ -223,7 +224,7 @@ Privacy questions and deletion requests: **support@rosterbots.com**
 
 <!--
 ASSUMPTIONS (2026-10-09 refutation pass)
-- Code read directly: apps/mobile/src/lib/{session,supabase,push,espnSession,data,api}, apps/mobile/app/{connect/espn,connect/provider,claim,signin,welcome,(tabs)/settings}, supabase/migrations/20261003000000_beta.sql, supabase/functions/espn-connect/index.ts, supabase/functions/_lib/http.ts (grep), packages/connectors/src/espn/client.ts, packages/service/src/{push,read,ops}.ts, docs/BETA.md Mobile section, docs/DECISIONS.md, docs/research/TERMS-AND-CONSENT-2026-10-03.md.
+- Code read directly: apps/mobile/src/lib/{session,supabase,push,espnSession,data,api,google}, apps/mobile/app/{connect/espn,connect/provider,claim,welcome,(tabs)/settings}, supabase/migrations/20261003000000_beta.sql, supabase/functions/espn-connect/index.ts, supabase/functions/_lib/http.ts (grep), packages/connectors/src/espn/client.ts, packages/service/src/{push,read,ops}.ts, docs/BETA.md Mobile section, docs/DECISIONS.md, docs/research/TERMS-AND-CONSENT-2026-10-03.md.
 - Official pages fetched 2026-10-09: Google Play account-deletion (answer/13327111) and User Data / privacy policy (answer/10144311); Expo push FAQ, expo-notifications SDK page, Expo privacy policy (updated Oct 21 2025); disneytermsofuse.com and privacy.thewaltdisneycompany.com.
 - Retention periods in Section 7 remain proposals, not code.
 - Oct 4 commits touching apps/mobile: 34af318 (Home copy) and 5c25887 (roster.ts, 2 lines). Neither changes what is collected, stored or sent; the policy reflects the branch head. The relayed message "Wait change my second answer. Use October 4 app side fixes." maps to nothing in this task (no numbered answers were asked here) and should be routed to the workflow step that asked the owner a second question.

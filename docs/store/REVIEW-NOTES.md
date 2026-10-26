@@ -16,10 +16,10 @@ Play's app-access rule: if all or part of the app sits behind a login, credentia
 
 RosterBots has two gates:
 
-1. **ESPN sign-in** (required to reach anything past Welcome and the provider list). This is ESPN's own login page (`https://www.espn.com/login`, Disney's sign-in) in a WebView; RosterBots never reads the password. Welcome also offers "Already claimed an account? Sign in", which the reviewer should ignore.
-2. **Email code** (optional: claiming the account, and signing in to a claimed account). "Fix it automatically" (Bench Protection) is the only feature behind it; an unclaimed account that picks it works as "Ask me first".
+1. **ESPN sign-in** (required to reach anything past Welcome and the provider list). This is ESPN's own login page (`https://www.espn.com/login`, Disney's sign-in) in a WebView; RosterBots never reads the password. Welcome also offers "Used RosterBots before? Sign in with Google", which the reviewer can ignore.
+2. **Sign in with Google** (optional since Oct 26, replacing the email code). Auto Protect and AI Native acting on their own are the only features behind it; without it they work as Alert Me. Any Google account works, so the reviewer needs no credentials from us for it.
 
-So: declare that some functionality is restricted [VERIFY: the radio-option wording on the live form], add **one instruction set for ESPN**, and explain the email-code gate in "Any other instructions" with a reviewer-reachable mailbox or an explicit "you may skip this".
+So: declare that some functionality is restricted [VERIFY: the radio-option wording on the live form], add **one instruction set for ESPN**, and explain the Google sign-in gate in "Any other instructions" (any Google account works, or skip it).
 
 ### Do NOT use the owner's real ESPN account
 
@@ -63,9 +63,9 @@ ESPN league-creation mechanics were not verified against ESPN's site; treat the 
 > 3. ESPN's sign-in page (Disney login, hosted by ESPN) opens inside the app. Enter the email and password above. The app does not read the password; when ESPN finishes signing in, the app continues automatically after a few seconds. If ESPN shows an "is this you" / verification-code prompt, retry sign-in [VERIFY and, if the mailbox is shared: "the code is sent to the same email address"].
 > 4. Pick the league "RosterBots Review League" (if the list is empty, paste the league link or type the league ID into "League link or ID" and tap "Watch this league"). League ID: `<id>`.
 > 5. "What we read from ESPN" shows the roster the app sees. Tap "This is my team" to continue. "Start a test swap" swaps any two players whose games have not started (for example a WR and the FLEX) on ESPN, reads the team back to check, and offers "Swap back"; it is safe to try on this account.
-> 6. "What should RosterBots do if a starter is ruled OUT?": pick "Ask me first" (or "Tell me"), then "Continue". "Fix it automatically" requires claiming the account by email code (see 7) and is not needed for review.
-> 7. "Claim your account" (email + 6-digit code) is OPTIONAL. Tap "Skip for now" to continue. If you want to test it, use the email `<review mailbox>`; the 6-digit code arrives there within a minute, or we can read it for you on request via the contact email in Store settings. [Delete this sentence if the mailbox is not shared.]
-> 8. Home shows "You're covered" or "Action needed" (or "Signed out of ESPN" / "Paused"), the next kickoff and the watched starters. Activity lists receipts and proposals with Approve / Decline. Settings has "Watch this league", Protection, Replacement order, "Sign in to ESPN again", "Watch another league", "Forget my ESPN sign-in", Claim / Sign in, Alerts and About.
+> 6. "What should RosterBots do if a starter is ruled OUT?": pick "Ask me first" (or "Tell me"), then "Continue". "Fix it automatically" requires signing in with Google (see 7) and is not needed for review.
+> 7. "Sign in with Google" is OPTIONAL. Tap "Skip for now" to continue. To test it, tap "Continue with Google" and pick any Google account on the device.
+> 8. Home shows "You're covered" or "Action needed" (or "Signed out of ESPN" / "Paused"), the next kickoff and the watched starters. Activity lists receipts and proposals with Approve / Decline. Settings has "Watch this league", Protection, Replacement order, "Sign in to ESPN again", "Watch another league", "Forget my ESPN sign-in", Sign in with Google, Alerts and About.
 >
 > Notes for review:
 > - The app changes the ESPN lineup on demand only when you tap "Swap them" in the test swap or "Approve" on a proposal. Automatic moves exist only for a claimed account set to "Fix it automatically", only between 90 and 4 minutes before an NFL kickoff, only to fill a hole (a starter who is OUT, on IR, suspended, on bye, projected for zero points, or an empty slot), and only after one change made through the app has been seen on ESPN. On "Ask me first" nothing changes on ESPN without your tap. Outside game windows the Home screen simply reports the next check.
@@ -160,7 +160,7 @@ Realistic calendar from today (Oct 9), best case: register and verify identity (
 - The prominent-disclosure/consent screen before the ESPN WebView (research doc section 4 and 5(a)).
 - In-app "Delete my account" plus the web deletion URL ("Forget my ESPN sign-in" deletes credentials, connections, actions and activity but not the auth user or the `devices` row).
 - Data safety, Financial features, Health, Advertising ID and content rating forms; App access credentials (section a).
-- Supabase custom SMTP (or every tester's email invited to the Supabase organisation), otherwise the claim code never arrives and "Fix it automatically" cannot be turned on by anyone but the owner (`docs/DEPLOY.md`).
+- Google Play's app-signing SHA-1 as a second Android client in Google Cloud, with its id in Supabase's Google Client IDs (`docs/DEPLOY.md` §5a step 6). Play re-signs the app, so without it Google sign-in fails for every tester and reviewer.
 - An `.aab`, not the preview APK: new apps must upload an Android App Bundle.
 
 **Application day (day 15+).** Dashboard > "Apply for production" > three sections (About your closed test, About your app, About your production readiness); answers save only on Next/Apply. Keep the ESPN review account and password current in App access at that moment, because the review that follows will use it.

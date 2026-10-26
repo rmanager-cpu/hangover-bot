@@ -53,7 +53,7 @@ export default function Welcome() {
           ))}
         </Card>
       ) : null}
-      <Button title="Already claimed an account? Sign in" variant="quiet" onPress={() => router.push("/signin")} style={{ alignSelf: "center", marginTop: space.sm }} />
+      <Button title="Used RosterBots before? Sign in with Google" variant="quiet" onPress={() => router.push("/claim")} style={{ alignSelf: "center", marginTop: space.sm }} />
     </Screen>
   );
 }

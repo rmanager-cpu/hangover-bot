@@ -104,7 +104,7 @@ Where each claim comes from (so the text can be re-checked when the code changes
 | No trades, FAAB, drops, free agents | `protection.tsx` `RULES`; BETA scope table "Out" |
 | T-90 to T-4 window for automatic moves; an approval is written whenever the user taps | `core.guard` `BETA_AUTOMATION`; `packages/service/src/decide.ts:93-151` (no window, cap or claim check on approve) |
 | Max 3 automatic moves per league per UTC day, never retried | BETA automation rule item 2 and the failed-write paragraph |
-| Needs a claimed account to move a player on its own (email + 6-digit code) | DECISIONS 2026-10-02 "No unattended writes for an anonymous user" |
+| Needs Google sign-in to move a player on its own | DECISIONS 2026-10-02 "No unattended writes for an anonymous user" |
 | Not on a bad read or an unknown kickoff | BETA guardrails 3 and 4 |
 | Sign-in never shown/logged; none kept on the phone after sign-in; encrypted on server; Forget deletes leagues, moves, receipts | README steps 3 and "Forget my ESPN sign-in"; `app/connect/espn.tsx:117-119` (one post, then `clearAll`); migration cascade and Vault trigger; `settings.tsx:23-29` |
 | Fresh read before and after, first move waits for the user's proof | BETA guardrail 5; `write_verified_at`; `decide.ts:145-148` |

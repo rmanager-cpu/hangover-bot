@@ -1,6 +1,7 @@
 // Every user starts as an anonymous Supabase session on first launch, with nothing to fill
-// in. Claiming the account by email (claim.tsx) turns the same user into a real one, which
-// is what Bench Protection needs before it may move anyone unattended.
+// in. Signing in with Google (claim.tsx, src/lib/google.ts) links Google to the same user and
+// makes it a real one, which is what Auto Protect and AI Native need before they may move
+// anyone unattended.
 
 import type { User } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
@@ -11,7 +12,7 @@ type State = { status: "loading" } | { status: "ready"; user: User } | { status:
 interface Session {
   state: State;
   user: User | null;
-  /** Claimed by email: no longer anonymous. */
+  /** Signed in (with Google, or by email before Oct 26): no longer anonymous. */
   claimed: boolean;
   retry: () => void;
 }
