@@ -127,10 +127,14 @@ test("only a pending action can be decided", async () => {
 });
 
 test("a notification is not something to approve", async () => {
-  const s = setup({ roster: achaneOut(), authority: "alerts" });
+  // A questionable starter three hours out is a wait, said and done: nothing to approve.
+  const r = team();
+  entry(r, ACHANE).player.status = "questionable";
+  const s = setup({ roster: r, at: T - 180 * MIN });
   await s.run();
-  const id = s.store.actions[0]!.id;
-  assert.equal((await decideAction(s.deps, "user-1", id, "approve")).ok, false);
+  const row = s.store.actions[0]!;
+  assert.equal(row.kind, "wait");
+  assert.equal((await decideAction(s.deps, "user-1", row.id, "approve")).ok, false);
 });
 
 // ---- decline
@@ -194,7 +198,7 @@ test("a test swap checks everything before it writes", async () => {
   assert.equal(await err(swap(WRIGHT, SHAHEED)), "same_slot: Those two are in the same slot, so swapping them changes nothing.");
   assert.equal(await err(swap(WRIGHT, HURTS)), "not_eligible: Wright can't play QB.");
   assert.equal(await err(swap(HURTS, WRIGHT)), "not_eligible: Wright can't play QB.", "checked both ways");
-  assert.equal(await err(swap(SHAHEED, DELL)), "ir: IR moves aren't part of the beta. Pick two players who aren't on IR.");
+  assert.equal(await err(swap(SHAHEED, DELL)), "ir: IR moves aren't part of the test swap. Pick two players who aren't on IR.");
 
   entry(s.espn.roster, WALKER).player.locked = true;
   assert.equal(await err(swap(WRIGHT, WALKER)), "locked: Walker's game has started, so ESPN won't let him move.");

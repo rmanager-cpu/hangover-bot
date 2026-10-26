@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PACKAGES = ["core", "connectors", "football-data", "service"];
+const PACKAGES = ["core", "connectors", "football-data", "service", "ai"];
 
 function run(root: string, ...args: string[]) {
   const r = spawnSync(process.execPath, [join(root, "scripts", "build-functions.ts"), ...args], { encoding: "utf8" });

@@ -15,8 +15,10 @@ const FUNCTIONS = join(ROOT, "supabase", "functions");
 const SHARED = join(FUNCTIONS, "_shared");
 
 /** Copied as `@rosterbots/<name>`. */
-const PACKAGES = ["core", "connectors", "football-data", "service"];
+const PACKAGES = ["core", "connectors", "football-data", "service", "ai"];
 const SUPABASE_JS = "npm:@supabase/supabase-js@2";
+/** The AI package's one dependency, resolved by Deno's npm support at the pinned version package.json names. */
+const ANTHROPIC_SDK = "npm:@anthropic-ai/sdk@1.3.0";
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -55,6 +57,7 @@ function expected(): Map<string, string> {
     imports[`@rosterbots/${pkg}`] = `../_shared/${pkg}/${entryOf(pkg)}`;
   }
   imports["@supabase/supabase-js"] = SUPABASE_JS;
+  imports["@anthropic-ai/sdk"] = ANTHROPIC_SDK;
 
   // "lock": false keeps a local `deno check` from leaving lockfiles in every function.
   const denoJson = JSON.stringify({ imports, lock: false }, null, 2) + "\n";

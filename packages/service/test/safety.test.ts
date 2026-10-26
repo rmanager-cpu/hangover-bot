@@ -149,7 +149,9 @@ test("a proposal whose players are locked is expired quietly, not withdrawn with
   s.clock.set(T - MIN);
   await s.run();
   assert.equal(s.store.actions[0]!.status, "expired");
-  assert.equal(s.store.activity.length, 1);
+  // No withdrawal notice; the T-3 all-clear still says what is wrong, locked or not.
+  assert.deepEqual(s.store.activity.map((x) => x.type), ["ACTION_RECOMMENDED", "ALL_CLEAR"]);
+  assert.equal(s.store.activity[1]!.body, "Achane was ruled OUT. Fix it in the ESPN app.");
 });
 
 // ---- no automatic move until a change has been seen landing on ESPN

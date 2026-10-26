@@ -13,12 +13,13 @@ for B in "$PWD"/supabase/.bundle/*/; do
   O="supabase/.bundle-min/$fn"
   mkdir -p "$O"
   npx -y esbuild "$B/index.ts" --bundle --format=esm --platform=neutral --target=esnext \
-    --minify-whitespace --minify-syntax --external:@supabase/supabase-js \
+    --minify-whitespace --minify-syntax --external:@supabase/supabase-js --external:@anthropic-ai/sdk \
     "--alias:@rosterbots/core=$B/_shared/core/index.ts" \
     "--alias:@rosterbots/connectors=$B/_shared/connectors/index.ts" \
     "--alias:@rosterbots/football-data=$B/_shared/football-data/index.ts" \
     "--alias:@rosterbots/service=$B/_shared/service/index.ts" \
+    "--alias:@rosterbots/ai=$B/_shared/ai/index.ts" \
     --outfile="$O/index.js" --log-level=warning
-  printf '{\n  "imports": { "@supabase/supabase-js": "npm:@supabase/supabase-js@2" },\n  "lock": false\n}\n' > "$O/deno.json"
+  printf '{\n  "imports": { "@supabase/supabase-js": "npm:@supabase/supabase-js@2", "@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@1.3.0" },\n  "lock": false\n}\n' > "$O/deno.json"
   printf '%-17s %6s bytes\n' "$fn" "$(wc -c < "$O/index.js")"
 done

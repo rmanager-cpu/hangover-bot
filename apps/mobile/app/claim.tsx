@@ -40,12 +40,17 @@ export default function Claim() {
   const [note, setNote] = useState<string | null>(null);
 
   const done = async () => {
-    // The reason they came here: turn Bench Protection on now that it's allowed.
+    // The reason they came here: turn the level on now that it's allowed. AI Native's own
+    // opt-in is the Droppable screen, so that comes next instead.
+    if (then === "ai_rescue" && id) {
+      router.replace({ pathname: "/droppable", params: { id, then: "ai_rescue", ...(setup === "1" ? { setup: "1" } : {}) } });
+      return;
+    }
     if (then === "bench_protection" && id) {
       try {
         await data.updateConnection(id, { authority: "bench_protection" });
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Couldn't turn on Bench Protection. Try again in Settings.");
+        setError(e instanceof Error ? e.message : "Couldn't turn on Auto Protect. Try again in Settings.");
         return;
       }
     }
@@ -101,12 +106,12 @@ export default function Claim() {
   return (
     <Screen
       footer={
-        setup === "1" && then !== "bench_protection" ? <Button title="Skip for now" variant="quiet" onPress={finishSetup} /> : undefined
+        setup === "1" && then !== "bench_protection" && then !== "ai_rescue" ? <Button title="Skip for now" variant="quiet" onPress={finishSetup} /> : undefined
       }
     >
       <Header
         title="Claim your account"
-        subtitle="Add your email so your league stays yours if you change phones. It's also what lets Bench Protection make moves on its own: without it, I ask you first."
+        subtitle="Add your email so your league stays yours if you change phones. It's also what lets Auto Protect and AI Native make moves on their own: without it, I ask you first."
         style={{ marginBottom: space.sm }}
       />
       <Muted style={{ marginBottom: space.xl }}>No password. We email you a 6-digit code.</Muted>

@@ -4,8 +4,8 @@
 // bench to RB. Achane is on your bench." Times are US Eastern, the way kickoffs are
 // given, and say so: the owner is on Pacific time.
 
-import { BENCH, IR, NOBODY_ELIGIBLE, isStarting, type Candidate, type Finding, type Move, type Player, type Roster, type Slot, type Step } from "@rosterbots/core";
-import type { ActionStatus, ActivityType } from "./types.ts";
+import { BENCH, IR, NOBODY_ELIGIBLE, isStarting, type Candidate, type Finding, type Move, type Player, type Room, type Roster, type Slot, type Step } from "@rosterbots/core";
+import type { ActionStatus, ActivityType, StoredTransaction } from "./types.ts";
 
 export interface Notice {
   type: ActivityType;
@@ -114,9 +114,17 @@ export function problemOf(f: Finding): string {
 /** Where a candidate's move puts a player: the hole, or the slot a shifted starter vacated. */
 const lands = (c: Candidate, f: Finding, id: string): Slot => c.moves.find((m) => m.playerId === id)?.to ?? f.slot;
 
-/** "Start Jaylen Wright at RB", or with shifts, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB". */
+/** How a free agent's roster spot is made: "into an open roster spot", "moving Tank Dell to IR", "dropping Rashid Shaheed". */
+export function howText(room: Room | StoredTransaction["room"]): string {
+  if (room.how === "open") return "into an open roster spot";
+  const name = "player" in room ? room.player.name : room.name;
+  return room.how === "ir" ? `moving ${name} to IR` : `dropping ${name}`;
+}
+
+/** "Start Jaylen Wright at RB", or with shifts, "Start Rashid Shaheed at FLEX and move Kenneth Walker III to RB"; an add says so first. */
 function startText(f: Finding, c: Candidate): string {
-  const start = `Start ${c.player.name} at ${slotName(lands(c, f, c.player.id))}`;
+  const slot = slotName(c.moves.find((m) => m.playerId === c.player.id)?.to ?? c.add?.to ?? f.slot);
+  const start = c.add ? `Add ${c.player.name} (${howText(c.add.room)}) and start him at ${slot}` : `Start ${c.player.name} at ${slot}`;
   return c.via?.length ? `${start} and move ${list(c.via.map((p) => `${p.name} to ${slotName(lands(c, f, p.id))}`))}` : start;
 }
 
@@ -136,10 +144,16 @@ export const HELD_FAILED_NOW = "a change failed this check";
 export const HELD_FAILED_WEEK = "a change failed this week";
 export const HELD_UNPROVEN = "ESPN changes not proven yet";
 export const HELD_JUDGMENT = "now a judgment call";
+/** A reason of the form "ask: <why>": a No-Cray rule only the user's tap may waive, or an AI that gave no answer. */
+export const HELD_ASK = "ask: ";
 
 /** Why a move that could have been automatic is waiting for a tap. */
 export function heldText(held: { reason: string; autoAt?: string }, now: Date): string {
   if (held.autoAt) return `I'll do it automatically at ${clock(held.autoAt, now)} if you don't decide first.`;
+  if (held.reason.startsWith(HELD_ASK)) {
+    const why = held.reason.slice(HELD_ASK.length);
+    return `${why.charAt(0).toUpperCase()}${why.slice(1)}, so this one is your call.`;
+  }
   switch (held.reason) {
     case "too close to kickoff for an automatic move":
       return "It's too close to kickoff for me to do it on my own.";
@@ -170,11 +184,11 @@ export function heldText(held: { reason: string; autoAt?: string }, now: Date): 
   }
 }
 
-export function proposal(f: Finding, c: Candidate, held: { reason: string; autoAt?: string } | undefined, now: Date, aside?: string): Notice {
-  // With a shift, "instead" would read as attaching to the shifted starter: say who sits.
-  const ask = c.via?.length ? `${changeOf(f, c)}?` : `${startText(f, c)}${f.starter ? " instead" : ""}?`;
+export function proposal(f: Finding, c: Candidate, held: { reason: string; autoAt?: string } | undefined, now: Date, aside?: string, reason = problemOf(f)): Notice {
+  // With a shift, or an add, "instead" would read as attaching to the wrong name: say who sits.
+  const ask = c.via?.length || c.add ? `${changeOf(f, c)}?` : `${startText(f, c)}${f.starter ? " instead" : ""}?`;
   const why = held ? heldText(held, now) : aside;
-  return { type: "ACTION_RECOMMENDED", title: problemOf(f), body: [ask, "Tap to approve.", why].filter(Boolean).join(" ") };
+  return { type: "ACTION_RECOMMENDED", title: reason, body: [ask, "Tap to approve.", why].filter(Boolean).join(" ") };
 }
 
 /** notify, wait and ask_user: things to know, nothing to approve. */
@@ -262,31 +276,71 @@ function lead(moves: Move[]): Move | undefined {
  */
 export const PROVED = "That's the first change from RosterBots that ESPN has shown in this league, so Bench Protection may now make moves here on its own.";
 
-export function receipt(reason: string | null, moves: Move[], who: Lookup, now: Date, proof?: string): Notice {
+/** "Added Jordan Mason, dropping Rashid Shaheed." */
+const addedText = (tx: StoredTransaction): string => `Added ${tx.add.name}, ${howText(tx.room)}.`;
+
+/** A reason as a sentence: a finding's ("Achane was ruled OUT") gets its full stop; advice already has one. */
+const sentence = (reason: string | null): string => (reason ? (/[.!?]$/.test(reason) ? reason : reason + ".") : "");
+
+export function receipt(reason: string | null, moves: Move[], who: Lookup, now: Date, proof?: string, tx?: StoredTransaction | null): Notice {
   const m = lead(moves);
-  const title = m ? `${who(m.playerId)?.name ?? "A player"} is in at ${slotName(m.to)}` : "Lineup updated";
-  const body = [reason ? reason + "." : "", movesText(moves, who), `Done at ${clock(now, now)}.`, proof ?? ""].filter(Boolean).join(" ");
+  const title = m ? `${who(m.playerId)?.name ?? "A player"} is in at ${slotName(m.to)}` : tx ? `${tx.add.name} is in at ${slotName(tx.add.to)}` : "Lineup updated";
+  const body = [sentence(reason), tx ? addedText(tx) : "", movesText(moves, who), `Done at ${clock(now, now)}.`, proof ?? ""].filter(Boolean).join(" ");
   return { type: "ACTION_COMPLETED", title, body };
 }
 
-/** A write that a fresh read did not confirm. Says what ESPN shows now, when we know. */
-export function failure(reason: string | null, moves: Move[], who: Lookup, after: Roster | undefined, deadline: string | null, now: Date): Notice {
+/** A write that a fresh read did not confirm. Says what ESPN shows now, when we know, and for an add how far it got. */
+export function failure(
+  reason: string | null,
+  moves: Move[],
+  who: Lookup,
+  after: Roster | undefined,
+  deadline: string | null,
+  now: Date,
+  tx?: StoredTransaction | null,
+  stage?: "ir" | "add" | "lineup" | "done",
+): Notice {
   const m = lead(moves);
   const full = (id: string) => who(id)?.name ?? "a player";
-  const name = m ? full(m.playerId) : "";
+  const name = m ? full(m.playerId) : tx ? tx.add.name : "";
   // The whole change, so a shift that did not land is not read as the shifted starter being benched.
   const shifts = moves.filter((x) => x !== m && isStarting(x.to));
-  const title = m ? `Couldn't start ${name} at ${slotName(m.to)}` : "A lineup change didn't go through";
-  const asked = m
-    ? `I asked ESPN to start ${name} at ${slotName(m.to)}${shifts.length ? ` and move ${list(shifts.map((x) => `${full(x.playerId)} to ${slotName(x.to)}`))}` : ""}`
-    : "I asked ESPN to change your lineup";
+  const slot = m ? slotName(m.to) : tx ? slotName(tx.add.to) : "";
+  const title = name && slot ? `Couldn't start ${name} at ${slot}` : "A lineup change didn't go through";
+  const asked = tx
+    ? `I asked ESPN to add ${tx.add.name} (${howText(tx.room)}) and start him at ${slot}`
+    : m
+      ? `I asked ESPN to start ${name} at ${slot}${shifts.length ? ` and move ${list(shifts.map((x) => `${full(x.playerId)} to ${slotName(x.to)}`))}` : ""}`
+      : "I asked ESPN to change your lineup";
+  const got = tx && stage === "ir" ? ` The IR move didn't go through, so nothing else was tried.` : tx && stage === "add" ? ` The add itself didn't go through.` : tx && stage === "lineup" ? ` He was added, but the lineup move didn't go through.` : "";
   const slotOf = (id: string) => after?.entries.find((e) => e.player.id === id)?.slot;
+  const names = [...moves.map((x) => x.playerId), ...(tx ? [tx.add.playerId, ...(tx.room.how === "open" ? [] : [tx.room.playerId])] : [])];
   const state = after
-    ? `ESPN now shows ${list(moves.map((x) => `${shortName(who(x.playerId)?.name ?? "a player")} ${where(slotOf(x.playerId))}`))}.`
+    ? `ESPN now shows ${list([...new Set(names)].map((id) => `${shortName(who(id)?.name ?? "a player")} ${where(slotOf(id))}`))}.`
     : "I couldn't read your lineup back to check.";
   const fix = deadline && Date.parse(deadline) > now.getTime() ? `Fix it in the ESPN app before ${clock(deadline, now)}.` : "Check your lineup in the ESPN app.";
-  const body = [reason ? reason + "." : "", `${asked}, but it didn't go through, and I won't try it again on my own.`, state, fix];
+  const body = [sentence(reason), `${asked}, but it didn't go through, and I won't try it again on my own.${got}`, state, fix];
   return { type: "ACTION_FAILED", title, body: body.filter(Boolean).join(" ") };
+}
+
+/** T-3 before a kickoff: the lineup is set for it, or what is still wrong. Every level. */
+export function allClear(kickoff: string, wrong: string[], waiting: number, now: Date): Notice {
+  const when = clock(kickoff, now);
+  if (!wrong.length && !waiting) return { type: "ALL_CLEAR", title: `All clear for ${when}`, body: `Every starter kicking off at ${when} is set.` };
+  const taps = waiting ? `${waiting === 1 ? "One move is" : `${waiting} moves are`} waiting for your answer in the app.` : "";
+  const problems = wrong.length ? `${list(wrong)}. Fix it in the ESPN app.` : "";
+  return { type: "ALL_CLEAR", title: `Still wrong before ${when}`, body: [problems, taps].filter(Boolean).join(" ") };
+}
+
+/** Roster Advice has new suggestions. One push for the lot. */
+export function adviceNotice(titles: string[]): Notice {
+  const n = titles.length;
+  return { type: "ADVICE", title: n === 1 ? "Roster Advice: one suggestion" : `Roster Advice: ${n} suggestions`, body: `${list(titles)}. Open Advice in the app; nothing happens without your tap.` };
+}
+
+/** AI Native found no free agent for a hole either. */
+export function nothingOutside(slot: Slot, why?: string): Notice {
+  return { type: "ACTION_REQUIRED", title: `Nobody to fill ${slotName(slot)}`, body: `No free agent fits ${slotName(slot)} either${why ? ` (${why})` : ""}. Fix it in the ESPN app.` };
 }
 
 export function signIn(teamName: string | null, wrongTeam: boolean): Notice {

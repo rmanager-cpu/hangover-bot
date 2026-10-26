@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Alert, StyleSheet, Switch, View } from "react-native";
 import { api, messageOf } from "../../src/lib/api";
 import { dbMessage, useData } from "../../src/lib/data";
-import { agoText, AUTHORITY } from "../../src/lib/format";
+import { agoText, AUTHORITY, levelOf } from "../../src/lib/format";
 import { usePush } from "../../src/lib/push";
 import { useSession } from "../../src/lib/session";
 import { supabase } from "../../src/lib/supabase";
@@ -82,7 +82,9 @@ export default function Settings() {
     );
   };
 
-  const authority = AUTHORITY[conn.authority === "ai_rescue" ? "bench_protection" : conn.authority].name;
+  const level = levelOf(conn.authority);
+  const authority = AUTHORITY[level].name;
+  const waitingAdvice = data.advice.filter((a) => a.connectionId === conn.id && a.status === "pending").length;
   const watching = conn.status === "active";
   const statusLine =
     conn.status === "needs_reauth"
@@ -144,8 +146,18 @@ export default function Settings() {
           title="Replacement order"
           value={conn.replacementOrder.length ? "Yours" : "ESPN projections"}
           onPress={() => router.push({ pathname: "/order", params: { id: conn.id } })}
-          last
+          last={level !== "ai_rescue"}
         />
+        {level === "ai_rescue" ? (
+          <>
+            <Row
+              title="Droppable players"
+              value={conn.droppable.length ? `${conn.droppable.length} marked` : "None"}
+              onPress={() => router.push({ pathname: "/droppable", params: { id: conn.id } })}
+            />
+            <Row title="Roster Advice" value={waitingAdvice ? `${waitingAdvice} waiting` : undefined} onPress={() => router.push("/advice")} last />
+          </>
+        ) : null}
       </Card>
 
       {data.connections.length > 1 ? (
@@ -184,7 +196,7 @@ export default function Settings() {
           <Row title="Claimed" value={user?.email ?? undefined} />
         ) : (
           <>
-            <Row title="Claim your account" detail="Needed for Bench Protection to act on its own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} />
+            <Row title="Claim your account" detail="Needed for Auto Protect and AI Native to act on their own" onPress={() => router.push({ pathname: "/claim", params: { id: conn.id } })} />
             <Row title="Sign in to an account you claimed before" detail="New phone, or a reinstall" onPress={() => router.push("/signin")} />
           </>
         )}

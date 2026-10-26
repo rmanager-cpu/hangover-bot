@@ -1,14 +1,15 @@
-// Pick the league to watch. ESPN's league list comes from the sign-in; when it couldn't be
-// read (that lookup is unproven), the league id can be typed or pasted from a league link.
+// Pick the league to watch. ESPN's league list comes from the sign-in, straight after it or,
+// from Settings' "Watch another league", from the sign-in already stored (the leagues
+// function), so there is nothing to type. Only when ESPN won't list them (that lookup is
+// unproven) can the league id be typed or pasted from a league link.
 
 import type { LeagueSummary } from "@rosterbots/connectors";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { api, ApiError, messageOf } from "../../src/lib/api";
+import { api, ApiError, messageOf, type EspnConnectResult } from "../../src/lib/api";
 import { useData } from "../../src/lib/data";
 import { useFlow } from "../../src/lib/flow";
-import { supabase } from "../../src/lib/supabase";
 import { space } from "../../src/theme";
 import { Banner, Body, Button, Field, H2, Header, Loading, Muted, Option, Pill, Screen } from "../../src/ui";
 
@@ -24,31 +25,43 @@ export default function Leagues() {
   const flow = useFlow();
   const data = useData();
   const signIn = flow.signIn;
-  const leagues: LeagueSummary[] = signIn?.leagues ?? [];
+  // The list: the sign-in's, or the one the stored sign-in gives when arriving from Settings.
+  const [listed, setListed] = useState<EspnConnectResult | null>(signIn);
   const [credentialId, setCredentialId] = useState<string | null>(signIn?.credentialId ?? null);
   const [looking, setLooking] = useState(!signIn);
-  // One league needs no choosing.
-  const [selected, setSelected] = useState<string | null>(leagues.length === 1 ? leagues[0]!.leagueId : null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ message: string; signIn: boolean } | null>(null);
 
-  // Arriving from Settings rather than straight from sign-in: use the stored ESPN sign-in.
+  // Arriving from Settings rather than straight from sign-in: ask the server for the leagues
+  // the stored sign-in belongs to. Without a sign-in, there is nothing to list.
   useEffect(() => {
     if (signIn) return;
-    supabase
-      .from("credentials")
-      .select("id,status")
-      .eq("provider", "espn")
-      .maybeSingle()
-      .then(({ data: row }) => {
-        setCredentialId(typeof row?.id === "string" ? row.id : null);
-        setLooking(false);
-      });
+    let live = true;
+    api
+      .leagues()
+      .then((r) => {
+        if (!live) return;
+        setListed(r);
+        setCredentialId(r.credentialId);
+      })
+      .catch((e) => {
+        if (!live) return;
+        if (e instanceof ApiError && e.code === "not_found") setCredentialId(null);
+        else setError({ message: messageOf(e), signIn: e instanceof ApiError && e.code === "espn_rejected" });
+      })
+      .finally(() => live && setLooking(false));
+    return () => {
+      live = false;
+    };
   }, [signIn]);
 
-  const lookupFailed = !signIn || signIn.leagueLookupFailed || leagues.length === 0;
+  const leagues: LeagueSummary[] = listed?.leagues ?? [];
   const watching = new Set(data.connections.map((c) => c.leagueId));
+  // One league not yet watched needs no choosing.
+  const unwatched = leagues.filter((l) => !watching.has(l.leagueId));
+  const picked = selected ?? (unwatched.length === 1 ? unwatched[0]!.leagueId : null);
 
   const watch = async (leagueId: string) => {
     if (!credentialId || busy) return;
@@ -81,16 +94,25 @@ export default function Leagues() {
 
   const typedId = leagueIdFrom(typed);
   const heading = leagues.length
-    ? { title: "Choose your league", subtitle: `We found ${leagues.length} ${leagues.length === 1 ? "league" : "leagues"} on ESPN.` }
+    ? signIn
+      ? { title: "Choose your league", subtitle: `We found ${leagues.length} ${leagues.length === 1 ? "league" : "leagues"} on ESPN.` }
+      : { title: "Watch another league", subtitle: `Your ESPN sign-in is in ${leagues.length} ${leagues.length === 1 ? "league" : "leagues"}. Pick one to watch.` }
     : signIn
       ? { title: "Enter your league", subtitle: "ESPN didn't hand over your league list this time." }
-      : { title: "Watch another league", subtitle: "Paste the league's link, or type its id." };
+      : { title: "Watch another league", subtitle: "ESPN didn't hand over your league list. Paste the league's link, or type its id." };
 
   return (
     <Screen
       footer={
         leagues.length ? (
-          <Button title="Continue" arrow large disabled={!selected || !!busy} busy={!!busy && busy === selected} onPress={() => selected && watch(selected)} />
+          <Button
+            title={picked && watching.has(picked) ? "Already watching" : "Watch this league"}
+            arrow
+            large
+            disabled={!picked || watching.has(picked) || !!busy}
+            busy={!!busy && busy === picked}
+            onPress={() => picked && watch(picked)}
+          />
         ) : undefined
       }
     >
@@ -104,7 +126,7 @@ export default function Leagues() {
       ) : null}
 
       {leagues.map((l) => (
-        <Option key={l.leagueId + ":" + l.season} tone="light" selected={selected === l.leagueId} disabled={!!busy} onPress={() => setSelected(l.leagueId)}>
+        <Option key={l.leagueId + ":" + l.season} tone="light" selected={picked === l.leagueId} disabled={!!busy} onPress={() => setSelected(l.leagueId)}>
           <H2 style={{ fontSize: 20 }}>{l.leagueName || `League ${l.leagueId}`}</H2>
           <Muted style={{ marginTop: 2 }}>{l.teamName ? `Your team: ${l.teamName}` : `League ${l.leagueId}`}</Muted>
           {watching.has(l.leagueId) ? (

@@ -93,9 +93,16 @@ export interface ConnectionRow {
   lastCheckedAt: string | null; nextCheckAt: string | null;
   /** When a change the user made through RosterBots was last seen on a fresh read here; null until then. */
   writeVerifiedAt: string | null;
+  /** AI Native (AI-NATIVE.md): the Droppable switches, and when Roster Advice last ran. */
+  droppable: string[]; advisedAt: string | null;
 }
 
-export type ActionKind = "notify" | "wait" | "propose" | "ask_user" | "execute";
+export type ActionKind = "notify" | "wait" | "propose" | "ask_user" | "execute" | "advise";
+/** A free agent in, and the room made for him, as an action stores it (AI-NATIVE.md). */
+export interface StoredTransaction {
+  add: { playerId: string; name: string; to: Slot };
+  room: { how: "open" } | { how: "ir" | "drop"; playerId: string; name: string; from: Slot; outForSeason?: boolean };
+}
 export type ActionStatus = "pending" | "approved" | "declined" | "expired" | "superseded" | "done" | "failed";
 export interface NewAction {
   connectionId: string; userId: string;
@@ -105,7 +112,8 @@ export interface NewAction {
   summary: string;   // one line a person reads: "Start Jaylen Wright at RB instead of De'Von Achane"
   reason: string;    // why: "Achane was ruled OUT"
   deadline: string | null; autoAt: string | null;
-  signature: string; // kind + finding key + moves, for dedupe
+  signature: string; // kind + finding key + moves (+ the transaction), for dedupe
+  transaction?: StoredTransaction | null; sources?: string[] | null;
 }
 export interface ActionRow extends NewAction {
   id: string; createdAt: string; decidedAt: string | null; executedAt: string | null; result: unknown;
@@ -113,7 +121,8 @@ export interface ActionRow extends NewAction {
 
 export type ActivityType =
   | "STATUS_CHANGED" | "ACTION_REQUIRED" | "ACTION_RECOMMENDED"
-  | "ACTION_COMPLETED" | "ACTION_FAILED" | "PREGAME_WARNING";
+  | "ACTION_COMPLETED" | "ACTION_FAILED" | "PREGAME_WARNING"
+  | "ALL_CLEAR" | "ADVICE";
 export interface ActivityEntry { userId: string; connectionId: string; type: ActivityType; title: string; body: string; data?: Record<string, unknown> }
 
 export interface Store {
@@ -137,6 +146,11 @@ export interface Store {
   failedWrites(connectionId: string, period: number): Promise<number>;
   /** A change of the user's was seen on a fresh read (`at`), or a test swap was not (null). */
   setWriteVerified(connectionId: string, at: string | null): Promise<void>;
+  /** Actions with a transaction, status 'approved' or 'done', any period (the no-churn rule). */
+  transactions(connectionId: string): Promise<ActionRow[]>;
+  /** Kind 'execute', status 'done', this period (the T-15 fill upgrade). */
+  doneExecutes(connectionId: string, period: number): Promise<ActionRow[]>;
+  setAdvised(connectionId: string, at: string): Promise<void>;
   addActivity(e: ActivityEntry): Promise<void>;
   pushTokens(userId: string): Promise<string[]>;
 }
@@ -144,6 +158,8 @@ export interface Push { send(tokens: string[], msg: { title: string; body: strin
 export type ConnectorFactory = (creds: { swid: string; espnS2: string }, season: number) => FantasyConnector;
 export interface Deps {
   store: Store; push: Push; connector: ConnectorFactory; now: () => Date; policy: AutomationPolicy;
+  /** The AI (core's Judge and Advisor), when the deployment has a key. Without it AI Native runs as Auto Protect plus questions. */
+  ai?: { judge: Judge; advisor?: Advisor };
   /** Waits before a second look at ESPN after one refusal. Defaults to a timer; tests pass one that returns at once. */
   pause?: (ms: number) => Promise<void>;
 }
@@ -153,6 +169,8 @@ export function protectConnection(deps: Deps, conn: ConnectionRow): Promise<Chec
 
 export type DecisionResult = { ok: true; status: ActionStatus; message: string } | { ok: false; error: string; message: string };
 export function decideAction(deps: Deps, userId: string, actionId: string, decision: "approve" | "decline"): Promise<DecisionResult>;
+/** Roster Advice for one league, when due (AI-NATIVE.md). Never throws. */
+export function adviseConnection(deps: Deps, conn: ConnectionRow): Promise<AdviceSummary>;
 
 export type SwapResult = { ok: true; message: string; after: ReadSummary } | { ok: false; error: string; message: string };
 export function manualSwap(deps: Deps, userId: string, connectionId: string, playerIdA: string, playerIdB: string): Promise<SwapResult>;
@@ -165,8 +183,8 @@ export interface ReadSummary {
 }
 export function summarizeRead(roster: Roster, now: Date): ReadSummary;
 
-/** Cadence: 1 min if any rostered player kicks off within 10 min (the window runs to T-4); 2 min within 100 min; 15 min within 12 h; else 60 min. Counted from the minute boundary `now` is in, so the cron tick that follows takes it. */
-export function nextCheckAt(roster: Roster | null, now: Date): Date;
+/** Cadence: 1 min if any rostered player kicks off within 10 min (16 for AI Native; the window runs to T-4); 2 min within 100 min; 15 min within 12 h; else 60 min. Counted from the minute boundary `now` is in, so the cron tick that follows takes it. */
+export function nextCheckAt(roster: Roster | null, now: Date, everyMinuteWithin?: number): Date;
 
 export function expoPush(fetchImpl?: typeof fetch): Push; // POST https://exp.host/--/api/v2/push/send, channelId "default"
 ```
@@ -177,8 +195,9 @@ ACTION_REQUIRED "Sign in to ESPN again", pushes, and stops) → incomplete? (`ro
 false, or no kickoff for anyone who could play: outcome `error`, the roster not saved, the
 next check within 5 minutes, and on the third in a row the user told once a period) → settle
 writes a dead run left in flight → settings (authority, `accountClaimed`, bench swaps, order;
-`ai_rescue` treated as `bench_protection`) → `evaluate` → `plan` → `guard` → per step, then
-withdraw proposals for problems the read no longer shows:
+a stored `alerts` read as `ask_me`; `ai_rescue` with the add, drop and IR permissions on) →
+`evaluate` → `plan` → `guard` → per step, then withdraw proposals for problems the read no
+longer shows, then AI Native's T-15 step and the T-3 all-clear (`AI-NATIVE.md`):
 
 - **Dedupe** by `signature` against `actionsFor(connection, findingKey, period)`. The same
   step is never announced twice. A pending proposal for the same finding with **different**
@@ -221,9 +240,9 @@ All tables RLS-on. Clients use the anon key; Edge Functions use the service role
 | Table | Columns | Client access |
 |---|---|---|
 | `credentials` | `id uuid pk`, `user_id uuid → auth.users`, `provider text default 'espn'`, `secret_id uuid` (Vault), `status text`, `created_at`, `updated_at`, unique (`user_id`,`provider`) | select own, **not** `secret_id` (column grants); **delete own** ("Forget my ESPN sign-in": cascades to connections, actions and activity, and a trigger removes the Vault secret) |
-| `connections` | `id`, `user_id`, `credential_id → credentials`, `provider`, `league_id text`, `season int`, `team_id text`, `team_name`, `league_name`, `status text check (active, needs_reauth, paused)`, `authority text check (alerts, ask_me, bench_protection, ai_rescue) default 'ask_me'`, `bench_swaps bool default true`, `replacement_order text[] default '{}'`, `max_auto_moves_per_day int default 3`, `last_checked_at`, `next_check_at default now()`, `last_roster jsonb`, `last_roster_at`, `write_verified_at`, `created_at`, unique (`user_id`,`league_id`,`season`) | select own; update own **only** `authority`, `bench_swaps`, `replacement_order`, `status` (to `paused` or `active`) |
-| `actions` | `id`, `connection_id`, `user_id`, `finding_key`, `period int`, `kind`, `status`, `moves jsonb`, `summary`, `reason`, `deadline`, `auto_at`, `signature`, `created_at`, `decided_at`, `executed_at`, `result jsonb` | select own |
-| `activity` | `id`, `user_id`, `connection_id`, `type`, `title`, `body`, `data jsonb`, `created_at` | select own |
+| `connections` | `id`, `user_id`, `credential_id → credentials`, `provider`, `league_id text`, `season int`, `team_id text`, `team_name`, `league_name`, `status text check (active, needs_reauth, paused)`, `authority text check (alerts, ask_me, bench_protection, ai_rescue) default 'ask_me'`, `bench_swaps bool default true`, `replacement_order text[] default '{}'`, `max_auto_moves_per_day int default 3`, `last_checked_at`, `next_check_at default now()`, `last_roster jsonb`, `last_roster_at`, `write_verified_at`, `droppable text[] default '{}'`, `advised_at`, `created_at`, unique (`user_id`,`league_id`,`season`) | select own; update own **only** `authority`, `bench_swaps`, `replacement_order`, `droppable`, `status` (to `paused` or `active`) |
+| `actions` | `id`, `connection_id`, `user_id`, `finding_key`, `period int`, `kind` (`notify`, `wait`, `propose`, `ask_user`, `execute`, `advise`), `status`, `moves jsonb`, `summary`, `reason`, `deadline`, `auto_at`, `signature`, `"transaction" jsonb`, `sources jsonb`, `created_at`, `decided_at`, `executed_at`, `result jsonb` | select own |
+| `activity` | `id`, `user_id`, `connection_id`, `type` (the six, plus `ALL_CLEAR`, `ADVICE`), `title`, `body`, `data jsonb`, `created_at` | select own |
 | `devices` | `id`, `user_id`, `expo_push_token text unique`, `platform`, `updated_at` | select/insert/update/delete own |
 
 Vault functions, `security definer`, executable by `service_role` only:
@@ -250,7 +269,8 @@ Deno. Shared code is copied from `packages/*/src` into `supabase/functions/_shar
 | `read` | user JWT | `{connectionId}` → `ReadSummary` (fresh read, saves `last_roster`); 409 `wrong_team` if the sign-in now manages a different team |
 | `decide` | user JWT | `{actionId, decision}` → `DecisionResult` |
 | `swap` | user JWT | `{connectionId, playerIdA, playerIdB}` → `SwapResult` |
-| `check` | `x-cron-secret` | runs `protectConnection` for up to 25 due connections → `{checked, deferred, results: CheckSummary[]}`; 503 `not_configured` while `CRON_SECRET` is unset |
+| `check` | `x-cron-secret` | runs `protectConnection` for up to 25 due connections, then Roster Advice for one AI Native league whose moment has come → `{checked, deferred, results: CheckSummary[], advised?}`; 503 `not_configured` while `CRON_SECRET` is unset |
+| `leagues` | user JWT | `{season?}` → `{credentialId, leagues: LeagueSummary[], leagueLookupFailed}` from the stored ESPN sign-in, for "Watch another league"; 404 `not_found` without a sign-in |
 | `delete-account` | user JWT | `{}` → `{ok: true}`. Deletes the caller's own `auth.users` row; the five tables cascade from it (`credentials`'s own trigger drops the Vault secret), so one call removes everything: ESPN session, leagues, moves, receipts, push token. Works for an unclaimed (anonymous) account too. Google Play's account-deletion requirement, `docs/store/`. |
 
 "User JWT" is checked **by the function** (`_lib/auth.ts`, `auth.getUser` on the bearer
@@ -280,12 +300,14 @@ and consent** (Google Play's prominent disclosure; Agree and continue, on every 
 store (`@react-native-cookies/cookies`, WebKit store on iOS), falling back to `document.cookie`
 → `espn-connect` → league list (manual league-id entry if lookup failed) → `connection-setup`
 → **What we read** (players, slots, statuses, kickoffs, locks, plus **Test swap**) →
-Protection (Alerts / Ask Me / Bench Protection; AI Rescue "Coming soon"; Bench Protection
-needs a claimed account) → Claim (email + 6-digit code: `updateUser({email})` then
-`verifyOtp({type:'email_change'})`) → Home ("YOU'RE COVERED" or "ACTION NEEDED", next kickoff,
-watched starters, protection level, last receipt) · Activity (receipts; proposals with
-Approve / Decline) · Settings (protection, replacement order with up/down, sign in to ESPN
-again, **Forget my ESPN sign-in**, **Delete my account**, About).
+Protection (Alert Me / Auto Protect / AI Native; the last two need a claimed account; AI
+Native goes through the **Droppable** screen, its opt-in) → Claim (email + 6-digit code:
+`updateUser({email})` then `verifyOtp({type:'email_change'})`) → Home ("YOU'RE COVERED" or
+"ACTION NEEDED", next kickoff, watched starters, protection level, last receipt, Roster
+Advice when AI Native) · Activity (receipts; proposals with Approve / Decline) · **Advice**
+(the AI's suggestions, Do it / Not now) · Settings (protection, replacement order with
+up/down, droppable players, **Watch another league** from the stored sign-in's list, sign in
+to ESPN again, **Forget my ESPN sign-in**, **Delete my account**, About).
 
 **Sign in to a claimed account** (Welcome, Settings, and the claim screen when the email
 is taken): email + 6-digit code, `signInWithOtp({email, options:{shouldCreateUser:false}})`

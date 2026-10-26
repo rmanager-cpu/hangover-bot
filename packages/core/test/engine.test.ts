@@ -457,19 +457,34 @@ test("a questionable starter waits for the inactives window", () => {
   assert.equal(plan(f, as("ai_rescue"), NOW).do, "wait");
 });
 
-test("in the window, judgment goes to AI only at AI Rescue; below it, the user decides", () => {
+test("in the window, a starter who might play is the user's call at every level, AI Native included (owner, Oct 25: it never overrules a choice)", () => {
   const near = new Date(Date.parse(LATE) - 60 * 60_000);
   const f = rules(qRoster(LATE))[0]!;
-  assert.equal(plan(f, as("ai_rescue"), near).do, "consult_ai");
+  assert.equal(plan(f, as("ai_rescue"), near).do, "ask_user");
   assert.equal(plan(f, as("bench_protection"), near).do, "ask_user");
   assert.equal(plan(f, as("ask_me"), near).do, "ask_user");
   assert.equal(plan(f, as("alerts"), near).do, "notify");
 });
 
+// A hole whose bench options all have something to doubt and no projection: a judgment call.
+const doubtedRoster = (kickoff: string) =>
+  roster([
+    at("WR", wr("out", { status: "out", game: { kickoff } })), at("WR", wr("b")), at("FLEX", wr("c")),
+    at("BENCH", wr("d", { status: "questionable", projection: undefined })), at("BENCH", wr("e", { status: "questionable", projection: undefined })),
+  ]);
+
+test("a hole that is a judgment call goes to the AI at AI Native only; below it, the user decides", () => {
+  const near = new Date(Date.parse(EARLY) - 30 * 60_000);
+  const f = rules(doubtedRoster(EARLY))[0]!;
+  assert.equal(f.resolution.type, "judgment");
+  assert.equal(plan(f, as("ai_rescue"), near).do, "consult_ai");
+  assert.equal(plan(f, as("bench_protection"), near).do, "ask_user");
+});
+
 test("the AI may only pick from the candidates it was given", () => {
   const near = new Date(Date.parse(EARLY) - 30 * 60_000);
   const s = as("ai_rescue");
-  const step = plan(evaluate(qRoster(EARLY), near, s)[0]!, s, near) as Extract<Step, { do: "consult_ai" }>;
+  const step = plan(evaluate(doubtedRoster(EARLY), near, s)[0]!, s, near) as Extract<Step, { do: "consult_ai" }>;
   assert.equal(step.do, "consult_ai");
   assert.equal(afterAi(step, { playerId: "somebody-else", confidence: 1, reason: "" }, s).do, "ask_user");
   assert.equal(afterAi(step, undefined, s).do, "ask_user");

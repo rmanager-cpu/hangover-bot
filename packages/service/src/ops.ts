@@ -4,10 +4,10 @@
 // Never log a request to ESPN, its headers or a credential. Nothing here logs at
 // all; errors carry HTTP statuses and connection ids, never cookies.
 
-import { applied, DEFAULT_SETTINGS, type Finding, type Move, type Roster, type Settings } from "@rosterbots/core";
+import { applied, DEFAULT_SETTINGS, IR, type Candidate, type Finding, type Move, type OutsideHistory, type Player, type Roster, type Settings } from "@rosterbots/core";
 import { AuthError, ProviderError, type FantasyConnector } from "@rosterbots/connectors";
-import { inMinutes, nextCheckAt } from "./read.ts";
-import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps, Store } from "./types.ts";
+import { inMinutes, minuteWindow, nextCheckAt } from "./read.ts";
+import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps, Store, StoredTransaction } from "./types.ts";
 import { failure, signIn, type Lookup } from "./words.ts";
 
 /** How long before a second look when ESPN refuses a read: a WAF's passing block clears in seconds. */
@@ -91,14 +91,66 @@ async function readBack(deps: Deps, espn: FantasyConnector, conn: ConnectionRow)
 
 /** The connection's settings as the engine reads them. */
 export async function settingsFor(deps: Deps, conn: ConnectionRow): Promise<Settings> {
+  // Alert Me is one option (owner, Oct 25): a stored alerts reads as ask_me, a push with a tap.
+  const authority = conn.authority === "alerts" ? "ask_me" : conn.authority;
+  // AI Native may add, drop and use IR, within the No-Cray Rules and the Droppable switches.
+  const ai = authority === "ai_rescue";
   return {
     ...DEFAULT_SETTINGS,
-    // AI Rescue is not offered in the beta: it gets Bench Protection's automation and no AI.
-    authority: conn.authority === "ai_rescue" ? "bench_protection" : conn.authority,
+    authority,
     accountClaimed: await deps.store.accountClaimed(conn.userId),
-    permissions: { ...DEFAULT_SETTINGS.permissions, benchSwaps: conn.benchSwaps },
+    permissions: { ...DEFAULT_SETTINGS.permissions, benchSwaps: conn.benchSwaps, freeAgentAdds: ai, drops: ai, irMoves: ai },
     replacementOrder: conn.replacementOrder ?? [],
+    droppable: conn.droppable ?? [],
   };
+}
+
+/** A candidate's add and room, as the action row stores them. Null for a bench move. */
+export function storedTransaction(c: Candidate): StoredTransaction | null {
+  if (!c.add) return null;
+  const r = c.add.room;
+  return {
+    add: { playerId: c.player.id, name: c.player.name, position: c.player.position, to: c.add.to },
+    room:
+      r.how === "open"
+        ? { how: "open" }
+        : { how: r.how, playerId: r.player.id, name: r.player.name, from: r.from, ...(r.how === "drop" && r.player.outForSeason ? { outForSeason: true } : {}) },
+  };
+}
+
+/** The add itself landed: the player is on the roster, the drop is gone, the IR move was made. */
+export function addLanded(tx: StoredTransaction, after: Roster): boolean {
+  const at = (id: string) => after.entries.find((e) => e.player.id === id)?.slot;
+  if (at(tx.add.playerId) === undefined) return false;
+  if (tx.room.how === "drop" && at(tx.room.playerId) !== undefined) return false;
+  if (tx.room.how === "ir" && at(tx.room.playerId) !== IR) return false;
+  return true;
+}
+
+/** Did the write land, transaction included: the add on the roster, the drop gone, the IR move made, and the moves. */
+export function landed(a: Pick<ActionRow, "moves" | "transaction">, after: Roster): boolean {
+  if (a.transaction && !addLanded(a.transaction, after)) return false;
+  return applied(a.moves, after);
+}
+
+/** A failed row whose add still went through: the lineup stage was the one that did not. */
+const addStood = (a: ActionRow): boolean =>
+  a.status !== "failed" || (typeof a.result === "object" && a.result !== null && (a.result as { stage?: string }).stage === "lineup");
+
+/** What RosterBots has added and dropped here, for the No-Cray Rules' no-churn rule. A failed write whose add landed counts. */
+export async function outsideHistory(store: Store, connectionId: string, period: number): Promise<OutsideHistory> {
+  const rows = await store.transactions(connectionId);
+  const addedAt = new Map<string, string>();
+  const dropped = new Set<string>();
+  let addsThisWeek = 0;
+  for (const a of rows) {
+    const tx = a.transaction;
+    if (!tx || !addStood(a)) continue;
+    if (a.period === period) addsThisWeek++;
+    addedAt.set(tx.add.playerId, a.executedAt ?? a.createdAt);
+    if (tx.room.how === "drop") dropped.add(tx.room.playerId);
+  }
+  return { addsThisWeek, addedAt, dropped };
 }
 
 /**
@@ -148,6 +200,73 @@ export async function writeAndVerify(deps: Deps, espn: FantasyConnector, conn: C
   return { applied: applied(moves, after), after, result };
 }
 
+export interface OutsideWrite {
+  applied: boolean;
+  after: Roster;
+  /** ESPN's answers, by stage. */
+  result: Record<string, unknown>;
+  /** The lineup moves made, adjusted to wherever ESPN put the add. */
+  moves: Move[];
+  /** The stage that did not land, or done. */
+  stage: "ir" | "add" | "lineup" | "done";
+}
+
+/**
+ * An add from outside the roster, in the owner's order: the IR move that makes room, if
+ * that is the room; then the add, with the drop if that is the room; then the lineup moves.
+ * Each stage is read back before the next, and the first that ESPN does not show stops it:
+ * the receipt says exactly how far it got. Throws only if a read back fails twice.
+ */
+export async function writeOutsideAndVerify(deps: Deps, espn: FantasyConnector, conn: ConnectionRow, candidate: Candidate, period: number): Promise<OutsideWrite> {
+  const add = candidate.add;
+  if (!add) throw new Error("writeOutsideAndVerify: not an outside candidate");
+  const result: Record<string, unknown> = {};
+  const tx = async (what: string, send: () => Promise<{ httpStatus: number; detail: string }>): Promise<void> => {
+    try {
+      const r = await send();
+      result[what] = { httpStatus: r.httpStatus, detail: r.detail };
+    } catch (e) {
+      const httpStatus = e instanceof AuthError || e instanceof ProviderError ? e.httpStatus : null;
+      result[what] = { httpStatus, detail: "", error: errorText(e) };
+    }
+  };
+  // A second look before any stage is called failed: ESPN's read host can lag its write host.
+  const confirmed = async (check: (r: Roster) => boolean): Promise<{ ok: boolean; after: Roster }> => {
+    let after = await readBack(deps, espn, conn);
+    if (check(after)) return { ok: true, after };
+    await pause(deps, RETRY_PAUSE_MS);
+    after = await readBack(deps, espn, conn);
+    return { ok: check(after), after };
+  };
+  const at = (r: Roster, id: string) => r.entries.find((e) => e.player.id === id)?.slot;
+  const room = add.room;
+  let after: Roster;
+
+  if (room.how === "ir") {
+    await tx("ir", () => espn.setLineup(conn.leagueId, [{ playerId: room.player.id, from: room.from, to: IR }], period));
+    const c = await confirmed((r) => at(r, room.player.id) === IR);
+    after = c.after;
+    if (!c.ok) return { applied: false, after, result, moves: [], stage: "ir" };
+  }
+
+  const drop = room.how === "drop" ? { playerId: room.player.id, fromSlot: room.from } : undefined;
+  await tx("add", () => espn.addDrop(conn.leagueId, { add: { playerId: candidate.player.id, toSlot: add.to }, ...(drop ? { drop } : {}) }, period));
+  const added = await confirmed((r) => at(r, candidate.player.id) !== undefined && (!drop || at(r, drop.playerId) === undefined));
+  after = added.after;
+  if (!added.ok) return { applied: false, after, result, moves: [], stage: "add" };
+
+  // The moves, from wherever ESPN put him: the slot asked for, or the bench.
+  const landedAt = at(after, candidate.player.id)!;
+  let moves = candidate.moves.map((m) => (m.playerId === candidate.player.id ? { ...m, from: landedAt } : m));
+  if (!moves.length && landedAt !== add.to) moves = [{ playerId: candidate.player.id, from: landedAt, to: add.to }];
+  moves = moves.filter((m) => m.from !== m.to);
+  if (!moves.length) return { applied: true, after, result, moves, stage: "done" };
+
+  await tx("lineup", () => espn.setLineup(conn.leagueId, moves, period));
+  const moved = await confirmed((r) => applied(moves, r));
+  return { applied: moved.ok, after: moved.after, result, moves, stage: moved.ok ? "done" : "lineup" };
+}
+
 /**
  * Keep what a fresh read showed, so Home is not a check behind after the user's own tap.
  * Never throws: the write and its receipt stand without it, and the next check saves a newer one.
@@ -160,8 +279,10 @@ export async function keepRoster(deps: Deps, conn: ConnectionRow, roster: Roster
   }
 }
 
-export function signature(kind: ActionKind, findingKey: string, moves: Move[]): string {
-  return [kind, findingKey, ...moves.map((m) => `${m.playerId}:${m.from}>${m.to}`)].join("|");
+export function signature(kind: ActionKind, findingKey: string, moves: Move[], tx?: StoredTransaction | null): string {
+  const parts = [kind, findingKey, ...moves.map((m) => `${m.playerId}:${m.from}>${m.to}`)];
+  if (tx) parts.push(`add:${tx.add.playerId}>${tx.add.to}`, tx.room.how === "open" ? "room:open" : `room:${tx.room.how}:${tx.room.playerId}<${tx.room.from}`);
+  return parts.join("|");
 }
 
 export const utcDayStart = (now: Date): string =>
@@ -201,7 +322,7 @@ export async function retryAt(deps: Deps, conn: ConnectionRow, now: Date, latest
   let next = inMinutes(now, REAUTH_RETRY_MIN);
   for (const r of [latest, saved]) {
     if (!r) continue;
-    const cadence = nextCheckAt(r, now);
+    const cadence = nextCheckAt(r, now, minuteWindow(conn));
     if (cadence < next) next = cadence;
   }
   return next.toISOString();
@@ -267,7 +388,8 @@ export async function failed(
   now: Date,
 ): Promise<boolean> {
   if (!(await deps.store.updateAction(action.id, { status: "failed", executedAt: now.toISOString(), result }, "approved"))) return false;
-  const notice = failure(action.reason, action.moves, who, after, action.deadline, now);
+  const stage = result && typeof result === "object" ? (result as { stage?: "ir" | "add" | "lineup" | "done" }).stage : undefined;
+  const notice = failure(action.reason, action.moves, who, after, action.deadline, now, action.transaction, stage);
   await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves: action.moves });
   return true;
 }

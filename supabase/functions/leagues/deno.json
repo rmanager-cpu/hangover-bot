@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "@rosterbots/core": "../_shared/core/index.ts",
+    "@rosterbots/connectors": "../_shared/connectors/index.ts",
+    "@rosterbots/football-data": "../_shared/football-data/index.ts",
+    "@rosterbots/service": "../_shared/service/index.ts",
+    "@rosterbots/ai": "../_shared/ai/index.ts",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
+    "@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@1.3.0"
+  },
+  "lock": false
+}

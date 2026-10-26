@@ -10,17 +10,19 @@ can run local commands (npm scripts) and read files; everything remote goes thro
 dashboard path written from the tools' descriptions, not from a run. If a call is refused,
 read its error, fix the call, and fix this file.
 
-What gets deployed: the migration in `supabase/migrations/`, the six Edge Functions in
-`supabase/functions/`, two Vault secrets (`project_url`, `cron_secret`), one Edge Function
-secret (`CRON_SECRET`, the owner's, by hand), and some Auth settings on the hosted project
-(the owner's, by hand).
+What gets deployed: the migrations in `supabase/migrations/` (the beta's, and from Oct 25
+`20261025000000_ai_native.sql`), the eight Edge Functions in `supabase/functions/`, two
+Vault secrets (`project_url`, `cron_secret`), the Edge Function secrets (`CRON_SECRET`, the
+owner's, by hand; `ANTHROPIC_API_KEY` for AI Native, which the session can set with
+`create_edge_function_secret`), and some Auth settings on the hosted project (the owner's,
+by hand).
 
 ## 0. Who does what
 
 | The session, through tools | The owner, in the dashboard on a phone |
 |---|---|
 | `apply_migration`, `execute_sql`: the schema, the cron job, the Vault secrets | `CRON_SECRET` on the Edge Functions (step 3) |
-| `deploy_edge_function` ×6, `list_edge_functions` | Anonymous sign-ins on (step 5) |
+| `deploy_edge_function` ×8, `list_edge_functions`, `create_edge_function_secret` for `ANTHROPIC_API_KEY` | Anonymous sign-ins on (step 5) |
 | `get_publishable_keys`: confirm `eas.json` | Two email templates with `{{ .Token }}` (step 5) |
 | `get_advisors`, `query_logs`: check it | Email delivery: invited address or SMTP (step 5) |
 | `build_run`, `build_info`, `build_logs` (Expo), building the **pushed** branch from GitHub | Link the GitHub repo to the EAS project on expo.dev, then install the APK from the build page (step 8) |
@@ -44,7 +46,9 @@ npm run functions:bundle   # supabase/.bundle/<function>/ with a manifest.json e
 
 `scripts/bundle-functions.test.ts` (in `npm test`) checks every import in every bundle
 resolves inside it. `cd supabase/.bundle/<function> && npx -y deno@2 check index.ts` is
-the same proof by Deno, and passed for all six on Oct 3.
+the same proof by Deno, and passed for all six on Oct 3 (and, from `supabase/functions/`,
+for `check`, `decide`, `leagues` and `connection-setup` on Oct 25, with the Anthropic SDK
+resolved through `npm:`).
 
 ## 2. Apply the migration
 
@@ -127,7 +131,27 @@ under Edge Functions, Secrets...`. Cron trying every minute and getting 503 is h
 To rotate later: `vault.update_secret` on `cron_secret` (see "Changing things later"),
 then the owner edits `CRON_SECRET` the same way.
 
-## 4. Deploy the six functions
+## 2b. The AI Native migration (Oct 25)
+
+A second `apply_migration` call, after the first has run (it alters its tables):
+
+```
+apply_migration
+  name:  "20261025000000_ai_native"
+  query: <the whole of supabase/migrations/20261025000000_ai_native.sql>
+```
+
+It adds columns and widens two check constraints; no row changes. The app's queries name
+the new columns (`connections.droppable`, `actions.transaction`, `actions.sources`), so the
+build that carries the AI layer needs this applied first.
+
+Then the key, once: `create_edge_function_secret` with name `ANTHROPIC_API_KEY` and the
+owner's Anthropic key **(unverified: the tool's parameter names)**. Without it every
+function still runs; AI Native fixes from the bench and asks where it would have added
+(the `check` log says `ai: ANTHROPIC_API_KEY is not set`). `ANTHROPIC_MODEL` is optional
+(default `claude-sonnet-5-5`).
+
+## 4. Deploy the eight functions
 
 **As done on Oct 4:** the 24-file bundles below are about 140 KB each, too large to send inline
 in one `deploy_edge_function` call. `npm run functions:compile` turns each bundle into one
@@ -137,7 +161,7 @@ a `deno.json` that maps only `@supabase/supabase-js`. Deploy those two files per
 to the engine needs both `check` and `decide` redeployed together: an approval re-runs the
 engine and refuses a proposal the other engine would not make.
 
-For each of `espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`, `delete-account`, read
+For each of `espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `check`, `delete-account`, `leagues`, read
 `supabase/.bundle/<name>/manifest.json`, read every file it lists, and call:
 
 ```
@@ -171,7 +195,7 @@ carries `verify_jwt: false` so the value is read, not remembered. If a deploy ev
 with it on, the owner can turn it off in the dashboard, **Edge Functions** → the function →
 **Details** → *Verify JWT with legacy secret* off **(unverified label)**, `check` first.
 
-Then `list_edge_functions`: six functions, each `ACTIVE`, each `verify_jwt: false`.
+Then `list_edge_functions`: eight functions, each `ACTIVE`, each `verify_jwt: false`.
 
 The functions need no secrets of their own beyond `CRON_SECRET`: Supabase injects
 `SUPABASE_URL` and the database key. Which key: the hosted runtime provides the legacy

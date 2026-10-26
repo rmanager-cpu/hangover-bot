@@ -183,7 +183,7 @@ test("an anonymous account never gets an automatic move, anywhere in the window"
   }
 });
 
-test("Ask Me proposes, Alerts only tells, and bench swaps off holds Bench Protection back", async () => {
+test("Alert Me proposes (a stored alerts reads the same: one option, owner Oct 25), and bench swaps off holds Auto Protect back", async () => {
   const ask = setup({ roster: achaneOut(), authority: "ask_me" });
   await ask.run();
   assert.equal(ask.espn.writes.length, 0);
@@ -192,9 +192,9 @@ test("Ask Me proposes, Alerts only tells, and bench swaps off holds Bench Protec
   const alerts = setup({ roster: achaneOut(), authority: "alerts" });
   await alerts.run();
   assert.equal(alerts.espn.writes.length, 0);
-  assert.deepEqual(alerts.store.actions.map((a) => [a.kind, a.status]), [["notify", "done"]]);
-  assert.equal(alerts.store.activity[0]!.type, "ACTION_REQUIRED");
-  assert.equal(alerts.store.activity[0]!.body, "Jaylen Wright is your best bench option at RB. You're on Alerts, so I haven't changed anything.");
+  assert.deepEqual(alerts.store.actions.map((a) => [a.kind, a.status]), [["propose", "pending"]]);
+  assert.equal(alerts.store.activity[0]!.type, "ACTION_RECOMMENDED");
+  assert.equal(alerts.store.activity[0]!.body, "Start Jaylen Wright at RB instead? Tap to approve.");
 
   const off = setup({ roster: achaneOut(), conn: { benchSwaps: false } });
   await off.run();

@@ -67,3 +67,7 @@ import_map = "./functions/check/deno.json"
 [functions.delete-account]
 verify_jwt = false
 import_map = "./functions/delete-account/deno.json"
+
+[functions.leagues]
+verify_jwt = false
+import_map = "./functions/leagues/deno.json"

@@ -1,5 +1,5 @@
 // Copied from packages/connectors/src/types.ts by scripts/build-functions.ts. Edit the original.
-import type { Move, Roster } from "@rosterbots/core";
+import type { FreeAgent, Move, Roster, Slot } from "@rosterbots/core";
 
 /** Handoff section 14. Waiver submission is deliberately not a capability in V1. */
 export const CAPABILITIES = [
@@ -40,6 +40,12 @@ export interface TransactionResult {
   detail: string;
 }
 
+/** A free agent in, straight into `toSlot`, and the player who goes to make room, if one does. */
+export interface AddDrop {
+  add: { playerId: string; toSlot: Slot };
+  drop?: { playerId: string; fromSlot: Slot };
+}
+
 /**
  * One instance per provider credential. A member's ESPN cookies cover every
  * league they are in, so league ids are arguments, not configuration.
@@ -48,7 +54,7 @@ export interface TransactionResult {
  *   connect()            the provider sign-in happens in the extension, not here
  *   refreshConnection()  ESPN sessions cannot be refreshed by us; an AuthError
  *                        means the user must sign in again (MEGACAST-AUDIT.md)
- * Free agents, drops and IR arrive with the phases that need them.
+ * Waiver claims and FAAB bids are absent on purpose (No-Cray rule 9).
  */
 export interface FantasyConnector {
   readonly provider: ProviderId;
@@ -63,6 +69,13 @@ export interface FantasyConnector {
    * re-reads the roster and checks core.applied().
    */
   setLineup(leagueId: string, moves: Move[], period: number): Promise<TransactionResult>;
+  /**
+   * Players nobody in the league rosters, free or on waivers, best first by how many
+   * leagues roster them. `slots` narrows them to those who can play one of the slots.
+   */
+  getFreeAgents(leagueId: string, period: number, opts?: { slots?: Slot[]; limit?: number }): Promise<FreeAgent[]>;
+  /** Add a free agent, dropping one player if asked. Resolving is NOT success: the caller re-reads. */
+  addDrop(leagueId: string, tx: AddDrop, period: number): Promise<TransactionResult>;
 }
 
 /** The credentials are no longer accepted. The user must sign in again. */

@@ -4,7 +4,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Authority, Move, Roster } from "@rosterbots/core";
-import type { ActionKind, ActionStatus, ActivityType, ConnectionStatus } from "@rosterbots/service";
+import type { ActionKind, ActionStatus, ActivityType, ConnectionStatus, StoredTransaction } from "@rosterbots/service";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSession } from "./session";
 import { supabase } from "./supabase";
@@ -26,6 +26,8 @@ export interface Connection {
   /** The last roster read from ESPN, in core's shape. */
   lastRoster: Roster | null;
   lastRosterAt: string | null;
+  /** Players the user switched to Droppable (AI Native), by id. */
+  droppable: string[];
 }
 
 export interface Proposal {
@@ -41,6 +43,10 @@ export interface Proposal {
   deadline: string | null;
   autoAt: string | null;
   createdAt: string;
+  /** The add and drop before the moves: AI Native's, or an advice item's. */
+  transaction: StoredTransaction | null;
+  /** Where a piece of advice came from. */
+  sources: string[];
 }
 
 export interface ActivityItem {
@@ -53,11 +59,11 @@ export interface ActivityItem {
   createdAt: string;
 }
 
-export type ConnectionPatch = Partial<Pick<Connection, "authority" | "benchSwaps" | "replacementOrder">> & { status?: "active" | "paused" };
+export type ConnectionPatch = Partial<Pick<Connection, "authority" | "benchSwaps" | "replacementOrder" | "droppable">> & { status?: "active" | "paused" };
 
 const CONNECTION_COLUMNS =
-  "id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,last_roster,last_roster_at";
-const ACTION_COLUMNS = "id,connection_id,finding_key,period,kind,status,moves,summary,reason,deadline,auto_at,created_at";
+  "id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,last_roster,last_roster_at,droppable";
+const ACTION_COLUMNS = "id,connection_id,finding_key,period,kind,status,moves,summary,reason,deadline,auto_at,created_at,transaction,sources";
 const ACTIVITY_COLUMNS = "id,connection_id,type,title,body,data,created_at";
 
 // Remembers which league Home shows on this phone. A convenience only.
@@ -83,6 +89,7 @@ function toConnection(r: Raw): Connection {
     nextCheckAt: str(r.next_check_at),
     lastRoster: r.last_roster && typeof r.last_roster === "object" ? (r.last_roster as Roster) : null,
     lastRosterAt: str(r.last_roster_at),
+    droppable: Array.isArray(r.droppable) ? (r.droppable as string[]) : [],
   };
 }
 
@@ -100,6 +107,8 @@ function toProposal(r: Raw): Proposal {
     deadline: str(r.deadline),
     autoAt: str(r.auto_at),
     createdAt: String(r.created_at),
+    transaction: r.transaction && typeof r.transaction === "object" ? (r.transaction as StoredTransaction) : null,
+    sources: Array.isArray(r.sources) ? (r.sources as string[]) : [],
   };
 }
 
@@ -131,6 +140,8 @@ interface Data {
   connection: Connection | null;
   /** Proposals still waiting for an answer, newest first, for every league. */
   pending: Proposal[];
+  /** Roster Advice, newest first: waiting, carried out or dismissed. */
+  advice: Proposal[];
   activity: ActivityItem[];
   refresh: () => Promise<void>;
   select: (connectionId: string) => void;
@@ -146,6 +157,7 @@ export function DataProvider(props: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pending, setPending] = useState<Proposal[]>([]);
+  const [advice, setAdvice] = useState<Proposal[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const run = useRef(0);
@@ -159,20 +171,22 @@ export function DataProvider(props: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (!userId) return;
     const mine = ++run.current;
-    const [c, a, act] = await Promise.all([
+    const [c, a, adv, act] = await Promise.all([
       supabase.from("connections").select(CONNECTION_COLUMNS).order("created_at", { ascending: true }),
       supabase.from("actions").select(ACTION_COLUMNS).eq("kind", "propose").eq("status", "pending").order("created_at", { ascending: false }).limit(25),
+      supabase.from("actions").select(ACTION_COLUMNS).eq("kind", "advise").order("created_at", { ascending: false }).limit(25),
       supabase.from("activity").select(ACTIVITY_COLUMNS).order("created_at", { ascending: false }).limit(60),
     ]);
     // A newer refresh started meanwhile; its answer wins.
     if (mine !== run.current) return;
-    const failed = c.error ?? a.error ?? act.error;
+    const failed = c.error ?? a.error ?? adv.error ?? act.error;
     if (!c.error) setConnections((c.data ?? []).map((r) => toConnection(r as Raw)));
     if (!a.error) {
       const now = Date.now();
       // Past its deadline, a proposal can't be acted on; the checker marks it expired.
       setPending((a.data ?? []).map((r) => toProposal(r as Raw)).filter((p) => !p.deadline || Date.parse(p.deadline) > now));
     }
+    if (!adv.error) setAdvice((adv.data ?? []).map((r) => toProposal(r as Raw)));
     if (!act.error) setActivity((act.data ?? []).map((r) => toActivity(r as Raw)));
     setError(failed ? dbMessage(failed) : null);
     setLoading(false);
@@ -198,6 +212,7 @@ export function DataProvider(props: { children: ReactNode }) {
       if (patch.authority !== undefined) row.authority = patch.authority;
       if (patch.benchSwaps !== undefined) row.bench_swaps = patch.benchSwaps;
       if (patch.replacementOrder !== undefined) row.replacement_order = patch.replacementOrder;
+      if (patch.droppable !== undefined) row.droppable = patch.droppable;
       if (patch.status !== undefined) row.status = patch.status;
       const { error: e } = await supabase.from("connections").update(row).eq("id", id);
       if (e) throw new Error(dbMessage(e));
@@ -208,8 +223,8 @@ export function DataProvider(props: { children: ReactNode }) {
 
   const value = useMemo<Data>(() => {
     const connection = connections.find((c) => c.id === selectedId) ?? connections[0] ?? null;
-    return { loading, error, connections, connection, pending, activity, refresh, select, updateConnection };
-  }, [loading, error, connections, selectedId, pending, activity, refresh, select, updateConnection]);
+    return { loading, error, connections, connection, pending, advice, activity, refresh, select, updateConnection };
+  }, [loading, error, connections, selectedId, pending, advice, activity, refresh, select, updateConnection]);
 
   return <DataContext.Provider value={value}>{props.children}</DataContext.Provider>;
 }

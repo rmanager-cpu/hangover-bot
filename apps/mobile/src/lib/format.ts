@@ -79,21 +79,27 @@ export function statusPill(status: string, bye: boolean): { text: string; tone: 
   return { text: tag.word, tone: tag.tone };
 }
 
-/** Each level's name (the contract's), the question the Protection screen asks, and what it promises. */
+/**
+ * The three levels (docs/AI-NATIVE.md): their names, the line the Protection screen shows
+ * under each, and what each promises. A stored `alerts` is Alert Me too: one option (owner, Oct 25).
+ */
 export const AUTHORITY: Record<Authority, { name: string; ask: string; askDetail: string; short: string }> = {
-  alerts: { name: "Alerts", ask: "Tell me", askDetail: "Push alert only", short: "I watch and tell you. I never touch your lineup." },
-  ask_me: { name: "Ask Me", ask: "Ask me first", askDetail: "Send a suggested swap for approval", short: "I find the fix and ask you. One tap to approve." },
-  bench_protection: { name: "Bench Protection", ask: "Fix it automatically", askDetail: "Make the best legal replacement", short: "I fix lineup holes myself, from your bench." },
-  ai_rescue: { name: "AI Rescue", ask: "AI Rescue", askDetail: "Coming soon", short: "Coming soon." },
+  alerts: { name: "Alert Me", ask: "Alert Me", askDetail: "A push, and a one-tap fix", short: "I find the fix and send it to you. One tap makes it." },
+  ask_me: { name: "Alert Me", ask: "Alert Me", askDetail: "A push, and a one-tap fix", short: "I find the fix and send it to you. One tap makes it." },
+  bench_protection: { name: "Auto Protect", ask: "Auto Protect", askDetail: "Fixes a hole from your bench, automatically", short: "I fix lineup holes myself, from your bench." },
+  ai_rescue: { name: "AI Native", ask: "AI Native", askDetail: "Auto Protect, plus free agents and Roster Advice", short: "I fix holes from your bench, then from free agency, and advise on the week ahead." },
 };
 
-/** Home's one line under the headline: "Protection: ON · Bench only". */
+/** The level as the app treats it: a stored alerts is Alert Me. */
+export const levelOf = (authority: Authority): Exclude<Authority, "alerts"> => (authority === "alerts" ? "ask_me" : authority);
+
+/** Home's one line under the headline: "Protection: Auto Protect · Bench only". */
 export function protectionLine(authority: Authority, claimed: boolean, status: string): string {
   if (status === "paused") return "Protection: PAUSED";
-  const level = authority === "ai_rescue" ? "bench_protection" : authority;
-  if (level === "alerts") return "Protection: Alerts only";
-  if (level === "ask_me") return "Protection: Ask me first · Bench only";
-  return claimed ? "Protection: ON · Bench only" : "Protection: Ask me first until you claim your account";
+  const level = levelOf(authority);
+  if (level === "ask_me") return "Protection: Alert Me · Bench only";
+  if (!claimed) return "Protection: Alert Me until you claim your account";
+  return level === "ai_rescue" ? "Protection: AI Native · Bench + free agents" : "Protection: Auto Protect · Bench only";
 }
 
 export const ACTIVITY_LABEL: Record<ActivityType, string> = {
@@ -103,6 +109,8 @@ export const ACTIVITY_LABEL: Record<ActivityType, string> = {
   ACTION_COMPLETED: "Done",
   ACTION_FAILED: "Didn't go through",
   PREGAME_WARNING: "Before kickoff",
+  ALL_CLEAR: "Kickoff check",
+  ADVICE: "Roster Advice",
 };
 
 export const isWarning = (t: ActivityType) => t === "ACTION_REQUIRED" || t === "ACTION_FAILED" || t === "PREGAME_WARNING";

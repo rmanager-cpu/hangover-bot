@@ -14,6 +14,7 @@ import type {
   ConnectionStatus,
   NewAction,
   Store,
+  StoredTransaction,
 } from "@rosterbots/service";
 import { SERVICE_KEY_NAMES, serviceKey } from "./keys.ts";
 
@@ -34,7 +35,7 @@ export function adminClient(): SupabaseClient {
 
 // last_roster is left out: it is large and the service never needs the old one.
 const CONNECTION_COLUMNS =
-  "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,write_verified_at";
+  "id,user_id,credential_id,league_id,season,team_id,team_name,league_name,status,authority,bench_swaps,replacement_order,max_auto_moves_per_day,last_checked_at,next_check_at,write_verified_at,droppable,advised_at";
 
 /**
  * How long a run holds the connections it took: longer than any one run can last (the
@@ -68,6 +69,8 @@ interface ConnectionDb {
   last_checked_at: string | null;
   next_check_at: string | null;
   write_verified_at: string | null;
+  droppable: string[] | null;
+  advised_at: string | null;
 }
 
 interface ActionDb {
@@ -88,6 +91,8 @@ interface ActionDb {
   decided_at: string | null;
   executed_at: string | null;
   result: unknown;
+  transaction: StoredTransaction | null;
+  sources: string[] | null;
 }
 
 const iso = (t: string | null): string | null => (t ? new Date(t).toISOString() : null);
@@ -110,6 +115,8 @@ function toConnection(r: ConnectionDb): ConnectionRow {
     lastCheckedAt: iso(r.last_checked_at),
     nextCheckAt: iso(r.next_check_at),
     writeVerifiedAt: iso(r.write_verified_at),
+    droppable: r.droppable ?? [],
+    advisedAt: iso(r.advised_at),
   };
 }
 
@@ -132,6 +139,8 @@ function toAction(r: ActionDb): ActionRow {
     decidedAt: iso(r.decided_at),
     executedAt: iso(r.executed_at),
     result: r.result ?? null,
+    transaction: r.transaction ?? null,
+    sources: r.sources ?? null,
   };
 }
 
@@ -150,6 +159,8 @@ function count(res: { count: number | null; error: { code?: string } | null }, w
 export interface AppStore extends Store {
   /** The credential's owner, or null if there is no such credential. */
   credentialOwner(credentialId: string): Promise<string | null>;
+  /** The user's stored ESPN sign-in, or null if they have none. */
+  credentialIdFor(userId: string): Promise<string | null>;
   /** Vault: create or replace this user's ESPN credential. Returns its id. */
   storeCredential(userId: string, creds: { swid: string; espnS2: string }): Promise<string>;
   /** The leagues this user watches, oldest first: a new sign-in is checked against one of them. */
@@ -271,6 +282,8 @@ export function createStore(db: SupabaseClient): AppStore {
             deadline: a.deadline,
             auto_at: a.autoAt,
             signature: a.signature,
+            transaction: a.transaction ?? null,
+            sources: a.sources ?? null,
           })
           .select("*")
           .single(),
@@ -331,6 +344,26 @@ export function createStore(db: SupabaseClient): AppStore {
       must(await db.from("connections").update({ write_verified_at: at }).eq("id", connectionId), "set write verified");
     },
 
+    async transactions(connectionId) {
+      const rows = must<ActionDb[]>(
+        await db.from("actions").select("*").eq("connection_id", connectionId).not("transaction", "is", null).in("status", ["approved", "done", "failed"]).order("created_at"),
+        "transactions",
+      );
+      return rows.map(toAction);
+    },
+
+    async doneExecutes(connectionId, period) {
+      const rows = must<ActionDb[]>(
+        await db.from("actions").select("*").eq("connection_id", connectionId).eq("period", period).eq("kind", "execute").eq("status", "done").order("created_at"),
+        "done executes",
+      );
+      return rows.map(toAction);
+    },
+
+    async setAdvised(connectionId, at) {
+      must(await db.from("connections").update({ advised_at: at }).eq("id", connectionId), "set advised");
+    },
+
     async addActivity(e: ActivityEntry) {
       must(
         await db.from("activity").insert({
@@ -351,6 +384,14 @@ export function createStore(db: SupabaseClient): AppStore {
         "push tokens",
       );
       return rows.map((r) => r.expo_push_token);
+    },
+
+    async credentialIdFor(userId) {
+      const r = must<{ id: string } | null>(
+        await db.from("credentials").select("id").eq("user_id", userId).eq("provider", "espn").maybeSingle(),
+        "credential for user",
+      );
+      return r?.id ?? null;
     },
 
     async credentialOwner(credentialId) {

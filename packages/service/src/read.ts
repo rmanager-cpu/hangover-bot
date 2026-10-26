@@ -16,12 +16,15 @@ export function inMinutes(now: Date, minutes: number): Date {
   return new Date(Math.floor(now.getTime() / MIN) * MIN + minutes * MIN);
 }
 
+/** Every minute inside this many minutes of a kickoff: 10 for everyone; 16 for AI Native, whose T-15 step wants every minute to T-8. */
+export const minuteWindow = (conn: { authority: string }): number => (conn.authority === "ai_rescue" ? 16 : 10);
+
 /**
- * Cadence: 1 min if any rostered player kicks off within 10 min (the window now runs to T-4,
- * so a late scratch ESPN shows then still gets a look); 2 min within 100 min; 15 min within
- * 12 h; else 60 min.
+ * Cadence: 1 min if any rostered player kicks off within `everyMinuteWithin` min (the window
+ * runs to T-4, so a late scratch ESPN shows then still gets a look); 2 min within 100 min;
+ * 15 min within 12 h; else 60 min.
  */
-export function nextCheckAt(roster: Roster | null, now: Date): Date {
+export function nextCheckAt(roster: Roster | null, now: Date, everyMinuteWithin = 10): Date {
   const t = now.getTime();
   let soonest = Infinity;
   for (const e of roster?.entries ?? []) {
@@ -29,7 +32,7 @@ export function nextCheckAt(roster: Roster | null, now: Date): Date {
     const until = e.player.game ? Date.parse(e.player.game.kickoff) - t : NaN;
     if (until >= 0 && until < soonest) soonest = until;
   }
-  const minutes = soonest <= 10 * MIN ? 1 : soonest <= 100 * MIN ? 2 : soonest <= 12 * 60 * MIN ? 15 : 60;
+  const minutes = soonest <= everyMinuteWithin * MIN ? 1 : soonest <= 100 * MIN ? 2 : soonest <= 12 * 60 * MIN ? 15 : 60;
   return inMinutes(now, minutes);
 }
 

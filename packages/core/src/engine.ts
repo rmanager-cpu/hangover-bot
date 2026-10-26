@@ -4,6 +4,7 @@
 // RosterBots does to a user's team starts here, so every rule is a test in
 // test/engine.test.ts.
 
+import type { AiChoice } from "./ai.ts";
 import {
   BENCH,
   isStarting,
@@ -86,6 +87,9 @@ function shiftable(p: Player, now: number): boolean {
   if (k !== undefined && k <= now) return false;
   return true;
 }
+
+/** A starter certain to score nothing: on bye, OUT, IR, suspended, or projected for exactly zero. The hard kinds of classify(). */
+export const isHole = (p: Player): boolean => p.game === null || p.status === "out" || p.status === "ir" || p.status === "suspended" || p.projection === 0;
 
 function classify(p: Player): FindingKind | undefined {
   if (p.game === null) return "starter_on_bye";
@@ -344,16 +348,22 @@ export function plan(finding: Finding, settings: Settings, now: Date): Step {
     const auto = authority !== "ask_me" && settings.permissions.benchSwaps;
     return { do: auto ? "execute" : "propose", finding, candidate: r.candidate, source: "rules" };
   }
-  // Judgment. AI is an AI Rescue feature; below it, the user makes the call.
-  if (authority === "ai_rescue") return { do: "consult_ai", finding, candidates: r.candidates };
+  // Judgment. AI is an AI Native feature, and only for a hole: a starter who might play is
+  // the user's choice, never the AI's (owner, Oct 25: it never overrules a choice).
+  if (authority === "ai_rescue" && finding.hard) return { do: "consult_ai", finding, candidates: r.candidates };
   return { do: "ask_user", finding, candidates: r.candidates };
 }
 
-export interface AiChoice {
-  /** A candidate's player id, or null to leave the lineup alone. */
-  playerId: string | null;
-  confidence: number;
-  reason: string;
+/**
+ * What an automatic move of this candidate needs from the permissions: a bench swap; for an
+ * add, that and the add permission, and the drop permission if room is made that way (an add
+ * always changes the lineup, so bench swaps off stops it too).
+ */
+export function permitted(candidate: Candidate, settings: Settings): boolean {
+  const p = settings.permissions;
+  if (!p.benchSwaps) return false;
+  if (!candidate.add) return true;
+  return p.freeAgentAdds && (candidate.add.room.how !== "drop" || p.drops);
 }
 
 /**
@@ -366,8 +376,7 @@ export function afterAi(step: Extract<Step, { do: "consult_ai" }>, choice: AiCho
   if (choice.playerId === null) return { do: "notify", finding: step.finding };
   const candidate = step.candidates.find((c) => c.player.id === choice.playerId);
   if (!candidate) return fallback;
-  const auto =
-    effectiveAuthority(settings) === "ai_rescue" && settings.permissions.benchSwaps && choice.confidence >= settings.minAiConfidence;
+  const auto = effectiveAuthority(settings) === "ai_rescue" && permitted(candidate, settings) && choice.confidence >= settings.minAiConfidence;
   return { do: auto ? "execute" : "propose", finding: step.finding, candidate, source: "ai" };
 }
 

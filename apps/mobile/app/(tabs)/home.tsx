@@ -45,6 +45,7 @@ export default function Home() {
   const open = roster ? problems(roster, now).filter((pr) => !proposalFor(pr, mine, conn.id)) : [];
   const receipt = data.activity.find((a) => a.connectionId === conn.id && a.type === "ACTION_COMPLETED");
   const actingAsAskMe = (conn.authority === "bench_protection" || conn.authority === "ai_rescue") && !claimed;
+  const waitingAdvice = conn.authority === "ai_rescue" ? data.advice.filter((a) => a.connectionId === conn.id && a.status === "pending").length : 0;
   const next = roster ? nextKickoff(roster, now) : null;
   const weekLine = roster ? `Week ${roster.period} · ${next ? `Next lock ${kickoffText(next.at)}` : "No more kickoffs this week"}` : "Not read yet";
 
@@ -129,13 +130,16 @@ export default function Home() {
           <Button title="View activity" variant="secondary" onPress={() => router.push("/activity")} style={s.action} />
           <Button title="Manage protection" onPress={() => router.push({ pathname: "/protection", params: { id: conn.id } })} style={s.action} />
         </View>
+        {conn.authority === "ai_rescue" ? (
+          <Row title="Roster Advice" detail={waitingAdvice ? `${waitingAdvice} ${waitingAdvice === 1 ? "suggestion" : "suggestions"} waiting for you` : "The AI's suggestions, one tap each"} onPress={() => router.push("/advice")} last />
+        ) : null}
       </Card>
 
       {actingAsAskMe ? (
         <Banner
           tone="warn"
-          title="Working as Ask me first"
-          body="Bench Protection only moves players on its own for a claimed account. Until then I send you each move to approve."
+          title="Working as Alert Me"
+          body="Auto Protect and AI Native only move players on their own for a claimed account. Until then I send you each move to tap."
           action={{ title: "Claim your account", onPress: () => router.push({ pathname: "/claim", params: { id: conn.id } }) }}
         />
       ) : null}
@@ -199,8 +203,8 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
           ))}
           {props.open.length ? (
             <Muted>
-              {conn.authority === "alerts"
-                ? "You're on Tell me, so I leave the fix to you in the ESPN app."
+              {conn.authority === "alerts" || conn.authority === "ask_me"
+                ? "You're on Alert Me, so the fix is yours to tap: it's in Activity when I have one."
                 : !conn.lastCheckedAt
                   ? // Before the first check nothing has been judged yet, so "no move" would be
                     // wrong: the Oct 3 install showed it for an OUT starter with a healthy bench.

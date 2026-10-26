@@ -1,29 +1,33 @@
 // Copied from packages/service/src/protect.ts by scripts/build-functions.ts. Edit the original.
 // One connection, one check: read ESPN, ask the engine, act within the guardrails,
 // tell the user once. docs/BETA.md "Service" is the contract, in its order:
-// credentials, connector, read, sanity, settings, evaluate, plan, guard, then each step.
+// credentials, connector, read, sanity, settings, evaluate, plan, guard, then each step;
+// then AI Native's T-15 step (outside.ts) and the T-3 all-clear (docs/AI-NATIVE.md).
 
 import {
-  applied,
+  afterAi,
+  effectiveAuthority,
   evaluate,
   guard,
+  isHole,
+  isStarting,
   plan,
   rosterLooksSane,
-  type AutomationPolicy,
   type Finding,
   type Roster,
-  type Settings,
   type Step,
 } from "@rosterbots/core";
-import type { FantasyConnector } from "@rosterbots/connectors";
+import { MIN, action, announced, automatic, connectionHold, history, policyFor, propose, reasonOf, supersede, tickOf, userHold, type Check } from "./check.ts";
 import {
   IncompleteReadError,
+  addLanded,
   announce,
   connect,
   declinedHoles,
   errorText,
   failed,
   isSignedOut,
+  landed,
   leaveUnconfirmed,
   noteWrite,
   readTeamPatiently,
@@ -36,28 +40,10 @@ import {
   writeAndVerify,
   writeUnproven,
 } from "./ops.ts";
-import { inMinutes, nextCheckAt, scheduleMissing } from "./read.ts";
-import type { ActionRow, CheckSummary, ConnectionRow, Deps, NewAction } from "./types.ts";
-import {
-  HELD_APPROVED,
-  HELD_DECLINED,
-  HELD_FAILED,
-  HELD_FAILED_NOW,
-  HELD_FAILED_WEEK,
-  HELD_JUDGMENT,
-  HELD_TRIED,
-  HELD_UNPROVEN,
-  changeOf,
-  incompleteRead,
-  inform,
-  playersIn,
-  problemOf,
-  proposal,
-  receipt,
-  withdrawn,
-} from "./words.ts";
-
-const MIN = 60_000;
+import { fillKeys, judgeInputFor, outside } from "./outside.ts";
+import { inMinutes, minuteWindow, nextCheckAt, scheduleMissing } from "./read.ts";
+import type { ActionRow, CheckSummary, ConnectionRow, Deps } from "./types.ts";
+import { HELD_JUDGMENT, allClear, changeOf, incompleteRead, inform, playersIn, problemOf, receipt, withdrawn } from "./words.ts";
 
 /**
  * A write still 'approved' after this long belongs to a run that died mid-write: a check
@@ -65,41 +51,11 @@ const MIN = 60_000;
  */
 const INTERRUPTED_MS = 3 * MIN;
 
-/**
- * The cron tick this check belongs to. Checks run on the minute and read the clock a few
- * hundred ms later; the automatic window is judged at the tick, so the T-4 check acts
- * (owner, Oct 3: the window runs to T-4) rather than missing it by the function's lag.
- */
-const tickOf = (now: Date): Date => new Date(Math.floor(now.getTime() / MIN) * MIN);
+/** The all-clear goes out this many minutes before a kickoff (docs/AI-NATIVE.md: T-3). */
+const ALL_CLEAR_MINUTES = 3;
 
 type Execute = Extract<Step, { do: "execute" }>;
-type Propose = Extract<Step, { do: "propose" }>;
 type Inform = Extract<Step, { do: "notify" | "wait" | "ask_user" }>;
-
-interface Check {
-  deps: Deps;
-  conn: ConnectionRow;
-  espn: FantasyConnector;
-  settings: Settings;
-  policy: AutomationPolicy;
-  /** The newest read: it changes after every write. */
-  latest: Roster;
-  autoToday: number;
-  /** A write failed in this check, or earlier this period: nothing more is automatic this week. */
-  failedNow: boolean;
-  failedEarlier: boolean;
-  /** No change the user made through RosterBots has been seen landing in this league yet. */
-  unproven: boolean;
-  /** Holes the user declined this period: their fixes do not claim bench players (core evaluate). */
-  release: ReadonlySet<string>;
-  tally: { executed: number; proposed: number; notified: number };
-}
-
-/** The shared policy with this connection's own daily limit. A copy: the shared one is frozen. */
-function policyFor(deps: Deps, conn: ConnectionRow): AutomationPolicy {
-  const max = Number.isFinite(conn.maxAutoMovesPerDay) ? conn.maxAutoMovesPerDay : deps.policy.maxAutoMovesPerDay;
-  return { ...deps.policy, maxAutoMovesPerDay: max };
-}
 
 /** Why this read is not one to judge a lineup by, if it is not. */
 function incompleteness(roster: Roster): string | undefined {
@@ -190,6 +146,8 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
       failedEarlier: false,
       unproven: writeUnproven(conn),
       release: new Set(),
+      aiChoices: new Map(),
+      reasons: new Map(),
       tally,
     };
     // Settled first, so the week's failures and the day's count below include them.
@@ -207,8 +165,11 @@ export async function protectConnection(deps: Deps, conn: ConnectionRow): Promis
     }
     // This read is whole (an incomplete one never gets here), so a problem it no longer shows is gone.
     await withdraw(check, new Set(found.map((f) => f.key)), first.period, now);
+    // AI Native, from T-15: a hole the bench could not fill, or a fill a free agent clearly beats.
+    await outside(check, first.period, now);
+    await allClearAt(check, first.period, now);
 
-    const next = nextCheckAt(check.latest, now).toISOString();
+    const next = nextCheckAt(check.latest, now, minuteWindow(conn)).toISOString();
     await deps.store.saveCheck(conn.id, {
       // A good read is the proof a connection marked needs_reauth works again.
       ...(conn.status === "active" ? {} : { status: "active" as const }),
@@ -255,15 +216,17 @@ async function settle(c: Check, roster: Roster, now: Date): Promise<void> {
       continue;
     }
     const who = playersIn(roster);
-    if (applied(a.moves, roster)) {
+    if (landed(a, roster)) {
       if (await c.deps.store.updateAction(a.id, { status: "done", executedAt: at, result: { interrupted: true } }, "approved")) {
         // An approval ESPN shows is the user's own change landing: the proof automation waits for.
-        if (a.kind === "propose") await noteWrite(c.deps, c.conn, now);
-        await announce(c.deps, c.conn, receipt(a.reason, a.moves, who, now), { actionId: a.id, findingKey: a.findingKey, moves: a.moves });
+        if (a.kind === "propose" || a.kind === "advise") await noteWrite(c.deps, c.conn, now);
+        await announce(c.deps, c.conn, receipt(a.reason, a.moves, who, now, undefined, a.transaction), { actionId: a.id, findingKey: a.findingKey, moves: a.moves });
         c.tally.notified++;
       }
-    } else if (await failed(c.deps, c.conn, a, who, roster, { error: "interrupted" }, now)) {
-      c.tally.notified++;
+    } else {
+      // An add that landed before the run died is still an add (the no-churn rule) and the receipt says so.
+      const result = a.transaction && addLanded(a.transaction, roster) ? { error: "interrupted", stage: "lineup" } : { error: "interrupted" };
+      if (await failed(c.deps, c.conn, a, who, roster, result, now)) c.tally.notified++;
     }
   }
 }
@@ -271,17 +234,23 @@ async function settle(c: Check, roster: Roster, now: Date): Promise<void> {
 /**
  * Proposals for a problem this check no longer sees. Past their deadline, or with a player
  * now locked, they just expire. Otherwise ESPN no longer shows the problem: withdrawn, and
- * said once, so a "Scheduled move" never sits there for a problem that went away.
+ * said once, so a "Scheduled move" never sits there for a problem that went away. An add
+ * proposal (AI Native's) is also for a fill RosterBots made that still stands; advice only
+ * ever expires.
  */
 async function withdraw(c: Check, keys: Set<string>, period: number, now: Date): Promise<void> {
+  let fills: Set<string> | undefined;
   for (const a of await c.deps.store.openActions(c.conn.id)) {
-    if (a.status !== "pending" || a.kind !== "propose" || (a.period === period && keys.has(a.findingKey))) continue;
+    if (a.status !== "pending" || (a.kind !== "propose" && a.kind !== "advise")) continue;
+    if (a.kind === "propose" && a.period === period && keys.has(a.findingKey)) continue;
+    if (a.kind === "propose" && a.transaction && a.period === period && (fills ??= await fillKeys(c, period, now)).has(a.findingKey)) continue;
     const locked = a.moves.some((m) => c.latest.entries.find((e) => e.player.id === m.playerId)?.player.locked);
     const late = a.period !== period || locked || (a.deadline !== null && Date.parse(a.deadline) <= now.getTime());
     if (late) {
       await c.deps.store.updateAction(a.id, { status: "expired" }, "pending");
       continue;
     }
+    if (a.kind === "advise") continue;
     if (!(await c.deps.store.updateAction(a.id, { status: "superseded" }, "pending"))) continue;
     await announce(c.deps, c.conn, withdrawn(a.summary), { actionId: a.id, findingKey: a.findingKey });
     c.tally.notified++;
@@ -294,51 +263,31 @@ async function act(c: Check, step: Step, period: number, now: Date): Promise<voi
       return execute(c, step, period, now);
     case "propose":
       return propose(c, step, period, now);
-    case "consult_ai":
-      // No AI in the beta, and settingsFor never asks for it. A judgment call is the user's.
-      return tell(c, { do: "ask_user", finding: step.finding, candidates: step.candidates }, period, now);
+    case "consult_ai": {
+      // A hole whose bench options all have something to doubt. AI Native asks the AI which
+      // one; without an AI, or below AI Native, the user decides.
+      const ai = c.deps.ai;
+      const asUser: Step = { do: "ask_user", finding: step.finding, candidates: step.candidates };
+      if (!ai || effectiveAuthority(c.settings) !== "ai_rescue") return tell(c, asUser, period, now);
+      const f = step.finding;
+      const choice = await ai.judge.pick(judgeInputFor(reasonOf(c, f), f.slot, f.deadline ?? f.starter?.game?.kickoff, step.candidates, now));
+      const next = afterAi(step, choice, c.settings);
+      // "Leave it" is no answer for a hole: the user decides.
+      if (next.do === "notify" || next.do === "ask_user") return tell(c, asUser, period, now);
+      if (next.do === "execute" && choice) c.aiChoices.set(f.key, choice);
+      return act(c, guard(next, { now: tickOf(now), autoMovesToday: c.autoToday, readLooksSane: true, policy: c.policy }), period, now);
+    }
     default:
       return tell(c, step, period, now);
   }
 }
 
-/** This finding's actions so far, with any proposal past its deadline marked expired. */
-async function history(c: Check, f: Finding, period: number, now: Date): Promise<ActionRow[]> {
-  const rows = await c.deps.store.actionsFor(c.conn.id, f.key, period);
-  const out: ActionRow[] = [];
-  for (const a of rows) {
-    if (a.status === "pending" && a.deadline !== null && Date.parse(a.deadline) <= now.getTime()) {
-      await c.deps.store.updateAction(a.id, { status: "expired" }, "pending");
-      out.push({ ...a, status: "expired" });
-    } else out.push(a);
-  }
-  return out;
-}
-
-/**
- * Withdraw the finding's waiting proposals. Only while they are still waiting: if the user
- * answered one first, their answer stands and this returns false.
- */
-async function supersede(c: Check, rows: ActionRow[]): Promise<boolean> {
-  for (const a of rows) {
-    if (a.status === "pending" && !(await c.deps.store.updateAction(a.id, { status: "superseded" }, "pending"))) return false;
-  }
-  return true;
-}
-
-function action(c: Check, f: Finding, period: number, fields: Omit<NewAction, "connectionId" | "userId" | "findingKey" | "period" | "deadline">): NewAction {
-  return { connectionId: c.conn.id, userId: c.conn.userId, findingKey: f.key, period, deadline: f.deadline ?? null, ...fields };
-}
-
-// A step counts as announced while its row stands. A superseded one was withdrawn,
-// so the same step coming back is news again.
-const announced = (rows: ActionRow[], sig: string) => rows.find((a) => a.signature === sig && a.status !== "superseded");
-
 /** notify, wait, ask_user: recorded as done, said once. */
 async function tell(c: Check, step: Inform, period: number, now: Date): Promise<void> {
   const f = step.finding;
   const sig = signature(step.do, f.key, []);
-  const rows = await history(c, f, period, now);
+  // AI Native's add for this hole, if one is waiting, is outside.ts's question, not this one's.
+  const rows = (await history(c, f, period, now)).filter((a) => !a.transaction);
   const candidates = step.do === "ask_user" ? step.candidates : f.resolution.type === "judgment" ? f.resolution.candidates : [];
   // A pending proposal whose moves are still among the options is still the right question,
   // and the user has it: a downgrade from one clear move to a choice is no reason to withdraw
@@ -366,88 +315,20 @@ async function tell(c: Check, step: Inform, period: number, now: Date): Promise<
   c.tally.notified++;
 }
 
-/** Why a Bench Protection user is being asked rather than told, when no guardrail says. */
-function aside(c: Check): string | undefined {
-  if (c.settings.authority !== "bench_protection") return undefined;
-  if (!c.settings.accountClaimed) return "Claim your account in Settings and I can make moves like this on my own.";
-  if (!c.settings.permissions.benchSwaps) return "Bench swaps are off in your settings, so I won't make it on my own.";
-  return undefined;
-}
-
-/** Why this finding's automatic move waits for a tap, from what already happened to it this week. */
-function findingHold(rows: ActionRow[]): string | undefined {
-  // Writes made for it: automatic ones, and proposals the user approved.
-  const writes = rows.filter((a) => a.kind === "execute" || (a.kind === "propose" && (a.status === "approved" || a.status === "done" || a.status === "failed")));
-  if (writes.some((a) => a.status === "failed")) return HELD_FAILED;
-  if (writes.some((a) => a.kind === "execute")) return HELD_TRIED;
-  if (writes.length) return HELD_APPROVED;
-  if (rows.some((a) => a.status === "declined")) return HELD_DECLINED;
-  return undefined;
-}
-
 /**
- * Why this finding's automatic move waits for a tap. A hole (a starter projected for zero,
- * OUT, IR, suspended or on bye, or an empty slot) is filled whatever happened to it before
- * this week, a change made and then undone in the ESPN app included (owner, Oct 4: "never a
- * situation in which an injured player with a 0 projection is in your starting lineup. I
- * don't want to have to approve it or not"). The user's own Decline in the app is the one
- * thing that stops it; a failed write still holds the week, through connectionHold.
+ * evaluate, plan and guard again on a fresh read, for the one finding about to be acted on.
+ * The AI's answer from this check stands for the re-read: the same option, judged the same way.
  */
-function userHold(f: Finding, rows: ActionRow[]): string | undefined {
-  if (!f.hard) return findingHold(rows);
-  if (rows.some((a) => a.status === "approved")) return HELD_APPROVED; // a write for it is under way
-  if (rows.some((a) => a.status === "failed")) return HELD_FAILED;
-  if (rows.some((a) => a.status === "declined")) return HELD_DECLINED;
-  return undefined;
-}
-
-/** Why every automatic move on this connection waits for a tap. */
-function connectionHold(c: Check): string | undefined {
-  if (c.failedNow) return HELD_FAILED_NOW;
-  if (c.failedEarlier) return HELD_FAILED_WEEK;
-  if (c.unproven) return HELD_UNPROVEN;
-  return undefined;
-}
-
-async function propose(c: Check, step: Propose, period: number, now: Date): Promise<void> {
-  const f = step.finding;
-  const moves = step.candidate.moves;
-  const sig = signature("propose", f.key, moves);
-  const rows = await history(c, f, period, now);
-  // Never promise an automatic move that a hold on this finding or the whole connection would stop.
-  const wide = step.held?.autoAt ? userHold(f, rows) ?? connectionHold(c) : undefined;
-  const held = wide ? { reason: wide } : step.held;
-  const autoAt = held?.autoAt ?? null;
-  // A proposal the user approved and that ESPN showed is done. The same problem back again
-  // means it was undone in the ESPN app (Oct 4: Jefferson back at WR after the approved
-  // swap): that is news, never silence until kickoff.
-  const same = announced(rows.filter((a) => !(a.kind === "propose" && a.status === "done")), sig);
-  if (same) {
-    // Already said. Except when it promised "automatically at 11:30", 11:30 has
-    // come, and it is still only a proposal: the user must hear that it will not happen.
-    const broken = same.status === "pending" && same.autoAt !== null && Date.parse(same.autoAt) <= now.getTime() && autoAt === null;
-    if (!broken) return;
-  }
-  // Includes a pending proposal for the same finding with different moves.
-  if (!(await supersede(c, rows))) return;
-  const notice = proposal(f, step.candidate, held, now, aside(c));
-  const row = await c.deps.store.insertAction(
-    action(c, f, period, { kind: "propose", status: "pending", moves, summary: changeOf(f, step.candidate), reason: problemOf(f), autoAt, signature: sig }),
-  );
-  await announce(c.deps, c.conn, notice, { actionId: row.id, findingKey: f.key, moves, autoAt });
-  c.tally.proposed++;
-}
-
-/** evaluate, plan and guard again on a fresh read, for the one finding about to be acted on. */
 function replan(c: Check, roster: Roster, key: string, now: Date): Step | undefined {
   const f = evaluate(roster, now, c.settings, c.release).find((x) => x.key === key);
   if (!f) return undefined;
-  return guard(plan(f, c.settings, now), { now: tickOf(now), autoMovesToday: c.autoToday, readLooksSane: rosterLooksSane(roster), policy: c.policy });
+  let step = plan(f, c.settings, now);
+  if (step.do === "consult_ai") {
+    const choice = c.aiChoices.get(key);
+    if (choice) step = afterAi(step, choice, c.settings);
+  }
+  return guard(step, { now: tickOf(now), autoMovesToday: c.autoToday, readLooksSane: rosterLooksSane(roster), policy: c.policy });
 }
-
-/** Does the connection as it stands now still allow an automatic move? */
-const automatic = (live: ConnectionRow): boolean =>
-  live.status !== "paused" && (live.authority === "bench_protection" || live.authority === "ai_rescue") && live.benchSwaps;
 
 async function execute(c: Check, first: Execute, period: number, now: Date): Promise<void> {
   const rows = await history(c, first.finding, period, now);
@@ -497,7 +378,7 @@ async function execute(c: Check, first: Execute, period: number, now: Date): Pro
 
   // Recorded before the write, so a crash mid-write cannot lead to a second one.
   const row = await c.deps.store.insertAction(
-    action(c, f, period, { kind: "execute", status: "approved", moves, summary: changeOf(f, step.candidate), reason: problemOf(f), autoAt: null, signature: sig }),
+    action(c, f, period, { kind: "execute", status: "approved", moves, summary: changeOf(f, step.candidate), reason: reasonOf(c, f), autoAt: null, signature: sig }),
   );
   c.autoToday++;
   const who = playersIn(fresh);
@@ -523,4 +404,45 @@ async function execute(c: Check, first: Execute, period: number, now: Date): Pro
   if (!(await c.deps.store.updateAction(row.id, { status: "done", executedAt: done.toISOString(), result: out.result }, "approved"))) return;
   await announce(c.deps, c.conn, receipt(row.reason, moves, who, done), { actionId: row.id, findingKey: f.key, moves });
   c.tally.executed++;
+}
+
+/**
+ * T-3 before each kickoff with a starter in it: the lineup is set for it, or what is still
+ * wrong, once per kickoff per period. Every level, since every level can act in the app.
+ */
+async function allClearAt(c: Check, period: number, now: Date): Promise<void> {
+  const roster = c.latest;
+  const soon = new Set<string>();
+  for (const e of roster.entries) {
+    const k = e.player.game?.kickoff;
+    if (!isStarting(e.slot) || !k) continue;
+    const until = Date.parse(k) - now.getTime();
+    if (until > 0 && until <= ALL_CLEAR_MINUTES * MIN) soon.add(k);
+  }
+  if (!soon.size) return;
+  const found = evaluate(roster, now, c.settings, c.release);
+  const open = await c.deps.store.openActions(c.conn.id);
+  const waiting = open.filter((a) => a.status === "pending" && a.kind === "propose" && a.period === period && a.autoAt === null && (a.deadline === null || Date.parse(a.deadline) > now.getTime())).length;
+  // A hole ESPN has already locked is past fixing, and still wrong: the engine skips it, this does not.
+  const lockedHoles = (k: string): string[] =>
+    roster.entries
+      .filter((e) => isStarting(e.slot) && e.player.locked && e.player.game?.kickoff === k && isHole(e.player))
+      .map((e) => {
+        const p = e.player;
+        const kind = p.game === null ? "starter_on_bye" : p.status === "out" || p.status === "ir" || p.status === "suspended" ? "starter_out" : "starter_zero";
+        return problemOf({ key: "", kind, hard: true, slot: e.slot, starter: p, resolution: { type: "none", why: "locked" } });
+      });
+  for (const k of [...soon].sort()) {
+    const key = `${period}:all_clear:${k}`;
+    const sig = signature("notify", key, []);
+    if ((await c.deps.store.actionsFor(c.conn.id, key, period)).some((a) => a.signature === sig)) continue;
+    const wrong = [...found.filter((f) => f.hard && (f.kind === "empty_slot" || f.starter?.game?.kickoff === k)).map(problemOf), ...lockedHoles(k)];
+    const notice = allClear(k, wrong, waiting, now);
+    const row = await c.deps.store.insertAction({
+      connectionId: c.conn.id, userId: c.conn.userId, findingKey: key, period, kind: "notify", status: "done", moves: [],
+      summary: notice.title, reason: notice.body, deadline: k, autoAt: null, signature: sig,
+    });
+    await announce(c.deps, c.conn, notice, { actionId: row.id, findingKey: key, kickoff: k });
+    c.tally.notified++;
+  }
 }

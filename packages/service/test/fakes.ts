@@ -1,10 +1,10 @@
 // In-memory stand-ins for everything outside the service: the database, ESPN, Expo
 // and the clock. Nothing here reaches a network.
 
-import { AuthError, ProviderError, type FantasyConnector, type TransactionResult } from "@rosterbots/connectors";
-import { BETA_AUTOMATION, type Authority, type Move, type Player, type Roster, type RosterEntry, type Slot } from "@rosterbots/core";
+import { AuthError, ProviderError, type AddDrop, type FantasyConnector, type TransactionResult } from "@rosterbots/connectors";
+import { BETA_AUTOMATION, type Advice, type AdviceInput, type AiChoice, type Authority, type FreeAgent, type JudgeInput, type Move, type Player, type Roster, type RosterEntry, type Slot } from "@rosterbots/core";
 import { protectConnection } from "../src/index.ts";
-import type { ActionRow, ActivityEntry, ConnectionRow, ConnectionStatus, Deps, NewAction, Push, Store } from "../src/index.ts";
+import type { ActionRow, ActivityEntry, AiDeps, ConnectionRow, ConnectionStatus, Deps, NewAction, Push, Store } from "../src/index.ts";
 
 export const MIN = 60_000;
 export const KICKOFF = "2026-10-04T17:00:00.000Z"; // Sunday 1:00 PM ET
@@ -103,6 +103,47 @@ export class FakeEspn implements FantasyConnector {
     for (const m of apply) entry(this.roster, m.playerId).slot = m.to;
     return { httpStatus: this.write === "ignore" ? 409 : 200, detail: "" };
   }
+
+  /** The league's free agents, as ESPN would list them. */
+  freeAgents: FreeAgent[] = [];
+  freeAgentReads: { period: number; slots?: Slot[] }[] = [];
+  freeAgentRead: "ok" | "error" = "ok";
+  addDrops: { tx: AddDrop; period: number }[] = [];
+  /** apply: the add lands where asked and the drop leaves; bench: ESPN puts him on the bench whatever was asked; ignore: nothing changes. */
+  addDropMode: "apply" | "bench" | "ignore" | "throw" = "apply";
+  async getFreeAgents(_leagueId: string, period: number, opts: { slots?: Slot[]; limit?: number } = {}): Promise<FreeAgent[]> {
+    this.freeAgentReads.push({ period, ...(opts.slots ? { slots: opts.slots } : {}) });
+    if (this.freeAgentRead === "error") throw new ProviderError("free agents", 503);
+    const slots = opts.slots;
+    return structuredClone(this.freeAgents.filter((f) => !slots || f.player.eligibleSlots.some((s) => slots.includes(s))));
+  }
+  async addDrop(_leagueId: string, tx: AddDrop, period: number): Promise<TransactionResult> {
+    this.addDrops.push({ tx: structuredClone(tx), period });
+    if (this.addDropMode === "throw") throw new ProviderError("transaction", 500);
+    if (this.addDropMode === "ignore") return { httpStatus: 409, detail: "" };
+    const fa = this.freeAgents.find((f) => f.player.id === tx.add.playerId);
+    if (!fa) return { httpStatus: 409, detail: "not a free agent" };
+    if (tx.drop) this.roster.entries = this.roster.entries.filter((e) => e.player.id !== tx.drop!.playerId);
+    this.freeAgents = this.freeAgents.filter((f) => f.player.id !== fa.player.id);
+    this.roster.entries.push({ player: structuredClone(fa.player), slot: this.addDropMode === "bench" ? "BENCH" : tx.add.toSlot });
+    return { httpStatus: 200, detail: "EXECUTED FREEAGENT" };
+  }
+}
+
+/** A scripted Judge and Advisor. By default the judge picks the first option, sure of it, and the advisor has nothing to say. */
+export class FakeAi implements AiDeps {
+  picks: JudgeInput[] = [];
+  asked: AdviceInput[] = [];
+  choose: (input: JudgeInput) => AiChoice | undefined = (input) => (input.candidates[0] ? { playerId: input.candidates[0].id, confidence: 0.9, reason: `${input.candidates[0].name} is the best option` } : undefined);
+  suggest: (input: AdviceInput) => Advice[] = () => [];
+  judge = { pick: async (input: JudgeInput) => {
+    this.picks.push(input);
+    return this.choose(input);
+  } };
+  advisor = { advise: async (input: AdviceInput) => {
+    this.asked.push(input);
+    return this.suggest(input);
+  } };
 }
 
 export class MemoryStore implements Store {
@@ -188,6 +229,18 @@ export class MemoryStore implements Store {
     const c = this.connections.get(connectionId);
     if (c) c.writeVerifiedAt = at;
   }
+  async transactions(connectionId: string) {
+    return this.actions.filter((a) => a.connectionId === connectionId && a.transaction && ["approved", "done", "failed"].includes(a.status)).map((a) => ({ ...a }));
+  }
+  async doneExecutes(connectionId: string, period: number) {
+    return this.actions.filter((a) => a.connectionId === connectionId && a.period === period && a.kind === "execute" && a.status === "done").map((a) => ({ ...a }));
+  }
+  advised: { connectionId: string; at: string }[] = [];
+  async setAdvised(connectionId: string, at: string) {
+    this.advised.push({ connectionId, at });
+    const c = this.connections.get(connectionId);
+    if (c) c.advisedAt = at;
+  }
   async addActivity(e: ActivityEntry) {
     this.activity.push(e);
   }
@@ -234,6 +287,9 @@ export interface SetupOptions {
   at?: number | string;
   roster?: Roster;
   conn?: Partial<ConnectionRow>;
+  /** true for the default FakeAi, or a scripted one. Absent: no AI, as a deployment without a key. */
+  ai?: true | FakeAi;
+  freeAgents?: FreeAgent[];
 }
 
 /** One user, one connection to team #2 of league 36784699, one phone. Inside the window unless told otherwise. */
@@ -246,7 +302,7 @@ export function setup(opts: SetupOptions = {}) {
     id: "conn-1", userId: "user-1", credentialId: "cred-1", leagueId: "36784699", season: 2026,
     teamId: "2", teamName: "Trust The Process", leagueName: "Live free or die hard RR4L",
     status: "active", authority: opts.authority ?? "bench_protection", benchSwaps: true, replacementOrder: [],
-    maxAutoMovesPerDay: 3, lastCheckedAt: null, nextCheckAt: null, writeVerifiedAt: TEST_SWAP_DONE, ...opts.conn,
+    maxAutoMovesPerDay: 3, lastCheckedAt: null, nextCheckAt: null, writeVerifiedAt: TEST_SWAP_DONE, droppable: [], advisedAt: null, ...opts.conn,
   };
   store.connections.set(conn.id, conn);
   store.creds.set(conn.credentialId, { swid: "{TEST-SWID}", espnS2: "test-espn-s2" });
@@ -254,8 +310,11 @@ export function setup(opts: SetupOptions = {}) {
   store.tokens.set(conn.userId, ["ExponentPushToken[pixel-8]"]);
   const opened: { creds: { swid: string; espnS2: string }; season: number }[] = [];
   const pauses: number[] = [];
+  if (opts.freeAgents) espn.freeAgents = opts.freeAgents;
+  const ai = opts.ai === undefined ? undefined : opts.ai === true ? new FakeAi() : opts.ai;
   const deps: Deps = {
     store, push, now: clock.now, policy: BETA_AUTOMATION,
+    ...(ai ? { ai } : {}),
     pause: async (ms) => {
       pauses.push(ms);
     },
@@ -266,5 +325,5 @@ export function setup(opts: SetupOptions = {}) {
   };
   // The row as the store has it now, the way the cron would hand it over.
   const run = () => protectConnection(deps, { ...store.connections.get(conn.id)! });
-  return { clock, store, espn, push, conn, deps, run, opened, pauses };
+  return { clock, store, espn, push, conn, deps, run, opened, pauses, ai };
 }

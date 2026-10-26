@@ -3,7 +3,7 @@
 // x-cron-secret. Connections run one at a time: one bad connection never stops the
 // others, and the log carries connection ids and outcomes only.
 
-import { protectConnection, type CheckSummary } from "@rosterbots/service";
+import { adviceDue, adviseConnection, protectConnection, type CheckSummary } from "@rosterbots/service";
 import { makeDeps } from "../_lib/deps.ts";
 import { json, serve } from "../_lib/http.ts";
 import { adminClient, createStore } from "../_lib/store.ts";
@@ -13,6 +13,10 @@ const MAX_CONNECTIONS = 25;
 // Stop starting connections well inside the Edge Function wall-clock limit (150 s on
 // the free plan). The ones not reached are handed back and the next run takes them.
 const BUDGET_MS = 90_000;
+
+// Roster Advice reads ESPN and asks the AI, with web searches: up to 100 s. One league per
+// run, and only when the checks left most of the wall clock, so a run never overruns it.
+const ADVICE_AFTER_MS = 20_000;
 
 // A connection due this soon is due now. next_check_at sits on a minute boundary (the
 // service's nextCheckAt), and this clock is read a moment after the cron tick, on another
@@ -81,5 +85,16 @@ serve("check", async (req) => {
     console.log(`check: ${deferred.length} connection(s) left for the next run`);
   }
 
-  return json({ checked: results.length, deferred: deferred.length, results });
+  // Roster Advice for one AI Native league whose moment has come (docs/AI-NATIVE.md).
+  let advised: string | undefined;
+  if (deps.ai?.advisor && Date.now() - started < ADVICE_AFTER_MS) {
+    const league = due.find((conn) => adviceDue(conn, deps.now()));
+    if (league) {
+      const a = await adviseConnection(deps, league);
+      advised = a.connectionId;
+      console.log(`advise: ${a.connectionId} ${a.outcome} given=${a.given} recorded=${a.recorded}${a.error ? " " + a.error : ""}`);
+    }
+  }
+
+  return json({ checked: results.length, deferred: deferred.length, results, ...(advised ? { advised } : {}) });
 });

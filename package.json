@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "test": "node --test \"packages/*/test/*.test.ts\" \"scripts/*.test.ts\"",
-    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/service && tsc -p scripts && npm run typecheck --workspace apps/mobile",
+    "typecheck": "tsc -p packages/core && tsc -p packages/football-data && tsc -p packages/connectors && tsc -p packages/ai && tsc -p packages/service && tsc -p scripts && npm run typecheck --workspace apps/mobile",
     "functions:build": "node scripts/build-functions.ts",
     "functions:check": "node scripts/build-functions.ts --check",
     "espn:check": "node scripts/espn-check.ts",

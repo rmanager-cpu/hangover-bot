@@ -1,0 +1,62 @@
+{
+  "players": [
+    {
+      "id": 4000001,
+      "onTeamId": 0,
+      "status": "FREEAGENT",
+      "player": {
+        "id": 4000001,
+        "fullName": "Jordan Mason",
+        "defaultPositionId": 2,
+        "proTeamId": 16,
+        "eligibleSlots": [2, 3, 23, 7, 20, 21],
+        "injuryStatus": "ACTIVE",
+        "injured": false,
+        "ownership": { "percentOwned": 42.3 },
+        "stats": [
+          { "statSourceId": 0, "scoringPeriodId": 0, "statSplitTypeId": 0, "appliedTotal": 38.1 },
+          { "statSourceId": 1, "scoringPeriodId": 0, "statSplitTypeId": 0, "appliedTotal": 95.2 },
+          { "statSourceId": 1, "scoringPeriodId": 5, "statSplitTypeId": 1, "appliedTotal": 11.4 }
+        ]
+      }
+    },
+    {
+      "id": 4000002,
+      "onTeamId": 0,
+      "status": "WAIVERS",
+      "player": {
+        "id": 4000002,
+        "fullName": "Waiver Wire",
+        "defaultPositionId": 3,
+        "proTeamId": 16,
+        "eligibleSlots": [3, 4, 5, 23, 7, 20, 21],
+        "injuryStatus": "ACTIVE",
+        "injured": false,
+        "ownership": { "percentOwned": 61.0 },
+        "stats": [{ "statSourceId": 1, "scoringPeriodId": 5, "statSplitTypeId": 1, "appliedTotal": 9.8 }]
+      }
+    },
+    {
+      "id": 4000003,
+      "onTeamId": 0,
+      "status": "FREEAGENT",
+      "player": {
+        "id": 4000003,
+        "fullName": "Bye Weeker",
+        "defaultPositionId": 2,
+        "proTeamId": 24,
+        "eligibleSlots": [2, 3, 23, 7, 20, 21],
+        "injuryStatus": "QUESTIONABLE",
+        "injured": true,
+        "ownership": { "percentOwned": 12.5 },
+        "stats": [{ "statSourceId": 1, "scoringPeriodId": 5, "statSplitTypeId": 1, "appliedTotal": 0 }]
+      }
+    },
+    {
+      "id": 4000004,
+      "onTeamId": 3,
+      "status": "ONTEAM",
+      "player": { "id": 4000004, "fullName": "Somebody's Player", "defaultPositionId": 2, "proTeamId": 16, "eligibleSlots": [2, 20] }
+    }
+  ]
+}

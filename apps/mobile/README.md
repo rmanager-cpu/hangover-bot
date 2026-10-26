@@ -5,7 +5,7 @@ The contract it is built to is the "Mobile" section of `docs/BETA.md`.
 
 The app never talks to ESPN on its own and never holds an ESPN credential after sign-in. It
 reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functions
-`espn-connect`, `connection-setup`, `read`, `decide` and `swap`.
+`espn-connect`, `connection-setup`, `read`, `decide`, `swap`, `leagues` and `delete-account`.
 
 ## The flow
 
@@ -22,17 +22,21 @@ reads and writes the user's own rows in Supabase (RLS) and calls the Edge Functi
    after. If the native store can't be read, a script in ESPN's page posts the two cookies
    instead, when page JavaScript can see them.
 4. League list (or type or paste the league id when ESPN's list didn't come back), then
-   `connection-setup`.
+   `connection-setup`. Settings' **Watch another league** shows the same list for the
+   stored sign-in (the `leagues` function), so there is nothing to type.
 5. **What we read from ESPN**: starters, bench and IR in ESPN's order, with injury tags,
    kickoffs, byes, locks and projections, to compare line by line with the ESPN app. Plus
    the **Test swap**: pick two players, confirm, see the receipt from a fresh read, **Swap back**.
-6. Protection: Alerts, Ask Me, Bench Protection (needs a claimed account), AI Rescue "Coming soon".
+6. Protection: Alert Me, Auto Protect, AI Native (the last two need a claimed account).
+   Choosing AI Native opens **Droppable players** (`app/droppable.tsx`): every player with a
+   Droppable / Not droppable switch, everyone off to start; saving it turns AI Native on.
 7. Claim: email, then the 6-digit code (`updateUser({ email })`, then
-   `verifyOtp({ type: "email_change" })`). Skippable unless Bench Protection was chosen.
+   `verifyOtp({ type: "email_change" })`). Skippable unless Auto Protect or AI Native was chosen.
    If the email already belongs to an account, the screen offers to sign in to it instead.
 8. Home (YOU'RE COVERED or ACTION NEEDED), Activity (receipts; proposals with big Approve and
-   Decline), Settings (protection, replacement order, pause, sign in to ESPN again, **Forget
-   my ESPN sign-in**, About).
+   Decline), **Roster Advice** (`app/advice.tsx`, AI Native: the AI's suggestions with their
+   sources, Do it / Not now), Settings (protection, replacement order, droppable players,
+   pause, watch another league, sign in to ESPN again, **Forget my ESPN sign-in**, About).
 
 Two more routes, for the second phone or the reinstall:
 

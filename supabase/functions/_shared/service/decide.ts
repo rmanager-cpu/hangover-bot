@@ -1,9 +1,12 @@
 // Copied from packages/service/src/decide.ts by scripts/build-functions.ts. Edit the original.
-// What the user does from the app: approve or decline a proposal, and the Saturday
-// test swap. The user's tap is the authority here, so neither depends on Bench
-// Protection or a claimed account. Both still re-read ESPN first and verify after.
+// What the user does from the app: approve or decline a proposal (a bench move, AI Native's
+// add, or a piece of Roster Advice), and the Saturday test swap. The user's tap is the
+// authority here, so neither depends on the protection level or a claimed account. Both
+// still re-read ESPN first and verify after; an add is also re-checked against the No-Cray
+// Rules, where the tap waives only the Droppable switch and data ESPN did not send.
 
-import { evaluate, IR, isStarting, type Move, type Player, type Roster, type Settings, type Slot } from "@rosterbots/core";
+import { BENCH, IR, evaluate, isHole, isStarting, noCray, type Candidate, type Move, type Player, type Room, type Roster, type Settings, type Slot } from "@rosterbots/core";
+import type { FantasyConnector } from "@rosterbots/connectors";
 import {
   announce,
   connect,
@@ -14,14 +17,17 @@ import {
   keepRoster,
   leaveUnconfirmed,
   noteWrite,
+  outsideHistory,
   readTeamPatiently,
   settingsFor,
   signature,
   signedOut,
   writeAndVerify,
+  writeOutsideAndVerify,
 } from "./ops.ts";
+import { fillOf } from "./outside.ts";
 import { summarizeRead } from "./read.ts";
-import type { ActionRow, ActionStatus, DecisionResult, Deps, Store, SwapResult } from "./types.ts";
+import type { ActionRow, ActionStatus, ConnectionRow, DecisionResult, Deps, Store, SwapResult } from "./types.ts";
 import { NOT_NEEDED, OUT_OF_DATE, PROVED, SIGN_IN_AGAIN, clock, failure, notPending, playersIn, receipt, shortName, slotName, type Lookup } from "./words.ts";
 
 const no = (error: string, message: string) => ({ ok: false as const, error, message });
@@ -84,6 +90,76 @@ async function stillNeeded(store: Store, action: ActionRow, roster: Roster, now:
   return undefined;
 }
 
+/** How many free agents to read when looking for the one an approval names, among those who play his position. */
+const FREE_AGENTS_TO_FIND = 150;
+
+/** The slot a position's players are listed under, for the free-agent filter. */
+const slotOfPosition = (position: string): Slot | undefined =>
+  (({ QB: "QB", RB: "RB", WR: "WR", TE: "TE", K: "K", DST: "DST", "D/ST": "DST" }) as Record<string, Slot>)[position];
+
+/**
+ * An approved add, rebuilt on fresh reads: the free agent must still be free, the player
+ * who makes room still where he was, the slot's own moves still possible, and the No-Cray
+ * Rules still satisfied, the user's tap waiving only what a tap may waive.
+ */
+async function outsideCandidateFor(
+  deps: Deps,
+  espn: FantasyConnector,
+  conn: ConnectionRow,
+  action: ActionRow,
+  fresh: Roster,
+  now: Date,
+  settings: Settings,
+): Promise<{ candidate: Candidate; who: Lookup } | { refused: Refusal }> {
+  const tx = action.transaction!;
+  const stale = (message: string): { refused: Refusal } => ({ refused: { status: "superseded", error: "stale", message } });
+  const positionSlot = slotOfPosition(tx.add.position);
+  const fas = await espn.getFreeAgents(conn.leagueId, fresh.period, { ...(positionSlot ? { slots: [positionSlot] } : {}), limit: FREE_AGENTS_TO_FIND });
+  const fa = fas.find((f) => f.player.id === tx.add.playerId);
+  if (!fa) return stale(`${tx.add.name} is no longer a free agent, so this is out of date. Nothing was changed.`);
+  if (fa.onWaivers) return stale(`${tx.add.name} is on waivers now, and RosterBots never makes waiver claims. Nothing was changed.`);
+  const at = (id: string) => fresh.entries.find((e) => e.player.id === id);
+
+  let room: Room;
+  if (tx.room.how === "open") room = { how: "open" };
+  else {
+    const e = at(tx.room.playerId);
+    if (!e || e.slot !== tx.room.from) return stale(`${tx.room.name} isn't where he was, so this is out of date. Nothing was changed.`);
+    if (started(e.player, now)) return { refused: { status: "expired", error: "locked", message: `${shortName(e.player.name)}'s game has started, so ESPN won't let him move.` } };
+    // The AI's word that his season is over (advice, from a web report) stands for the tap that takes it.
+    const player = tx.room.how === "drop" && tx.room.outForSeason ? { ...e.player, outForSeason: true } : e.player;
+    room = { how: tx.room.how, player, from: e.slot };
+  }
+  // The slot's own moves (the starter who sits) must still be possible; the add's are his to make.
+  const own = action.moves.filter((m) => m.playerId !== tx.add.playerId);
+  const bad = invalid(own, fresh, now);
+  if (bad) return { refused: bad };
+
+  const slot = action.moves.find((m) => m.playerId === tx.add.playerId)?.to ?? tx.add.to;
+  const occupantId = own.find((m) => isStarting(m.from))?.playerId;
+  const occupant = occupantId ? at(occupantId)?.player : undefined;
+  const advice = action.findingKey.includes(":advice:");
+  if (!advice) {
+    // The hole must still be one: its starter still a hole, or still RosterBots' own fill; an empty slot still empty.
+    if (occupant) {
+      const fill = (await deps.store.doneExecutes(conn.id, fresh.period)).some((a) => a.findingKey === action.findingKey && fillOf(a)?.playerId === occupant.id);
+      if (!isHole(occupant) && !fill) return { refused: { status: "superseded", error: "not_needed", message: NOT_NEEDED } };
+    } else if (isStarting(slot) && fresh.entries.filter((e) => e.slot === slot).length >= fresh.starterSlots.filter((s) => s === slot).length) {
+      return { refused: { status: "superseded", error: "not_needed", message: NOT_NEEDED } };
+    }
+  }
+  const history = await outsideHistory(deps.store, conn.id, fresh.period);
+  const v = noCray(
+    { add: fa.player, room },
+    { roster: fresh, settings, now, history, slot: advice ? BENCH : slot, baseline: 0, purpose: advice ? "advice" : "hole", ...(occupant ? { occupant } : {}) },
+  );
+  if (!v.ok && !v.waivable) return { refused: { status: "superseded", error: "not_allowed", message: `I can't make this one: ${v.why}. Nothing was changed.` } };
+
+  const roster = playersIn(fresh);
+  const who: Lookup = (id) => roster(id) ?? (id === fa.player.id ? fa.player : undefined);
+  return { candidate: { player: fa.player, moves: action.moves, add: { to: tx.add.to, room } }, who };
+}
+
 /** Changes a pending action, or says why it cannot: someone answered it first. */
 async function fromPending(store: Store, id: string, patch: Parameters<Store["updateAction"]>[1]): Promise<DecisionResult | undefined> {
   if (await store.updateAction(id, patch, "pending")) return undefined;
@@ -104,7 +180,8 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     return lost ?? { ok: true, status: "declined", message: "Okay. I'll leave your lineup as it is." };
   }
 
-  if (action.kind !== "propose" || !action.moves.length) return no("not_approvable", "There's no change to approve here.");
+  const approvable = (action.kind === "propose" || action.kind === "advise") && (action.moves.length > 0 || !!action.transaction);
+  if (!approvable) return no("not_approvable", "There's no change to approve here.");
   if (action.deadline !== null && Date.parse(action.deadline) <= now.getTime()) {
     await store.updateAction(action.id, { status: "expired" }, "pending");
     return no("expired", `Too late: this one expired at ${clock(action.deadline, now)}.`);
@@ -124,7 +201,19 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     const fresh = await readTeamPatiently(deps, espn, conn);
     who = playersIn(fresh);
     const at = deps.now();
-    const refused = invalid(action.moves, fresh, at) ?? (await stillNeeded(store, action, fresh, at, await settingsFor(deps, conn)));
+    const settings = await settingsFor(deps, conn);
+    let candidate: Candidate | undefined;
+    let refused: Refusal | undefined;
+    if (action.transaction) {
+      const r = await outsideCandidateFor(deps, espn, conn, action, fresh, at, settings);
+      if ("refused" in r) refused = r.refused;
+      else {
+        candidate = r.candidate;
+        who = r.who;
+      }
+    } else {
+      refused = invalid(action.moves, fresh, at) ?? (await stillNeeded(store, action, fresh, at, settings));
+    }
     if (refused) {
       const lost = await fromPending(store, action.id, { status: refused.status });
       // The lineup moved on since the last check; Home should show it as it is.
@@ -136,19 +225,22 @@ export async function decideAction(deps: Deps, userId: string, actionId: string,
     const lost = await fromPending(store, action.id, { status: "approved", decidedAt: at.toISOString() });
     if (lost) return lost;
     wrote = true;
-    const out = await writeAndVerify(deps, espn, conn, action.moves, fresh.period);
+    const out = candidate ? await writeOutsideAndVerify(deps, espn, conn, candidate, fresh.period) : await writeAndVerify(deps, espn, conn, action.moves, fresh.period);
+    const moves = candidate ? (out as { moves: Move[] }).moves : action.moves;
+    const stage = candidate ? (out as { stage: string }).stage : undefined;
     const done = deps.now();
     await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
-      await failed(deps, conn, action, who, out.after, out.result, done);
-      return no("not_applied", failure(action.reason, action.moves, who, out.after, action.deadline, done).body);
+      const result = stage ? { ...out.result, stage } : out.result;
+      await failed(deps, conn, { ...action, moves: moves.length ? moves : action.moves }, who, out.after, result, done);
+      return no("not_applied", failure(action.reason, moves.length ? moves : action.moves, who, out.after, action.deadline, done, action.transaction, stage as "ir" | "add" | "lineup" | "done" | undefined).body);
     }
-    // A change ESPN shows is the proof Bench Protection waits for; the first one says so.
-    const notice = receipt(action.reason, action.moves, who, done, conn.writeVerifiedAt ? undefined : PROVED);
+    // A change ESPN shows is the proof Auto Protect waits for; the first one says so.
+    const notice = receipt(action.reason, moves, who, done, conn.writeVerifiedAt ? undefined : PROVED, action.transaction);
     verified = notice.body;
     await noteWrite(deps, conn, done);
     await store.updateAction(action.id, { status: "done", executedAt: done.toISOString(), result: out.result }, "approved");
-    await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves: action.moves });
+    await announce(deps, conn, notice, { actionId: action.id, findingKey: action.findingKey, moves, ...(action.transaction ? { transaction: action.transaction } : {}) });
     return { ok: true, status: "done", message: notice.body };
   } catch (e) {
     // ESPN shows the change: it happened, whatever went wrong recording it.
@@ -195,8 +287,8 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
       if (started(e.player, now)) return no("locked", `${shortName(e.player.name)}'s game has started, so ESPN won't let him move.`);
     }
     if (a.slot === b.slot) return no("same_slot", "Those two are in the same slot, so swapping them changes nothing.");
-    // IR moves are not in the beta.
-    if (a.slot === IR || b.slot === IR) return no("ir", "IR moves aren't part of the beta. Pick two players who aren't on IR.");
+    // IR moves are not part of the test swap.
+    if (a.slot === IR || b.slot === IR) return no("ir", "IR moves aren't part of the test swap. Pick two players who aren't on IR.");
     for (const [x, y] of [[a, b], [b, a]] as const) {
       if (!x.player.eligibleSlots.includes(y.slot)) return no("not_eligible", `${shortName(x.player.name)} can't play ${slotName(y.slot)}.`);
     }
@@ -209,13 +301,13 @@ export async function manualSwap(deps: Deps, userId: string, connectionId: strin
     const done = deps.now();
     await keepRoster(deps, conn, out.after, done);
     if (!out.applied) {
-      // ESPN's write did not work here, so Bench Protection waits for one that does.
+      // ESPN's write did not work here, so automatic moves wait for one that does.
       await noteWrite(deps, conn, null);
       const notice = failure(null, moves, who, out.after, null, done);
       await announce(deps, conn, notice, { moves, result: out.result });
       return no("not_applied", notice.body);
     }
-    // The proof Bench Protection waits for before its first automatic move here; the first one says so.
+    // The proof automatic moves wait for before the first one here; the first one says so.
     const notice = receipt(null, moves, who, done, conn.writeVerifiedAt ? undefined : PROVED);
     verified = { ok: true, message: notice.body, after: summarizeRead(out.after, done) };
     await noteWrite(deps, conn, done);
