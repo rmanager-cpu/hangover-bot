@@ -60,8 +60,18 @@ $w = 1400; $h = [int]($w * ($tight.Height + 2 * $pad) / ($tight.Width + 2 * $pad
 Save (Compose $lockup $tight $w $h (New-Object System.Drawing.Rectangle 0, 0, $w, $h) $null) (Join-Path $out "brand\rosterbots-lockup.png")
 Write-Output ("lockup aspect {0:N4}" -f ($w / $h))
 
-# The splash: the lockup on transparent, with room around it; app.config.ts sets Midnight behind.
-Save (Compose $lockup $tight 1200 600 (New-Object System.Drawing.Rectangle 60, 60, 1080, 480) $null) (Join-Path $out "splash-icon.png")
+# The splash: the lockup on transparent; app.config.ts sets Midnight behind. Android 12 and
+# later draw the splash image on a 288 dp square and show only the 192 dp circle in its middle,
+# clipping the rest, so the first, wide splash lost both ends of the lockup on the owner's
+# phone (Oct 26). The image is that square (1152 px, 288 dp at 4x) with the lockup fitted
+# inside the circle less 4 dp each side, and app.config.ts sets imageWidth 288 so Expo maps it
+# one to one. iOS shows the same image with no mask.
+$S = 1152
+$D = $S * 184 / 288
+$a = $tight.Width / $tight.Height
+$bw = [int]($D * $a / [Math]::Sqrt(1 + $a * $a)); $bh = [int]($D / [Math]::Sqrt(1 + $a * $a))
+Save (Compose $lockup $tight $S $S (New-Object System.Drawing.Rectangle ([int](($S - $bw) / 2)), ([int](($S - $bh) / 2)), $bw, $bh) $null) (Join-Path $out "splash-icon.png")
+Write-Output ("splash lockup {0}x{1} px of {2}, inside a {3} px circle" -f $bw, $bh, $S, $D)
 
 # The robot's head and shoulders from the lockup, for the peek beside "You're covered" on Home.
 $head = New-Object System.Drawing.Rectangle ($tight.X + [int]($tight.Width * 0.115)), $tight.Y, ([int]($tight.Width * 0.235)), ([int]($tight.Height * 0.60))

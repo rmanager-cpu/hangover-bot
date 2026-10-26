@@ -52,10 +52,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
-    // The splash is the lockup on Midnight.
+    // The splash is the lockup on Midnight. The image is Android's 288 dp splash square with
+    // the lockup inside the 192 dp circle Android leaves visible (scripts/brand-assets.ps1),
+    // so imageWidth is 288: wider, and Android clips the lockup's ends.
     [
       "expo-splash-screen",
-      { image: "./assets/splash-icon.png", imageWidth: 300, resizeMode: "contain", backgroundColor: MIDNIGHT },
+      { image: "./assets/splash-icon.png", imageWidth: 288, resizeMode: "contain", backgroundColor: MIDNIGHT },
     ],
     // The service names this channel on every push (ANDROID_CHANNEL); src/lib/push.tsx creates it.
     ["expo-notifications", { icon: "./assets/notification-icon.png", color: TURBO_ORANGE, defaultChannel: "default" }],
