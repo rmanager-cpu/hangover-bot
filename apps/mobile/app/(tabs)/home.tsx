@@ -1,6 +1,6 @@
 // Home stays small (handoff section 3), laid out as the brand sheet draws it: are you
 // covered, the team card with its watched starters, the last action, and anything
-// unresolved. The robot peeks in beside the headline when all is well.
+// unresolved. The robot peeks over the team card when all is well.
 
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect } from "react";
@@ -191,6 +191,20 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
       </>
     );
   }
+  // Checks still run but can't read ESPN: the team below is the last good read, so nothing
+  // here may say covered (seen Oct 27: two days of failed checks under "You're covered").
+  if (readFailing(conn)) {
+    return (
+      <>
+        <Headline tone="orange" title="Can't read ESPN" line={line} note={`Last good read ${agoText(conn.lastRosterAt!)}.`} />
+        <Card tone="warn">
+          <Body>My last check couldn't read {team} from ESPN. I'm trying again every few minutes. Until it works, the team below is from the last good read.</Body>
+          <Muted style={{ marginTop: space.sm }}>If it keeps happening, signing in to ESPN again usually fixes it.</Muted>
+          <Button title="Sign in to ESPN again" variant="secondary" onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })} style={{ marginTop: space.lg, alignSelf: "flex-start" }} />
+        </Card>
+      </>
+    );
+  }
   if (props.needTap.length || props.open.length) {
     return (
       <>
@@ -233,22 +247,43 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
   );
 }
 
+/**
+ * A check that fails still stamps last_checked_at but keeps the last good roster and its time
+ * (service protect.ts); a good check stamps both alike. So a gap means the checks since that
+ * read have failed.
+ */
+function readFailing(conn: Connection): boolean {
+  if (!conn.lastCheckedAt || !conn.lastRosterAt) return false;
+  return Date.parse(conn.lastCheckedAt) - Date.parse(conn.lastRosterAt) > READ_GRACE_MS;
+}
+const READ_GRACE_MS = 10 * 60_000;
+
 /** The big line at the top of Home, with the robot peeking in from the right when asked. */
 function Headline(props: { tone: "green" | "orange" | "red" | "muted"; title: string; line: string; note?: string; robot?: boolean }) {
   return (
     <View style={s.headline}>
-      {props.robot ? <Image source={ROBOT_PEEK.source} style={s.robot} resizeMode="contain" accessibilityIgnoresInvertColors /> : null}
-      <View style={[{ flex: 1 }, props.robot && { paddingRight: 96 }]}>
+      {props.robot ? (
+        <View style={s.robotClip} pointerEvents="none">
+          <Image source={ROBOT_PEEK.source} style={s.robot} resizeMode="contain" accessibilityIgnoresInvertColors />
+        </View>
+      ) : null}
+      <View style={{ flex: 1 }}>
         <View style={s.headRow}>
           <Dot tone={props.tone} />
           <Hero style={s.hero}>{props.title}</Hero>
         </View>
-        <Body style={s.line}>{props.line}</Body>
-        {props.note ? <Muted style={{ marginTop: space.xs }}>{props.note}</Muted> : null}
+        <Body style={[s.line, props.robot && { marginRight: ROBOT_ROOM }]}>{props.line}</Body>
+        {props.note ? <Muted style={[{ marginTop: space.xs }, props.robot && { marginRight: ROBOT_ROOM }]}>{props.note}</Muted> : null}
       </View>
     </View>
   );
 }
+
+const ROBOT_W = 120;
+const ROBOT_SHOWN = 86;
+const ROBOT_OFFSCREEN = 8;
+// The lines under the title stop short of the robot; the title sits above its head.
+const ROBOT_ROOM = ROBOT_W - ROBOT_OFFSCREEN;
 
 const s = StyleSheet.create({
   top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.lg, marginTop: space.xs },
@@ -256,7 +291,11 @@ const s = StyleSheet.create({
   headRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   hero: { fontSize: 32, lineHeight: 38, flexShrink: 1 },
   line: { color: color.muted, fontSize: 17, marginTop: space.xs, marginLeft: 14 + space.md },
-  robot: { position: "absolute", right: -space.sm, top: -space.md, width: 176, height: 176 / ROBOT_PEEK.aspect },
+  // The robot peeks over the team card from the right, facing the headline. The art is cut off
+  // at its left and bottom, so it is flipped to put the cut side past the screen's edge, and
+  // its clip ends at the card's top edge (the headline's bottom margin), hiding the bottom cut.
+  robotClip: { position: "absolute", right: -(space.lg + ROBOT_OFFSCREEN), bottom: -space.lg, width: ROBOT_W, height: ROBOT_SHOWN, overflow: "hidden" },
+  robot: { position: "absolute", left: 0, top: 0, width: ROBOT_W, height: ROBOT_W / ROBOT_PEEK.aspect, transform: [{ scaleX: -1 }] },
   cardHead: { flexDirection: "row", alignItems: "center", gap: space.md },
   starter: { flexDirection: "row", alignItems: "center", paddingVertical: space.sm, gap: space.md },
   starterLine: { borderBottomWidth: 1, borderBottomColor: color.inkLine },

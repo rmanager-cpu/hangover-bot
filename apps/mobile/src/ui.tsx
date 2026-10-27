@@ -4,9 +4,12 @@
 // palette from the surface it sits on, so a Body inside a white Card is navy and the same
 // Body straight on the screen is white.
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
+  Animated,
+  Easing,
   Image,
   Pressable,
   RefreshControl,
@@ -23,7 +26,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
-import { LOCKUP, WORDMARK } from "./brand";
+import { LOCKUP, SPLASH, WORDMARK } from "./brand";
 import { ARROW, CHEVRON, Radio } from "./icons";
 import { color, font, radius, space } from "./theme";
 
@@ -69,14 +72,51 @@ export function Centered(props: { children: ReactNode }) {
   return <View style={s.centered}>{props.children}</View>;
 }
 
+/**
+ * Loading: the splash's lockup at the splash's size, breathing, with an orange bar sweeping
+ * under it like the lockup's speed lines. On launch it takes over from the splash with the
+ * lockup in the same place. Still when the phone asks for reduced motion.
+ */
 export function Loading(props: { label?: string }) {
+  const sweep = useRef(new Animated.Value(0)).current;
+  const breathe = useRef(new Animated.Value(0)).current;
+  const [still, setStill] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    AccessibilityInfo.isReduceMotionEnabled().then((on) => alive && setStill(on)).catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (still) return;
+    const half = (toValue: number) => Animated.timing(breathe, { toValue, duration: 700, easing: Easing.inOut(Easing.sin), useNativeDriver: true });
+    const loop = Animated.loop(
+      Animated.parallel([
+        Animated.timing(sweep, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
+        Animated.sequence([half(1), half(0)]),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [still, sweep, breathe]);
+
+  const scale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+  const translateX = sweep.interpolate({ inputRange: [0, 1], outputRange: [-LOAD_BAR, LOAD_TRACK] });
   return (
     <Centered>
-      <ActivityIndicator color={color.orange} size="large" />
-      {props.label ? <Muted style={{ marginTop: space.md, textAlign: "center" }}>{props.label}</Muted> : null}
+      <View style={s.loadBox} accessible accessibilityRole="progressbar" accessibilityLabel={props.label ?? "Loading"}>
+        <Animated.Image source={SPLASH.source} style={[s.loadArt, { transform: [{ scale }] }]} resizeMode="contain" />
+        <View style={s.loadTrack}>
+          <Animated.View style={[s.loadBar, still ? { left: (LOAD_TRACK - LOAD_BAR) / 2 } : { transform: [{ translateX }] }]} />
+        </View>
+        {props.label ? <Muted style={s.loadLabel}>{props.label}</Muted> : null}
+      </View>
     </Centered>
   );
 }
+const LOAD_TRACK = 132;
+const LOAD_BAR = 44;
 
 // Marks.
 
@@ -356,6 +396,12 @@ const s = StyleSheet.create({
   content: { padding: space.lg, paddingBottom: space.xxl },
   footer: { paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.md, backgroundColor: color.midnight },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: space.xl, backgroundColor: color.midnight },
+  // The splash square stays exactly centred; the bar and the label hang below the lockup inside it.
+  loadBox: { width: SPLASH.size, height: SPLASH.size },
+  loadArt: { width: SPLASH.size, height: SPLASH.size },
+  loadTrack: { position: "absolute", top: SPLASH.size / 2 + 44, left: (SPLASH.size - LOAD_TRACK) / 2, width: LOAD_TRACK, height: 4, borderRadius: 2, backgroundColor: color.line, overflow: "hidden" },
+  loadBar: { position: "absolute", top: 0, bottom: 0, width: LOAD_BAR, borderRadius: 2, backgroundColor: color.orange },
+  loadLabel: { position: "absolute", top: SPLASH.size / 2 + 64, left: 0, right: 0, textAlign: "center" },
 
   card: { backgroundColor: color.white, borderRadius: radius.lg, padding: CARD_PAD, marginBottom: space.md },
   cardDark: { backgroundColor: color.navy, borderWidth: 1, borderColor: color.line },
