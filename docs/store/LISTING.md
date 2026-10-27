@@ -42,12 +42,12 @@ Developer name field: `Turbo Devs` (10). [VERIFY] the developer-name character l
 
 ## 3. Full description (limit 4,000; plain text, no markup)
 
-**3,941 characters with LF line endings (Play counts Unicode characters, so paste with LF).** 59 characters of room remain; cut before adding.
+**3,946 characters with LF line endings (Play counts Unicode characters, so paste with LF).** 54 characters of room remain; cut before adding.
 
 ```
 RosterBots: Hangover Protection, by Turbo Devs.
 
-Fantasy help for real life. RosterBots watches the starters on your ESPN fantasy football team and makes sure a player who cannot play is not still in your lineup when his game kicks off.
+Fantasy insurance for real life. RosterBots watches the starters on your ESPN fantasy football team and makes sure a player who cannot play is not still in your lineup when his game kicks off.
 
 WHAT IT DOES
 - You sign in to ESPN inside the app, on ESPN's own login page. RosterBots never sees your ESPN password.

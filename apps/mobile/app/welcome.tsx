@@ -21,7 +21,7 @@ export default function Welcome() {
   return (
     <Screen edges={["top", "bottom", "left", "right"]}>
       <Lockup style={s.lockup} />
-      <Title style={s.headline}>Fantasy help for real life.</Title>
+      <Title style={s.headline}>Fantasy insurance for real life.</Title>
       <Body style={[s.tagline, { marginBottom: space.xl }]}>We watch your lineup and let you know when players are ruled out, so you can make moves before it's too late.</Body>
 
       <Card>

@@ -218,7 +218,7 @@ export default function Settings() {
       <Label>About</Label>
       <Card tone="dark">
         <Wordmark width={180} />
-        <Muted style={{ marginTop: space.sm }}>RosterBots: Hangover Protection. Fantasy help for real life.</Muted>
+        <Muted style={{ marginTop: space.sm }}>RosterBots: Hangover Protection. Fantasy insurance for real life.</Muted>
         <Body style={{ marginTop: space.md }}>
           RosterBots reads your ESPN team with the sign-in you gave it in this app, and never sees your ESPN password. It changes your lineup only as your protection setting allows, and tells you every time it does.
         </Body>

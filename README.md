@@ -1,6 +1,6 @@
 # RosterBots: Hangover Protection
 
-Fantasy help for real life, by Turbo Devs. RosterBots watches your ESPN fantasy football
+Fantasy insurance for real life, by Turbo Devs. RosterBots watches your ESPN fantasy football
 lineup on game day and fixes a starter who can't play before his game kicks off.
 
 The beta is an Android app for ESPN leagues, first used in the owner's own league.
