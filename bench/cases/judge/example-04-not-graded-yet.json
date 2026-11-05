@@ -1,0 +1,16 @@
+{
+  "id": "example-04-not-graded-yet",
+  "example": true,
+  "note": "What a case captured in shadow mode looks like before Monday: outcome is empty, so runs skip it unless --ungraded.",
+  "tags": ["example"],
+  "input": {
+    "problem": "Example Tight End was ruled OUT at TE",
+    "slot": "TE",
+    "now": "2026-11-08T17:45:00.000Z",
+    "kickoff": "2026-11-08T18:00:00.000Z",
+    "candidates": [
+      { "id": "fa6", "name": "Example Free TE", "position": "TE", "proTeam": "MMM", "status": "active", "projection": 7.2, "kickoff": "2026-11-08T18:00:00.000Z", "opponent": "NNN", "how": "free agent, open roster spot" }
+    ]
+  },
+  "outcome": {}
+}

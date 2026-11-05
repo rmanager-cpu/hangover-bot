@@ -1,0 +1,64 @@
+{
+  "models": [
+    {
+      "name": "sonnet-5.5 (prod)",
+      "via": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "priceFrom": "anthropic/claude-sonnet-5.5",
+      "note": "What RosterBots runs today, through packages/ai unchanged. The baseline."
+    },
+    {
+      "name": "haiku-5.5",
+      "via": "anthropic",
+      "model": "claude-haiku-5-5",
+      "priceFrom": "anthropic/claude-haiku-5.5",
+      "note": "Same adapter, cheaper model. Already allowed by docs/STACK.md, so switching is a config change."
+    },
+    {
+      "name": "sonnet-5.5 (openrouter)",
+      "via": "openrouter",
+      "model": "anthropic/claude-sonnet-5.5",
+      "reasoning": "low",
+      "off": true,
+      "note": "Sanity check: should score like the prod row. If it doesn't, the OpenRouter path is skewing results."
+    },
+    { "name": "gpt-6.1-sol", "via": "openrouter", "model": "openai/gpt-6.1-sol", "reasoning": "low" },
+    { "name": "gpt-6.1-terra", "via": "openrouter", "model": "openai/gpt-6.1-terra", "reasoning": "low" },
+    { "name": "gemini-4-argon", "via": "openrouter", "model": "google/gemini-4-argon", "reasoning": "low" },
+    {
+      "name": "grok-4.7",
+      "via": "openrouter",
+      "model": "x-ai/grok-4.7",
+      "reasoning": "low",
+      "note": "Through OpenRouter this is Grok the model, not Grok's live X search. See README."
+    },
+    {
+      "name": "glm-5.3",
+      "via": "openrouter",
+      "model": "z-ai/glm-5.3",
+      "reasoning": "low",
+      "off": true,
+      "note": "Id unconfirmed: run `node bench/run.ts models z-ai`, fix the id, remove off."
+    },
+    {
+      "name": "deepseek-v4.1-flash",
+      "via": "openrouter",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "reasoning": "low",
+      "off": true,
+      "note": "Id unconfirmed: run `node bench/run.ts models deepseek`, fix the id, remove off."
+    },
+    {
+      "name": "kimi-k3.1-pro",
+      "via": "openrouter",
+      "model": "moonshotai/kimi-k3.1-pro",
+      "reasoning": "low",
+      "off": true
+    },
+    { "name": "mock-best", "via": "mock", "model": "best-projection", "off": true, "note": "Offline: highest projection wins." },
+    { "name": "mock-keep", "via": "mock", "model": "keep", "off": true, "note": "Offline: always keeps the bench fill." },
+    { "name": "mock-offlist", "via": "mock", "model": "off-list", "off": true, "note": "Offline: names a player nobody offered." },
+    { "name": "mock-unsure", "via": "mock", "model": "first-unsure", "off": true, "note": "Offline: first candidate, low confidence." },
+    { "name": "mock-silent", "via": "mock", "model": "silent", "off": true, "note": "Offline: never answers." }
+  ]
+}
