@@ -1,0 +1,106 @@
+{
+  "id": "2025-12-14-rome-odunze-A",
+  "note": "Real. Rome Odunze (CHI) vs CLE, 2025-12-14, 1:00 PM ET: did not play. Collector's doubts: Late scratch after being declared active. He is absent from the ESPN box score (Bears won 31-3), and his 2025 ESPN game log has no Dec 14 game. Schefter's time comes from his ESPN contributor page, which shows 'Dec 14, 2025, 12:56 PM' with no time zone. That fits ET next to Rapoport's 12:55 PM post, but I could not open the X post itself. The Bears' 11:30 AM post is an image; that Odunze was not on the list is cited from Bear Goggles On (11:46 AM ET, page metadata 16:46Z). I did not find the time of Chris Emma's own report or Fowler's own post; their times are the CBS blurb times.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Rome Odunze",
+    "position": "WR",
+    "team": "CHI"
+  },
+  "opponent": "CLE",
+  "kickoff": "2025-12-14T18:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-14T16:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-12T19:16:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Odunze (foot) remained limited at practice Friday and is listed as questionable for Sunday's game against Cleveland.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bears-rome-odunze-questionable-after-limited-practice/"
+    },
+    {
+      "at": "2025-12-12T20:00:00.000Z",
+      "source": "FantasyPros (citing Bears PR on X)",
+      "words": "Rome Odunze (foot) is questionable to play in Sunday's game against the Cleveland Browns.",
+      "url": "https://www.fantasypros.com/nfl/news/558704/rome-odunze-foot-questionable-to-play-sunday.php"
+    },
+    {
+      "at": "2025-12-13T15:30:00.000Z",
+      "source": "RotoWire via CBS (citing Jeremy Fowler, ESPN)",
+      "words": "There is optimism in the Bears organization that Odunze (foot) will be available to play against the Browns on Sunday, Jeremy Fowler of ESPN.com reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bears-rome-odunze-optimism-for-week-15/"
+    },
+    {
+      "at": "2025-12-14T04:11:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "The #Bears are optimistic that WR Rome Odunze (foot) plays on Sunday, source says. He's listed as questionable and missed last week.",
+      "url": "https://x.com/RapSheet/status/2000055899105460320"
+    },
+    {
+      "at": "2025-12-14T16:30:00.000Z",
+      "source": "team",
+      "words": "Inactives for #CLEvsCHI:",
+      "url": "https://x.com/ChicagoBears/status/2000241889577152815"
+    },
+    {
+      "at": "2025-12-14T16:46:00.000Z",
+      "source": "Bear Goggles On (FanSided)",
+      "words": "The Bears released their Week 15 inactives with six players being included. One player who isn't on there: wide receiver Rome Odunze.",
+      "url": "https://beargoggleson.com/bears-week-15-inactives-confirms-rome-odunze-news-that-ll-fire-up-fans"
+    },
+    {
+      "at": "2025-12-14T17:55:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Bears WR Rome Odunze, who is officially active, is being ruled out after aggravating his foot injury. Bad news right before kickoff.",
+      "url": "https://x.com/RapSheet/status/2000263301394317747"
+    },
+    {
+      "at": "2025-12-14T17:56:00.000Z",
+      "source": "Adam Schefter",
+      "words": "Bears WR Rome Odunze, who was officially active, now has been ruled out after aggravating his foot injury.",
+      "url": "https://www.espn.com/contributor/adam-schefter/40a2f8490f82c"
+    },
+    {
+      "at": "2025-12-14T17:58:00.000Z",
+      "source": "RotoWire via CBS (citing Chris Emma, 670 The Score)",
+      "words": "Odunze aggravated the stress fracture in his foot during pregame warmups and has been ruled out for Sunday's game against the Browns",
+      "url": "https://www.cbssports.com/fantasy/football/news/bears-rome-odunze-ruled-out-sunday/"
+    }
+  ],
+  "confirmedAt": "2025-12-14T17:55:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772904",
+  "aliases": {
+    "Bears": "Team A",
+    "Chicago": "Team A",
+    "Bears Chicago": "Team A",
+    "Chicago Bears": "Team A",
+    "Browns": "Team B",
+    "Cleveland": "Team B",
+    "Browns Cleveland": "Team B",
+    "Cleveland Browns": "Team B",
+    "CHIvsCLE": "Team A vs Team B",
+    "CLEvsCHI": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "id": "2026-01-03-george-kittle-C",
+  "note": "Real. George Kittle (SF) vs SEA, 2026-01-03, 8:00 PM ET: played. Collector's doubts: Misleading type: stale items. The three Dec 27-28 items (game-time decision, Schefter 'highly unlikely', inactive) are about Week 17 vs Chicago, six days before this Saturday-night Week 18 game; he played (5 rec, 29 yds on 7 targets per ESPN box score). Week 18 was a Saturday game, so the final injury report came Thursday Jan 1 (NFL.com reg18: Ankle, Limited, Questionable), not Friday. Footballers times are Pacific, converted by +3h (cross-checked: its Jan 1 3:01pm item is CBS's 6:01 pm ET item). The FantasyPros 'test in pregame warmups' line is FantasyPros' own Fantasy Impact text, not a quote from Schefter. The Schefter post is trimmed with '...' (full text is longer than 25 words). This game day also has its own doubt, so it overlaps group B.",
+  "tags": [
+    "2026",
+    "group-C"
+  ],
+  "group": "C",
+  "player": {
+    "name": "George Kittle",
+    "position": "TE",
+    "team": "SF"
+  },
+  "opponent": "SEA",
+  "kickoff": "2026-01-04T01:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2026-01-03T23:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-28T04:35:00.000Z",
+      "source": "RotoWire via The Fantasy Footballers",
+      "words": "Kittle (ankle) plans to work out before Sunday night's game against the Bears to determine if he will be able to play versus Chicago",
+      "url": "https://www.thefantasyfootballers.com/news/625497/george-kittle-shaping-up-as-game-time-decision"
+    },
+    {
+      "at": "2025-12-28T14:01:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "49ers TE George Kittle ... is “highly unlikely” to play vs. the Bears, per source.",
+      "url": "https://x.com/AdamSchefter/status/2005277863487144025"
+    },
+    {
+      "at": "2025-12-28T23:57:00.000Z",
+      "source": "RotoWire via The Fantasy Footballers",
+      "words": "Kittle (ankle) is listed as inactive Sunday against the Bears, Briana Jeannel of the 49ers' official site reports.",
+      "url": "https://www.thefantasyfootballers.com/news/625734/george-kittle-officially-inactive-in-week-17"
+    },
+    {
+      "at": "2025-12-31T01:12:00.000Z",
+      "source": "Nick Wagoner on X",
+      "words": "#49ers TE George Kittle (ankle) back at practice tonight.",
+      "url": "https://x.com/nwagoner/status/2006171536705597906"
+    },
+    {
+      "at": "2026-01-01T00:22:00.000Z",
+      "source": "Underdog NFL on X",
+      "words": "George Kittle (ankle) said he'll \"absolutely\" play Saturday.",
+      "url": "https://x.com/UnderdogNFL/status/2006521286365950354"
+    },
+    {
+      "at": "2026-01-01T23:01:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kittle (ankle) is listed as questionable for Saturday's game versus the Seahawks, Nick Wagoner of ESPN.com reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-status-in-question-for-saturday/"
+    },
+    {
+      "at": "2026-01-01T23:07:00.000Z",
+      "source": "FantasyPros (citing Adam Schefter)",
+      "words": "Kittle will test the injured ankle in pregame warmups before a determination is made on the tight end’s availability against the Seahawks Saturday night.",
+      "url": "https://www.fantasypros.com/nfl/news/563040/george-kittle-ankle-questionable-week-18.php"
+    },
+    {
+      "at": "2026-01-03T23:38:00.000Z",
+      "source": "RotoWire via The Fantasy Footballers",
+      "words": "Kittle (ankle) is listed as active Saturday against the Seahawks, Briana Jeannel of the 49ers' official site reports.",
+      "url": "https://www.thefantasyfootballers.com/news/626797/george-kittle-back-in-action-saturday"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772961",
+  "aliases": {
+    "49ers": "Team A",
+    "San Francisco": "Team A",
+    "Niners": "Team A",
+    "49ers San Francisco": "Team A",
+    "49ers Niners": "Team A",
+    "San Francisco 49ers": "Team A",
+    "San Francisco Niners": "Team A",
+    "Niners 49ers": "Team A",
+    "Niners San Francisco": "Team A",
+    "Seahawks": "Team B",
+    "Seattle": "Team B",
+    "Seahawks Seattle": "Team B",
+    "Seattle Seahawks": "Team B",
+    "SFvsSEA": "Team A vs Team B",
+    "SEAvsSF": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

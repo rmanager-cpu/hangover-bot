@@ -1,0 +1,16 @@
+{
+  "id": "example-02-tested-and-played",
+  "example": true,
+  "note": "Made-up, to test the bench. A true game-time decision who tested his ankle in warmups, was active, and played.",
+  "group": "B",
+  "player": { "name": "Pat Sample", "position": "RB", "team": "EXC" },
+  "opponent": "EXD",
+  "kickoff": "2025-12-14T18:00:00Z",
+  "designation": "questionable",
+  "inactiveList": { "at": "2025-12-14T16:30:00Z", "result": "active" },
+  "news": [
+    { "at": "2025-12-14T14:30:00Z", "source": "Example Insider on X", "words": "Pat Sample is a true game-time decision and will test his ankle in pregame warmups." },
+    { "at": "2025-12-14T17:20:00Z", "source": "beat reporter", "words": "Pat Sample went through warmups with a sleeve on his ankle and looked limited." }
+  ],
+  "outcome": "played"
+}

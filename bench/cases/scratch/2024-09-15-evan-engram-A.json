@@ -1,0 +1,75 @@
+{
+  "id": "2024-09-15-evan-engram-A",
+  "note": "Real. Evan Engram (JAX) vs CLE, 2024-09-15, 1:00 PM ET: did not play. Collector's doubts: 2024 season. Pure late scratch with no doubt beforehand, so it does not meet the 'questionable on Friday' rule; drop it if every group A case must carry a Friday designation. He was not on the Week 2 practice report: NFL.com's 2024 reg2 page lists him 'Hamstring, Out' with no practice entries, the Out being the game-day change. PFT: the change came 'about 30 minutes after the Jaguars handed in their initial inactive list', which did not include him. The CBS Week 2 2024 live blog stamps its Jaguars-inactives post 9:41 am ET, which cannot be right for a 1 PM game (it looks like a placeholder time), so I did not use it. He is absent from the ESPN box score (Browns won 18-13), and his 2024 game log has no Sept 15 game.",
+  "tags": [
+    "2024",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Evan Engram",
+    "position": "TE",
+    "team": "JAX"
+  },
+  "opponent": "CLE",
+  "kickoff": "2024-09-15T17:00:00.000Z",
+  "designation": "none",
+  "inactiveList": {
+    "at": "2024-09-15T15:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2024-09-15T15:59:00.000Z",
+      "source": "team",
+      "words": "TE Evan Engram sustained a hamstring injury in pregame warmups and has been ruled out for today's game.",
+      "url": "https://x.com/JaguarsPR/status/1835347737576919117"
+    },
+    {
+      "at": "2024-09-15T16:10:00.000Z",
+      "source": "Pro Football Talk (NBC Sports)",
+      "words": "The Jaguars made a big addition to their inactive list about an hour ahead of kickoff.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/evan-engram-ruled-out-after-hurting-hamstring-in-warmups"
+    },
+    {
+      "at": "2024-09-15T16:35:00.000Z",
+      "source": "team",
+      "words": "Engram, the Jaguars' Pro Bowl tight end, sustained a hamstring injury in pregame warmups and has been ruled out",
+      "url": "https://www.jaguars.com/news/jaguars-in-and-out-2024-week-2-update-evan-engram-ruled-out"
+    }
+  ],
+  "confirmedAt": "2024-09-15T15:59:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401671635",
+  "aliases": {
+    "Jaguars": "Team A",
+    "Jacksonville": "Team A",
+    "Jags": "Team A",
+    "Jaguars Jacksonville": "Team A",
+    "Jaguars Jags": "Team A",
+    "Jacksonville Jaguars": "Team A",
+    "Jacksonville Jags": "Team A",
+    "Jags Jaguars": "Team A",
+    "Jags Jacksonville": "Team A",
+    "Browns": "Team B",
+    "Cleveland": "Team B",
+    "Browns Cleveland": "Team B",
+    "Cleveland Browns": "Team B",
+    "JAXvsCLE": "Team A vs Team B",
+    "CLEvsJAX": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

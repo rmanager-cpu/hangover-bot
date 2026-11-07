@@ -1,0 +1,31 @@
+{
+  "id": "2026-w9-kingslayers",
+  "note": "Real. KingSlayers (Homiewood - Double Flex), Week 9, as RosterBots read it Nov 6 2026 8:15 PM PT. No free agents: reading them needs the ESPN sign-in, not on this PC.",
+  "input": {
+    "teamName": "KingSlayers",
+    "week": 9,
+    "now": "2026-11-07T05:00:14Z",
+    "starterSlots": ["QB", "RB", "RB", "WR", "WR", "TE", "DST", "K", "FLEX", "FLEX"],
+    "roster": [
+      { "id": "4362628", "name": "Ja'Marr Chase", "slot": "FLEX", "status": "active", "byeWeek": 6, "kickoff": "2026-11-08T14:30:00.000Z", "proTeam": "CIN", "opponent": "ATL", "position": "WR", "projection": 22.87127085, "percentRostered": 99.92, "seasonProjection": 340.02142469 },
+      { "id": "4567048", "name": "Kenneth Walker III", "slot": "RB", "status": "active", "byeWeek": 5, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "KC", "opponent": "NYJ", "position": "RB", "projection": 23.02633739, "percentRostered": 99.88, "seasonProjection": 238.78839658 },
+      { "id": "4426502", "name": "Drake London", "slot": "WR", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T14:30:00.000Z", "proTeam": "ATL", "opponent": "CIN", "position": "WR", "projection": 16.43569271, "percentRostered": 99.61, "seasonProjection": 267.37983672 },
+      { "id": "4882093", "name": "Bhayshul Tuten", "slot": "RB", "status": "active", "byeWeek": 7, "kickoff": "2026-11-06T01:15:00.000Z", "proTeam": "JAX", "opponent": "BAL", "position": "RB", "projection": 15.29590448, "percentRostered": 94.12, "seasonProjection": 4.71317189 },
+      { "id": "16737", "name": "Mike Evans", "slot": "BENCH", "status": "out", "byeWeek": 8, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "SF", "opponent": "LV", "position": "WR", "projection": 0, "percentRostered": 93.27, "seasonProjection": 235.0686861 },
+      { "id": "4870653", "name": "KC Concepcion", "slot": "WR", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "CLE", "opponent": "NO", "position": "WR", "projection": 11.14800551, "percentRostered": 61.09, "seasonProjection": 161.3352447 },
+      { "id": "4426385", "name": "Zach Charbonnet", "slot": "FLEX", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "SEA", "opponent": "ARI", "position": "RB", "projection": 10.76204303, "percentRostered": 73.26, "seasonProjection": 137.02487636 },
+      { "id": "4696044", "name": "Kaelon Black", "slot": "BENCH", "status": "active", "byeWeek": 8, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "SF", "opponent": "LV", "position": "RB", "projection": 10.19955024, "percentRostered": 35.2, "seasonProjection": 113.49617319 },
+      { "id": "4596334", "name": "Keaton Mitchell", "slot": "BENCH", "status": "active", "byeWeek": 7, "kickoff": "2026-11-08T21:05:00.000Z", "proTeam": "LAC", "opponent": "HOU", "position": "RB", "projection": 6.47652349, "percentRostered": 10.35, "seasonProjection": 27.46882409 },
+      { "id": "4432708", "name": "Marvin Harrison Jr.", "slot": "BENCH", "status": "active", "byeWeek": 8, "kickoff": "2026-11-08T21:05:00.000Z", "proTeam": "HOU", "opponent": "LAC", "position": "WR", "projection": 7.49410735, "percentRostered": 65.16, "seasonProjection": 239.99654111 },
+      { "id": "4360423", "name": "Michael Penix Jr.", "slot": "QB", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T14:30:00.000Z", "proTeam": "ATL", "opponent": "CIN", "position": "QB", "projection": 15.83362768, "percentRostered": 15.68, "seasonProjection": 251.13447505 },
+      { "id": "4249087", "name": "Matt Gay", "slot": "K", "status": "active", "byeWeek": 13, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "LV", "opponent": "SF", "position": "K", "projection": 9.36643459, "percentRostered": 57.75, "seasonProjection": 140.07527903 },
+      { "id": "5081397", "name": "Dylan Sampson", "slot": "BENCH", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "CLE", "opponent": "NO", "position": "RB", "projection": 8.91134333, "percentRostered": 17.77, "seasonProjection": 199.19851542 },
+      { "id": "4360635", "name": "Chig Okonkwo", "slot": "TE", "status": "active", "byeWeek": 7, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "WSH", "opponent": "LAR", "position": "TE", "projection": 9.45381435, "percentRostered": 13.2, "seasonProjection": 135.56258081 },
+      { "id": "4360698", "name": "Joe Milton", "slot": "BENCH", "status": "active", "byeWeek": 10, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "PHI", "opponent": "NYG", "position": "QB", "projection": 13.71058958, "percentRostered": 3.94, "seasonProjection": 2.58670333 },
+      { "id": "4362619", "name": "Chris Rodriguez Jr.", "slot": "BENCH", "status": "active", "byeWeek": 7, "kickoff": "2026-11-06T01:15:00.000Z", "proTeam": "JAX", "opponent": "BAL", "position": "RB", "projection": 5.57116138, "percentRostered": 19.09, "seasonProjection": 33.90536613 },
+      { "id": "-16018", "name": "Saints D/ST", "slot": "DST", "status": "active", "byeWeek": 8, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "NO", "opponent": "CLE", "position": "DST", "projection": 5.82198943, "percentRostered": 11.82, "seasonProjection": 62.13562141 }
+    ],
+    "freeAgents": [],
+    "droppable": []
+  }
+}

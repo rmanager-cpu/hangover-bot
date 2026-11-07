@@ -1,0 +1,93 @@
+{
+  "id": "2025-10-19-josh-jacobs-B",
+  "note": "Real. Josh Jacobs (GB) vs ARI, 2025-10-19, 4:25 PM ET: played. Collector's doubts: Box score line (13 carries, 55 yds, 2 TD; 1 catch) read from ESPN's summary API for gameId 401772863; the espn.com page itself returns a bot check to scripts. Schefter also posted a near-identical first version at 9:16 PM (x.com/adamschefter/status/1979718161084604688) whose text comes back cut off; I cite the 9:17 PM version.",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Josh Jacobs",
+    "position": "RB",
+    "team": "GB"
+  },
+  "opponent": "ARI",
+  "kickoff": "2025-10-19T20:25:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-10-19T18:55:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-10-17T20:22:00.000Z",
+      "source": "FantasyPros (Leo Sells, citing Zach Kruse on X)",
+      "words": "Josh Jacobs (calf/illness) is questionable to play in Sunday's game against the Arizona Cardinals.",
+      "url": "https://www.fantasypros.com/nfl/news/545896/josh-jacobs-calfillness-questionable-to-play-sunday.php"
+    },
+    {
+      "at": "2025-10-19T01:17:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Packers RB Josh Jacobs, listed as questionable for Sunday due to illness and a calf injury, is now being considered a “true game-time decision”",
+      "url": "https://x.com/AdamSchefter/status/1979718390882132015"
+    },
+    {
+      "at": "2025-10-19T01:22:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter)",
+      "words": "is considered a \"true game-time decision,\" a league source tells Adam Schefter of ESPN.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-josh-jacobs-true-game-time-decision-for-sunday/"
+    },
+    {
+      "at": "2025-10-19T03:13:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "is up in the air regarding his status on Sunday, per me and @TomPelissero. Whether he plays will be determined pre-game.",
+      "url": "https://x.com/RapSheet/status/1979747582520746317"
+    },
+    {
+      "at": "2025-10-19T18:53:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Packers RB Josh Jacobs is active today vs. the Cardinals.",
+      "url": "https://x.com/AdamSchefter/status/1979984293930610916"
+    },
+    {
+      "at": "2025-10-19T18:55:00.000Z",
+      "source": "team",
+      "words": "Josh Jacobs is ACTIVE vs. Arizona",
+      "url": "https://x.com/packers/status/1979984649557618767"
+    },
+    {
+      "at": "2025-10-19T18:59:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Jacobs (illness/calf) is listed as active Sunday at Arizona, Mike Spofford of the Packers' official site reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-josh-jacobs-active-in-week-7/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772863",
+  "aliases": {
+    "Packers": "Team A",
+    "Green Bay": "Team A",
+    "Packers Green Bay": "Team A",
+    "Green Bay Packers": "Team A",
+    "Cardinals": "Team B",
+    "Arizona": "Team B",
+    "Cardinals Arizona": "Team B",
+    "Arizona Cardinals": "Team B",
+    "GBvsARI": "Team A vs Team B",
+    "ARIvsGB": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

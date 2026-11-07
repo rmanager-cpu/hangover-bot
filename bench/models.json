@@ -1,0 +1,128 @@
+{
+  "models": [
+    {
+      "name": "sonnet-5.5 (prod)",
+      "via": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "priceFrom": "anthropic/claude-sonnet-5.5",
+      "note": "What RosterBots runs today, through packages/ai unchanged. The baseline."
+    },
+    {
+      "name": "haiku-5.5",
+      "via": "anthropic",
+      "model": "claude-haiku-5-5",
+      "priceFrom": "anthropic/claude-haiku-5.5",
+      "note": "Same adapter, cheaper model. Already allowed by docs/STACK.md, so switching is a config change."
+    },
+    {
+      "name": "opus-5.5",
+      "via": "anthropic",
+      "model": "claude-opus-5-5",
+      "priceFrom": "anthropic/claude-opus-5.5",
+      "note": "Same adapter, the biggest model. Listed in docs/STACK.md."
+    },
+    {
+      "name": "sonnet-5.5 (openrouter)",
+      "via": "openrouter",
+      "model": "anthropic/claude-sonnet-5.5",
+      "reasoning": "low",
+      "off": true,
+      "note": "Sanity check: should score like the prod row. If it doesn't, the OpenRouter path is skewing results."
+    },
+    {
+      "name": "gpt-6.1-sol",
+      "via": "openrouter",
+      "model": "openai/gpt-6.1-sol",
+      "reasoning": "low"
+    },
+    {
+      "name": "gpt-6.1-terra",
+      "via": "openrouter",
+      "model": "openai/gpt-6.1-terra",
+      "reasoning": "low"
+    },
+    {
+      "name": "gemini-4-argon",
+      "via": "openrouter",
+      "model": "google/gemini-4-argon",
+      "reasoning": "low"
+    },
+    {
+      "name": "grok-4.7",
+      "via": "openrouter",
+      "model": "x-ai/grok-4.7",
+      "reasoning": "low",
+      "note": "xAI native web search through OpenRouter; with --tools all, X search too, and told to use it."
+    },
+    {
+      "name": "glm-5.3",
+      "via": "openrouter",
+      "model": "z-ai/glm-5.3",
+      "reasoning": "low",
+      "note": "Z.ai GLM 5.3 (Aug 2026). Flagship alternative: z-ai/glm-5.3-prime. No native search: OpenRouter searches with Exa."
+    },
+    {
+      "name": "deepseek-v4.1-flash",
+      "via": "openrouter",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "reasoning": "low",
+      "note": "DeepSeek V4.1 Flash (Sep 2026). Flagship alternative: deepseek/deepseek-v4-pro-0813. No native search: Exa."
+    },
+    {
+      "name": "kimi-k3.1-pro",
+      "via": "openrouter",
+      "model": "moonshotai/kimi-k3.1-pro",
+      "reasoning": "low",
+      "note": "Moonshot Kimi K3.1 Pro (Oct 2026). No native search: Exa."
+    },
+    {
+      "name": "mock-best",
+      "via": "mock",
+      "model": "best-projection",
+      "off": true,
+      "note": "Offline: highest projection wins."
+    },
+    {
+      "name": "mock-keep",
+      "via": "mock",
+      "model": "keep",
+      "off": true,
+      "note": "Offline: always keeps the bench fill."
+    },
+    {
+      "name": "mock-offlist",
+      "via": "mock",
+      "model": "off-list",
+      "off": true,
+      "note": "Offline: names a player nobody offered."
+    },
+    {
+      "name": "mock-unsure",
+      "via": "mock",
+      "model": "first-unsure",
+      "off": true,
+      "note": "Offline: first candidate, low confidence."
+    },
+    {
+      "name": "mock-silent",
+      "via": "mock",
+      "model": "silent",
+      "off": true,
+      "note": "Offline: never answers."
+    },
+    {
+      "name": "mock-keyword",
+      "via": "mock",
+      "model": "keyword",
+      "off": true,
+      "note": "Offline, scratch bench: believes any news that says out."
+    },
+    {
+      "name": "mock-never",
+      "via": "mock",
+      "model": "never",
+      "off": true,
+      "note": "Offline, scratch bench: never thinks he sits."
+    }
+  ]
+}

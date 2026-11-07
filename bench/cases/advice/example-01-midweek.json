@@ -1,0 +1,31 @@
+{
+  "id": "example-01-midweek",
+  "example": true,
+  "note": "Made-up players. Tuesday scan: an injured starting RB, no backup TE, a bye coming.",
+  "input": {
+    "teamName": "Example Team",
+    "week": 10,
+    "now": "2026-11-10T15:00:00.000Z",
+    "starterSlots": ["QB", "RB", "RB", "WR", "WR", "TE", "FLEX", "DST", "K"],
+    "roster": [
+      { "id": "r1", "name": "Example QB", "position": "QB", "proTeam": "AAA", "slot": "QB", "status": "active", "projection": 19.5, "seasonProjection": 300, "percentRostered": 92, "byeWeek": 11 },
+      { "id": "r2", "name": "Example Hurt Starter RB", "position": "RB", "proTeam": "BBB", "slot": "RB", "status": "questionable", "projection": 11.0, "seasonProjection": 180, "percentRostered": 97, "byeWeek": 12 },
+      { "id": "r3", "name": "Example RB Two", "position": "RB", "proTeam": "CCC", "slot": "RB", "status": "active", "projection": 12.4, "seasonProjection": 170, "percentRostered": 88, "byeWeek": 9 },
+      { "id": "r4", "name": "Example WR One", "position": "WR", "proTeam": "DDD", "slot": "WR", "status": "active", "projection": 14.1, "seasonProjection": 210, "percentRostered": 99, "byeWeek": 11 },
+      { "id": "r5", "name": "Example WR Two", "position": "WR", "proTeam": "EEE", "slot": "WR", "status": "active", "projection": 10.3, "seasonProjection": 150, "percentRostered": 75, "byeWeek": 13 },
+      { "id": "r6", "name": "Example Only TE", "position": "TE", "proTeam": "FFF", "slot": "TE", "status": "active", "projection": 8.0, "seasonProjection": 110, "percentRostered": 70, "byeWeek": 11 },
+      { "id": "r7", "name": "Example Flex WR", "position": "WR", "proTeam": "GGG", "slot": "FLEX", "status": "active", "projection": 9.2, "seasonProjection": 120, "percentRostered": 60, "byeWeek": 14 },
+      { "id": "r8", "name": "Example Defense", "position": "DST", "proTeam": "HHH", "slot": "DST", "status": "active", "projection": 6.0, "seasonProjection": 90, "percentRostered": 50, "byeWeek": 10 },
+      { "id": "r9", "name": "Example Kicker", "position": "K", "proTeam": "III", "slot": "K", "status": "active", "projection": 8.0, "seasonProjection": 130, "percentRostered": 55, "byeWeek": 12 },
+      { "id": "r10", "name": "Example Bench WR", "position": "WR", "proTeam": "JJJ", "slot": "BENCH", "status": "active", "projection": 4.1, "seasonProjection": 50, "percentRostered": 8, "byeWeek": 9 },
+      { "id": "r11", "name": "Example Bench RB", "position": "RB", "proTeam": "PPP", "slot": "BENCH", "status": "active", "projection": 3.0, "seasonProjection": 35, "percentRostered": 5, "byeWeek": 9 }
+    ],
+    "freeAgents": [
+      { "id": "f1", "name": "Example Backup to Hurt RB", "position": "RB", "proTeam": "BBB", "status": "active", "projection": 5.5, "seasonProjection": 60, "percentRostered": 14 },
+      { "id": "f2", "name": "Example Free TE", "position": "TE", "proTeam": "LLL", "status": "active", "projection": 6.5, "seasonProjection": 80, "percentRostered": 20 },
+      { "id": "f3", "name": "Example Waiver WR", "position": "WR", "proTeam": "MMM", "status": "active", "projection": 11.0, "seasonProjection": 115, "percentRostered": 35, "onWaivers": true },
+      { "id": "f4", "name": "Example Free Defense", "position": "DST", "proTeam": "NNN", "status": "active", "projection": 7.5, "seasonProjection": 85, "percentRostered": 25 }
+    ],
+    "droppable": ["r10", "r11"]
+  }
+}

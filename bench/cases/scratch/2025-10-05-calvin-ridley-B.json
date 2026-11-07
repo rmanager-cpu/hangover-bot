@@ -1,0 +1,87 @@
+{
+  "id": "2025-10-05-calvin-ridley-B",
+  "note": "Real. Calvin Ridley (TEN) vs ARI, 2025-10-05, 4:05 PM ET: played. Collector's doubts: Insider tone is mostly positive ('likely to play'), so the doubt is milder than the others. RotoWire labels its update '8:32AM EST' in October, which is presumably Eastern time. Stats (5 catches, 131 yds on 10 targets) from ESPN's summary API.",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Calvin Ridley",
+    "position": "WR",
+    "team": "TEN"
+  },
+  "opponent": "ARI",
+  "kickoff": "2025-10-05T20:05:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-10-05T18:35:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-10-03T20:09:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "After logging back-to-back DNPs Wednesday and Thursday, Ridley was able to work in a limited capacity Friday before being deemed questionable",
+      "url": "https://www.cbssports.com/fantasy/football/news/titans-calvin-ridley-questionable-after-limited-practice/"
+    },
+    {
+      "at": "2025-10-05T02:23:00.000Z",
+      "source": "RotoWire via CBS (citing Jeremy Fowler, ESPN)",
+      "words": "Ridley (knee/elbow) is trending toward being active for Sunday's game against the Cardinals, Jeremy Fowler of ESPN.com reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/titans-calvin-ridley-on-track-to-play-vs-arizona/"
+    },
+    {
+      "at": "2025-10-05T03:13:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Titans WR Calvin Ridley, dealing with knee and elbow injuries, has a good chance of playing on Sunday, source said.",
+      "url": "https://x.com/RapSheet/status/1974674152167752181"
+    },
+    {
+      "at": "2025-10-05T04:22:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "is likely to play vs. the Cardinals, but the team still needs to see how he feels pre-game first, per source.",
+      "url": "https://x.com/AdamSchefter/status/1974691614921544030"
+    },
+    {
+      "at": "2025-10-05T12:32:00.000Z",
+      "source": "RotoWire Gameday Injuries: Week 5",
+      "words": "how he feels in pregame warmups will be the determining factor as to whether he's active.",
+      "url": "https://www.rotowire.com/football/article/gameday-injuries-week-5-96860"
+    },
+    {
+      "at": "2025-10-05T18:39:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Ridley (knee/elbow) is listed as active for Sunday's game against the Cardinals.",
+      "url": "https://www.cbssports.com/fantasy/football/news/titans-calvin-ridley-active-for-sundays-game/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772747",
+  "aliases": {
+    "Titans": "Team A",
+    "Tennessee": "Team A",
+    "Titans Tennessee": "Team A",
+    "Tennessee Titans": "Team A",
+    "Cardinals": "Team B",
+    "Arizona": "Team B",
+    "Cardinals Arizona": "Team B",
+    "Arizona Cardinals": "Team B",
+    "TENvsARI": "Team A vs Team B",
+    "ARIvsTEN": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

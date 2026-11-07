@@ -1,0 +1,104 @@
+{
+  "id": "2025-10-20-emeka-egbuka-B",
+  "note": "Real. Emeka Egbuka (TB) vs DET, 2025-10-20, 7:00 PM ET: played. Collector's doubts: Monday night game, so the final injury report (questionable) came Saturday, not Friday. The Oct 15 Rapoport item is early-week and stale by game day (could also serve group C). The RotoWire article time is its publish time (2025-10-19T05:00 PT in the page data); it may have been updated later. Stats (4 catches, 58 yds on 12 targets) from ESPN's summary API.",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Emeka Egbuka",
+    "position": "WR",
+    "team": "TB"
+  },
+  "opponent": "DET",
+  "kickoff": "2025-10-20T23:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-10-20T21:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-10-15T12:41:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "the #Bucs likely won’t have WR Emeka Egbuka vs the #Lions.",
+      "url": "https://x.com/RapSheet/status/1978440979272106194"
+    },
+    {
+      "at": "2025-10-18T15:10:00.000Z",
+      "source": "Greg Auman on X",
+      "words": "Surprising news at Bucs practice: rookie receiver Emeka Egbuka is practicing, a quick return from his hamstring injury.",
+      "url": "https://x.com/gregauman/status/1979565662663066035"
+    },
+    {
+      "at": "2025-10-18T16:27:00.000Z",
+      "source": "Rick Stroud on X",
+      "words": "Bucs coach Todd Bowles said WR Emeka Egbuka was limited with a hamstring injury but practiced Saturday. He said Egbuka is a game time decision.",
+      "url": "https://x.com/NFLSTROUD/status/1979585047674950023"
+    },
+    {
+      "at": "2025-10-19T12:00:00.000Z",
+      "source": "RotoWire Gameday Injuries: Week 7",
+      "words": "with his status not likely to be confirmed until pregame warmups, fantasy managers may want to pivot elsewhere",
+      "url": "https://www.rotowire.com/football/article/gameday-injuries-week-7-97423"
+    },
+    {
+      "at": "2025-10-19T16:23:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter)",
+      "words": "remains listed as questionable for Monday's game against the Lions but has \"a real chance to play,\" sources tell Adam Schefter of ESPN.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-emeka-egbuka-shaping-up-as-game-time-call-week-7/"
+    },
+    {
+      "at": "2025-10-20T20:54:00.000Z",
+      "source": "Jeremy Fowler on X",
+      "words": "Bucs WR Emeka Egbuka checked out OK pregame and is considered 'good to go' tonight vs. Lions, per source.",
+      "url": "https://x.com/JFowlerESPN/status/1980377114072518697"
+    },
+    {
+      "at": "2025-10-20T21:00:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "Early last week, this appeared to be a long-shot. But a pregame workout went well, and now he’ll play.",
+      "url": "https://x.com/RapSheet/status/1980378659539259433"
+    },
+    {
+      "at": "2025-10-20T21:33:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Egbuka (hamstring) is listed as active Monday at Detroit.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-emeka-egbuka-active-for-mnf/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772816",
+  "aliases": {
+    "Buccaneers": "Team A",
+    "Bucs": "Team A",
+    "Tampa Bay": "Team A",
+    "Buccaneers Bucs": "Team A",
+    "Buccaneers Tampa Bay": "Team A",
+    "Bucs Buccaneers": "Team A",
+    "Bucs Tampa Bay": "Team A",
+    "Tampa Bay Buccaneers": "Team A",
+    "Tampa Bay Bucs": "Team A",
+    "Lions": "Team B",
+    "Detroit": "Team B",
+    "Lions Detroit": "Team B",
+    "Detroit Lions": "Team B",
+    "TBvsDET": "Team A vs Team B",
+    "DETvsTB": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

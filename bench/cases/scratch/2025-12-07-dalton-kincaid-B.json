@@ -1,0 +1,87 @@
+{
+  "id": "2025-12-07-dalton-kincaid-B",
+  "note": "Real. Dalton Kincaid (BUF) vs CIN, 2025-12-07, 1:00 PM ET: played. Collector's doubts: Stats (4 catches, 41 yds, 1 TD) from ESPN's summary API. The RotoWire article time is its publish time (2025-12-07T05:00 PT in the page data). A search summary said he was also questionable and did not dress in Week 13; I did not verify that, so it is not in the news list.",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Dalton Kincaid",
+    "position": "TE",
+    "team": "BUF"
+  },
+  "opponent": "CIN",
+  "kickoff": "2025-12-07T18:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-07T16:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-05T16:29:00.000Z",
+      "source": "Cameron Wolfe on X",
+      "words": "TE Dalton Kincaid (knee/hammy) & RT Spencer Brown (shoulder) QUESTIONABLE. HC Sean McDermott says he needs to see both guys be “functional” to play.",
+      "url": "https://x.com/CameronWolfe/status/1996980287310295530"
+    },
+    {
+      "at": "2025-12-05T16:38:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kincaid last suited up Week 10 at Miami, as a hamstring injury has sidelined him the last three games.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bills-dalton-kincaid-to-be-questionable-for-week-14/"
+    },
+    {
+      "at": "2025-12-07T03:14:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "who is listed as questionable for Sunday due to knee and hamstring injuries, plans to try to play vs. the Bengals, per sources.",
+      "url": "https://x.com/AdamSchefter/status/1997505036293927106"
+    },
+    {
+      "at": "2025-12-07T03:39:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "he'll try to give it a go Sunday, though his official status probably won't be solidified until after he begins his pregame routine",
+      "url": "https://www.cbssports.com/fantasy/football/news/bills-dalton-kincaid-will-try-to-play-through-injuries/"
+    },
+    {
+      "at": "2025-12-07T13:00:00.000Z",
+      "source": "RotoWire Gameday Injuries: Week 14",
+      "words": "As per Saturday night reports, Kincaid is expected to play provided he checks out well in pregame warmups.",
+      "url": "https://www.rotowire.com/football/article/gameday-injuries-week-14-100179"
+    },
+    {
+      "at": "2025-12-07T16:31:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kincaid (hamstring/knee) is active for Sunday's game against the Bengals.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bills-dalton-kincaid-active-versus-bengals/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772902",
+  "aliases": {
+    "Bills": "Team A",
+    "Buffalo": "Team A",
+    "Bills Buffalo": "Team A",
+    "Buffalo Bills": "Team A",
+    "Bengals": "Team B",
+    "Cincinnati": "Team B",
+    "Bengals Cincinnati": "Team B",
+    "Cincinnati Bengals": "Team B",
+    "BUFvsCIN": "Team A vs Team B",
+    "CINvsBUF": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

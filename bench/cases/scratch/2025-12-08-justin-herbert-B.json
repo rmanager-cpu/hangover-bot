@@ -1,0 +1,93 @@
+{
+  "id": "2025-12-08-justin-herbert-B",
+  "note": "Real. Justin Herbert (LAC) vs PHI, 2025-12-08, 8:15 PM ET: played. Collector's doubts: Monday night game, so the final report (questionable) came Saturday. The worrying part is the surgery a week earlier; insider wording was positive ('expected to play'), so this is the mildest case. The NFL.com URL slug says 'expected to play' but the page now reads 'active'; the 6:23 PM time is its datePublished. Stats (12/26, 139 yds; 10 rushes, 66 yds) from ESPN's summary API.",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Justin Herbert",
+    "position": "QB",
+    "team": "LAC"
+  },
+  "opponent": "PHI",
+  "kickoff": "2025-12-09T01:15:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-08T23:45:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-03T23:24:00.000Z",
+      "source": "Daniel Popper on X",
+      "words": "Justin Herbert said he had a plate and multiple screws put in his hand during surgery.",
+      "url": "https://x.com/danielrpopper/status/1996359990366573012"
+    },
+    {
+      "at": "2025-12-06T19:52:00.000Z",
+      "source": "Tom Pelissero on X",
+      "words": "The Chargers are listing QB Justin Herbert (left hand) as questionable for Monday night's game vs. the Eagles.",
+      "url": "https://x.com/TomPelissero/status/1997393736242700773"
+    },
+    {
+      "at": "2025-12-06T19:58:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Herbert thus may log most of his reps in the shotgun Monday, assuming he's made active for that contest.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-justin-herbert-officially-questionable-for-monday/"
+    },
+    {
+      "at": "2025-12-07T13:00:00.000Z",
+      "source": "RotoWire Gameday Injuries: Week 14",
+      "words": "Per Saturday reports, Herbert is expected to play, although he'll likely operate primarily out of shotgun",
+      "url": "https://www.rotowire.com/football/article/gameday-injuries-week-14-100179"
+    },
+    {
+      "at": "2025-12-08T23:21:00.000Z",
+      "source": "Omar Ruiz on X",
+      "words": "#Chargers QB Justin Herbert, wearing a padded glove on his surgically repaired left hand, is expected to start tonight vs the #Eagles, source confirms.",
+      "url": "https://x.com/OmarDRuiz/status/1998171125877289243"
+    },
+    {
+      "at": "2025-12-08T23:23:00.000Z",
+      "source": "NFL.com",
+      "words": "Herbert is active and will start against the Philadelphia Eagles despite suffering a broken bone in his left non-throwing hand",
+      "url": "https://www.nfl.com/news/chargers-qb-justin-herbert-left-hand-expected-to-play-monday-vs-eagles"
+    },
+    {
+      "at": "2025-12-08T23:55:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Herbert (left hand) is listed as active for Monday night's game against the Eagles, Eric Smith of the Chargers' official site reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-justin-herbert-active-for-mnf/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772822",
+  "aliases": {
+    "Chargers": "Team A",
+    "Los Angeles": "Team A",
+    "Chargers Los Angeles": "Team A",
+    "Los Angeles Chargers": "Team A",
+    "Eagles": "Team B",
+    "Philadelphia": "Team B",
+    "Eagles Philadelphia": "Team B",
+    "Philadelphia Eagles": "Team B",
+    "LACvsPHI": "Team A vs Team B",
+    "PHIvsLAC": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

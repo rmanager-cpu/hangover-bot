@@ -1,0 +1,18 @@
+{
+  "id": "example-01-warmups-scratch",
+  "example": true,
+  "note": "Made-up, to test the bench. Questionable, declared active, then ruled out after warmups six minutes before kickoff.",
+  "group": "A",
+  "player": { "name": "Sam Example", "position": "WR", "team": "EXA" },
+  "opponent": "EXB",
+  "kickoff": "2025-12-14T18:00:00Z",
+  "designation": "questionable",
+  "inactiveList": { "at": "2025-12-14T16:30:00Z", "result": "active" },
+  "news": [
+    { "at": "2025-12-12T19:00:00Z", "source": "team injury report", "words": "Sam Example (foot) is questionable after three limited practices." },
+    { "at": "2025-12-14T17:54:00Z", "source": "Example Insider on X", "words": "Sam Example aggravated his foot in warmups and has been ruled out." }
+  ],
+  "confirmedAt": "2025-12-14T17:54:00Z",
+  "outcome": "did_not_play",
+  "aliases": { "Examplers": "Team A" }
+}

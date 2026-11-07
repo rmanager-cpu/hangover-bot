@@ -1,0 +1,92 @@
+{
+  "id": "2025-12-28-ricky-pearsall-B",
+  "note": "Real. Ricky Pearsall (SF) vs CHI, 2025-12-28, 8:20 PM ET: played. Collector's doubts: The 49ers' post names only Kittle as inactive; Pearsall's active status comes from FantasyPros at 6:59 PM. Stats (5 catches, 85 yds on 8 targets) from ESPN's summary API. Kittle, listed beside him, was inactive (a possible group A case).",
+  "tags": [
+    "2025",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Ricky Pearsall",
+    "position": "WR",
+    "team": "SF"
+  },
+  "opponent": "CHI",
+  "kickoff": "2025-12-29T01:20:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-28T23:50:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-26T22:29:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "49ers are listing TE George Kittle and WR Ricky Pearsall as questionable for Sunday night’s game against the Bears.",
+      "url": "https://x.com/AdamSchefter/status/2004680989608673580"
+    },
+    {
+      "at": "2025-12-28T08:04:00.000Z",
+      "source": "RotoWire Gameday Injuries: Week 17",
+      "words": "Pearsall made improvement each day this week, but his availability will likely come down to how he feels in pregame warmups.",
+      "url": "https://www.rotowire.com/football/article/gameday-injuries-week-17-101537"
+    },
+    {
+      "at": "2025-12-28T14:10:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "49ers WR Ricky Pearsall, listed as questionable for Sunday night due to knee and ankle injuries, is likely to play, per source.",
+      "url": "https://x.com/AdamSchefter/status/2005280147042377894"
+    },
+    {
+      "at": "2025-12-28T14:25:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Pearsall was unavailable for the 49ers' 48-27 win over the Colts this past Monday while managing his pair of injuries",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-ricky-pearsall-set-to-play-through-injuries/"
+    },
+    {
+      "at": "2025-12-28T23:52:00.000Z",
+      "source": "team",
+      "words": "George Kittle will be inactive for Sunday Night Football.",
+      "url": "https://x.com/49ers/status/2005426566105555139"
+    },
+    {
+      "at": "2025-12-28T23:59:00.000Z",
+      "source": "FantasyPros",
+      "words": "Pearsall is good to go after passing through pregame warmups without any setbacks and shedding a questionable designation",
+      "url": "https://www.fantasypros.com/nfl/news/562240/ricky-pearsall-kneeankle-active-week-17.php"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772935",
+  "aliases": {
+    "49ers": "Team A",
+    "San Francisco": "Team A",
+    "Niners": "Team A",
+    "49ers San Francisco": "Team A",
+    "49ers Niners": "Team A",
+    "San Francisco 49ers": "Team A",
+    "San Francisco Niners": "Team A",
+    "Niners 49ers": "Team A",
+    "Niners San Francisco": "Team A",
+    "Bears": "Team B",
+    "Chicago": "Team B",
+    "Bears Chicago": "Team B",
+    "Chicago Bears": "Team B",
+    "SFvsCHI": "Team A vs Team B",
+    "CHIvsSF": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

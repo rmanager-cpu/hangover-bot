@@ -1,0 +1,94 @@
+{
+  "id": "2025-11-23-aaron-rodgers-A",
+  "note": "Real. Aaron Rodgers (PIT) vs CHI, 2025-11-23, 1:00 PM ET: did not play. Collector's doubts: A QB with a non-displaced fracture of his left (non-throwing) wrist. I did not find Schefter's own Saturday post; its time is the CBS blurb time. The Steelers.com time comes from the page and its metadata (22:45Z). Mason Rudolph started. Rodgers is absent from the ESPN box score (Bears won 31-28), and his game log has no Nov 23 game.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Aaron Rodgers",
+    "position": "QB",
+    "team": "PIT"
+  },
+  "opponent": "CHI",
+  "kickoff": "2025-11-23T18:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-11-23T16:30:00.000Z",
+    "result": "inactive"
+  },
+  "news": [
+    {
+      "at": "2025-11-21T22:45:00.000Z",
+      "source": "team",
+      "words": "Coach Mike Tomlin said quarterback Aaron Rodgers is questionable for Sunday's game against the Chicago Bears at Soldier Field.",
+      "url": "https://www.steelers.com/news/rodgers-questionable-for-sunday-s-game-vs-bears"
+    },
+    {
+      "at": "2025-11-23T03:56:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter)",
+      "words": "Rodgers (wrist), who is officially questionable for Sunday's matchup against Chicago, \"has been pushing to play,\" but Steelers doctors have been \"cautious and guarded\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/steelers-aaron-rodgers-status-for-sunday-still-uncertain/"
+    },
+    {
+      "at": "2025-11-23T15:44:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Steelers QB Aaron Rodgers has been pushing to play against the #Bears, but in the end, it was too quick, per me and @TomPelissero.",
+      "url": "https://x.com/RapSheet/status/1992620393870577971"
+    },
+    {
+      "at": "2025-11-23T15:45:00.000Z",
+      "source": "NFL on CBS on X",
+      "words": "Mason Rudolph will be starting at QB today for the Steelers, Mike Tomlin tells @EvanWashburn",
+      "url": "https://x.com/NFLonCBS/status/1992620593762410970"
+    },
+    {
+      "at": "2025-11-23T15:50:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport)",
+      "words": "Rodgers (wrist) remains listed as questionable but isn't in line to start Sunday's game against the Bears, Ian Rapoport of NFL Network reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/steelers-aaron-rodgers-not-slated-to-start-sunday/"
+    },
+    {
+      "at": "2025-11-23T16:36:00.000Z",
+      "source": "team",
+      "words": "Inactives for #PITvsCHI",
+      "url": "https://x.com/steelers/status/1992633380618330423"
+    },
+    {
+      "at": "2025-11-23T16:36:00.000Z",
+      "source": "RotoWire via CBS (citing Steelers.com)",
+      "words": "Rodgers (wrist) is inactive for Sunday's game against the Bears, Teresa Varley of the Steelers' official site reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/steelers-aaron-rodgers-not-suiting-up-sunday/"
+    }
+  ],
+  "confirmedAt": "2025-11-23T15:44:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772780",
+  "aliases": {
+    "Steelers": "Team A",
+    "Pittsburgh": "Team A",
+    "Steelers Pittsburgh": "Team A",
+    "Pittsburgh Steelers": "Team A",
+    "Bears": "Team B",
+    "Chicago": "Team B",
+    "Bears Chicago": "Team B",
+    "Chicago Bears": "Team B",
+    "PITvsCHI": "Team A vs Team B",
+    "CHIvsPIT": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "id": "2025-09-28-jaylen-warren-A",
+  "note": "Real. Jaylen Warren (PIT) vs MIN, 2025-09-28, 9:30 AM ET: did not play. Collector's doubts: Late scratch of the 'expected to play' kind: Schefter's Saturday report said he would play, and he went through early warmups, but he was never declared active. The game was in Dublin (Croke Park) with a 9:30 AM ET kickoff, so the inactive list came out at about 8:00 AM ET (Heavy: 'shortly after 8 am ET'). I could not find the Steelers' inactive-list post. The Friday item's time is the Footballers' Pacific time plus 3h. Schefter says he was 'added to the injury report on Friday', while RotoWire says he was limited all week ('resting vet', then knee). He is absent from the ESPN box score (Steelers won 24-21), and his game log has no Sept 28 game.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Jaylen Warren",
+    "position": "RB",
+    "team": "PIT"
+  },
+  "opponent": "MIN",
+  "kickoff": "2025-09-28T13:30:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-09-28T12:00:00.000Z",
+    "result": "inactive"
+  },
+  "news": [
+    {
+      "at": "2025-09-26T17:02:00.000Z",
+      "source": "RotoWire via The Fantasy Footballers",
+      "words": "Warren (not-injury related - resting player, knee) is listed as questionable for Sunday's game against the Vikings.",
+      "url": "https://www.thefantasyfootballers.com/news/607637/jaylen-warren-questionable-for-sunday/"
+    },
+    {
+      "at": "2025-09-27T15:09:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Steelers RB Jaylen Warren ... is expected to play Sunday in Dublin vs. the Vikings, per league source.",
+      "url": "https://x.com/AdamSchefter/status/1971955460157984969"
+    },
+    {
+      "at": "2025-09-27T15:15:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter)",
+      "words": "Warren (rest/knee) is expected to play against the Vikings on Sunday in Dublin, Ireland, Adam Schefter of ESPN reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/steelers-jaylen-warren-expected-to-play-week-4/"
+    },
+    {
+      "at": "2025-09-28T12:07:00.000Z",
+      "source": "Mike Garafolo on X",
+      "words": "#Steelers RB Jaylen Warren a no go today. Was added to the injury report late in the week with a knee injury.",
+      "url": "https://x.com/MikeGarafolo/status/1972271909304926452"
+    },
+    {
+      "at": "2025-09-28T12:10:00.000Z",
+      "source": "RotoWire via CBS (citing Teresa Varley, Steelers.com)",
+      "words": "Warren (knee) is inactive for Sunday's game against the Vikings in Dublin, Teresa Varley of the Steelers' official site reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/steelers-jaylen-warren-sitting-out-ireland-game/"
+    },
+    {
+      "at": "2025-09-28T12:20:00.000Z",
+      "source": "Steelers Now",
+      "words": "Though listed as questionable, Warren was expected to suit up, and took early warmups at Croke Park before being declared inactive.",
+      "url": "https://steelersnow.com/steelers-rb-jaylen-warren-unexpectedly-inactive-vs-vikings-with-injury/"
+    },
+    {
+      "at": "2025-09-28T12:21:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Steelers RB Jaylen Warren did not feel right after Saturday’s practice and the Steelers decided to hold him out today.",
+      "url": "https://x.com/AdamSchefter/status/1972275360382525860"
+    },
+    {
+      "at": "2025-09-28T12:41:00.000Z",
+      "source": "Pro Football Talk (NBC Sports)",
+      "words": "the Steelers made him inactive after he tested the knee in pre-game warmups.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/jaylen-warren-inactive-for-steelers-vs-vikings-in-ireland"
+    }
+  ],
+  "confirmedAt": "2025-09-28T12:00:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772632",
+  "aliases": {
+    "Steelers": "Team A",
+    "Pittsburgh": "Team A",
+    "Steelers Pittsburgh": "Team A",
+    "Pittsburgh Steelers": "Team A",
+    "Vikings": "Team B",
+    "Minnesota": "Team B",
+    "Vikings Minnesota": "Team B",
+    "Minnesota Vikings": "Team B",
+    "PITvsMIN": "Team A vs Team B",
+    "MINvsPIT": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

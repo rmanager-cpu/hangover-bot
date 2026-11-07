@@ -1,0 +1,82 @@
+{
+  "id": "2025-11-02-cooper-kupp-A",
+  "note": "Real. Cooper Kupp (SEA) vs WSH, 2025-11-02, 8:20 PM ET: did not play. Collector's doubts: Sunday-night game, so an insider's 'unlikely' came about 20 hours before kickoff. These same items are reused as stale items in group C's Kupp Week 10 case (Nov 9), where he played. CBS live-blog post times can be placeholder times (see Engram), but this 10:34 AM stamp fits the surrounding posts. He is absent from the ESPN box score (Seahawks won 38-14), and his game log has no Nov 2 game.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Cooper Kupp",
+    "position": "WR",
+    "team": "SEA"
+  },
+  "opponent": "WSH",
+  "kickoff": "2025-11-03T01:20:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-11-02T23:50:00.000Z",
+    "result": "inactive"
+  },
+  "news": [
+    {
+      "at": "2025-10-31T20:26:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (heel/hamstring) is listed as questionable for Sunday's game at Washington, Michael-Shawn Dugar of The Athletic reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-questionable-for-sunday-night/"
+    },
+    {
+      "at": "2025-11-02T04:23:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Seahawks WR Cooper Kupp, listed as questionable for Sunday night due to a heel and hamstring injury, is unlikely to play vs. the Commanders",
+      "url": "https://x.com/AdamSchefter/status/1984838821243126173"
+    },
+    {
+      "at": "2025-11-02T15:34:00.000Z",
+      "source": "CBS Sports Week 9 inactives live blog",
+      "words": "ESPN reports that Kupp, who is officially listed as questionable with a heel and hamstring injury, is unlikely to play.",
+      "url": "https://www.cbssports.com/nfl/news/nfl-week-9-inactives-injury-tracker-latest-player-news-as-kickoffs-approach/live/"
+    },
+    {
+      "at": "2025-11-02T23:50:00.000Z",
+      "source": "team",
+      "words": "Tonight’s @Seahawks inactives: CB Derion Kendrick QB Jalen Milroe (Emergency 3rd QB) WR Cooper Kupp",
+      "url": "https://x.com/seahawksPR/status/1985132464478531867"
+    },
+    {
+      "at": "2025-11-02T23:56:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (heel/hamstring) is inactive for Sunday's contest at Washington.",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-inactive-sunday-as-expected/"
+    }
+  ],
+  "confirmedAt": "2025-11-02T23:50:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772926",
+  "aliases": {
+    "Seahawks": "Team A",
+    "Seattle": "Team A",
+    "Seahawks Seattle": "Team A",
+    "Seattle Seahawks": "Team A",
+    "Commanders": "Team B",
+    "Washington": "Team B",
+    "Commanders Washington": "Team B",
+    "Washington Commanders": "Team B",
+    "SEAvsWSH": "Team A vs Team B",
+    "WSHvsSEA": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

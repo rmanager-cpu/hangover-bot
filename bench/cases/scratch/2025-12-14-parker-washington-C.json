@@ -1,0 +1,86 @@
+{
+  "id": "2025-12-14-parker-washington-C",
+  "note": "Real. Parker Washington (JAX) vs NYJ, 2025-12-14, 1:00 PM ET: played. Collector's doubts: Misleading type: stale items. The Dec 6-7 items are a Saturday-night insider 'won't play' and a Sunday 'Inactive Sunday' about the previous week (Colts game); exactly seven days later he was questionable again (after a full Friday practice), active, and played (3 rec, 53 yds per ESPN box score). The Week 15 items themselves are not misleading. No Sunday-morning insider report found for Week 15. NFL.com official Week 15 report: Hip, Full Participation, Questionable.",
+  "tags": [
+    "2025",
+    "group-C"
+  ],
+  "group": "C",
+  "player": {
+    "name": "Parker Washington",
+    "position": "WR",
+    "team": "JAX"
+  },
+  "opponent": "NYJ",
+  "kickoff": "2025-12-14T18:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-14T16:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-12-07T04:09:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Jaguars WR Parker Washington (hip) is listed as questionable for Sunday and won’t play, source said. He’ll be inactive.",
+      "url": "https://x.com/RapSheet/status/1997518680654012650"
+    },
+    {
+      "at": "2025-12-07T04:17:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Washington (hip), who is officially questionable to suit up against Indianapolis on Sunday, isn't expected to play, Ian Rapoport of NFL Network reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-parker-washington-likely-to-be-sidelined-sunday/"
+    },
+    {
+      "at": "2025-12-07T16:42:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Washington (hip) is officially inactive for Sunday's game against the Colts.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-parker-washington-inactive-sunday/"
+    },
+    {
+      "at": "2025-12-12T21:06:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Washington (hip) was a full participant in Friday's practice and officially is listed as questionable for Sunday's game against the Jets.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-parker-washington-questionable-after-full-practice/"
+    },
+    {
+      "at": "2025-12-14T16:58:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Washington (hip) is active for Sunday's game against the Jets.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-parker-washington-ready-to-face-jets/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772797",
+  "aliases": {
+    "Jaguars": "Team A",
+    "Jacksonville": "Team A",
+    "Jags": "Team A",
+    "Jaguars Jacksonville": "Team A",
+    "Jaguars Jags": "Team A",
+    "Jacksonville Jaguars": "Team A",
+    "Jacksonville Jags": "Team A",
+    "Jags Jaguars": "Team A",
+    "Jags Jacksonville": "Team A",
+    "Jets": "Team B",
+    "New York": "Team B",
+    "Jets New York": "Team B",
+    "New York Jets": "Team B",
+    "JAXvsNYJ": "Team A vs Team B",
+    "NYJvsJAX": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

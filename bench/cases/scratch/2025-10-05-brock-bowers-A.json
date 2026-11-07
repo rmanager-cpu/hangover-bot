@@ -1,0 +1,112 @@
+{
+  "id": "2025-10-05-brock-bowers-A",
+  "note": "Real. Brock Bowers (LV) vs IND, 2025-10-05, 1:00 PM ET: did not play. Collector's doubts: The head coach's Friday 'we think he's playing' was reversed by Saturday-afternoon insider reports. PFT's page shows '04:18 PM' with no zone; I take it as ET (PFT's Jacobs Week 12 item is stamped 11:31 AM, in line with that 11:30 AM ET inactive list). His first missed game as a pro. He is absent from the ESPN box score (Colts won 40-6), and his game log has no Oct 5 game.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "Brock Bowers",
+    "position": "TE",
+    "team": "LV"
+  },
+  "opponent": "IND",
+  "kickoff": "2025-10-05T17:00:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-10-05T15:30:00.000Z",
+    "result": "inactive"
+  },
+  "news": [
+    {
+      "at": "2025-10-03T20:18:00.000Z",
+      "source": "Pro Football Talk (NBC Sports), quoting coach Pete Carroll",
+      "words": "“We think he’s playing, but we wanted to make sure and rest him,” Carroll said",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/brock-bowers-listed-as-questionable-but-raiders-expect-him-to-play"
+    },
+    {
+      "at": "2025-10-03T20:37:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Bowers (knee) is listed as questionable for Sunday's game against the Colts after not practicing Thursday and Friday.",
+      "url": "https://www.cbssports.com/fantasy/football/news/raiders-brock-bowers-uncertain-for-sunday/"
+    },
+    {
+      "at": "2025-10-04T19:44:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Raiders star TE Brock Bowers is trending toward not playing Sunday against the #Colts, per me and @TomPelissero.",
+      "url": "https://x.com/RapSheet/status/1974561320340181201"
+    },
+    {
+      "at": "2025-10-04T19:56:00.000Z",
+      "source": "FantasyPros (citing Ian Rapoport)",
+      "words": "Raiders TE Brock Bowers (knee) is trending towards not playing in Week 5 against the Colts.",
+      "url": "https://www.fantasypros.com/nfl/news/543813/brock-bowers-knee-trending-towards-not-playing-week-5.php"
+    },
+    {
+      "at": "2025-10-05T11:43:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Raiders TE Brock Bowers has been playing through a PCL injury and bone bruise on his knee that has impacted his performance, per sources.",
+      "url": "https://x.com/AdamSchefter/status/1974802731610030493"
+    },
+    {
+      "at": "2025-10-05T12:08:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Raiders' Brock Bowers: Likely to sit out with PCL injury",
+      "url": "https://www.cbssports.com/fantasy/football/news/raiders-brock-bowers-likely-to-sit-out-with-pcl-injury/"
+    },
+    {
+      "at": "2025-10-05T12:29:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "#Raiders TE Brock Bowers is trending toward not playing",
+      "url": "https://x.com/RapSheet/status/1974814268517138580"
+    },
+    {
+      "at": "2025-10-05T15:30:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Raiders TE Brock Bowers officially is inactive today due to the PCL injury and bone bruise on his knee.",
+      "url": "https://x.com/AdamSchefter/status/1974859628883374427"
+    },
+    {
+      "at": "2025-10-05T15:30:00.000Z",
+      "source": "team",
+      "words": "Inactives for #LVvsIND",
+      "url": "https://x.com/Raiders/status/1974859749662548469"
+    },
+    {
+      "at": "2025-10-05T15:33:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Bowers (knee) is inactive for Sunday's game against the Colts.",
+      "url": "https://www.cbssports.com/fantasy/football/news/raiders-brock-bowers-missing-first-game-of-career/"
+    }
+  ],
+  "confirmedAt": "2025-10-05T15:30:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772851",
+  "aliases": {
+    "Raiders": "Team A",
+    "Las Vegas": "Team A",
+    "Raiders Las Vegas": "Team A",
+    "Las Vegas Raiders": "Team A",
+    "Colts": "Team B",
+    "Indianapolis": "Team B",
+    "Colts Indianapolis": "Team B",
+    "Indianapolis Colts": "Team B",
+    "LVvsIND": "Team A vs Team B",
+    "INDvsLV": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

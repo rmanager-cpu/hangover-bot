@@ -1,0 +1,53 @@
+{
+  "id": "example-01-out-starter",
+  "example": true,
+  "note": "Made-up players. A starting RB ruled OUT; the bench fill is weak and a free agent who starts for his team is open.",
+  "tags": [
+    "example",
+    "rb"
+  ],
+  "input": {
+    "problem": "Example Back A was ruled OUT at RB",
+    "slot": "RB",
+    "now": "2026-11-08T17:45:00.000Z",
+    "kickoff": "2026-11-08T18:00:00.000Z",
+    "benchFill": {
+      "name": "Example Bench RB",
+      "projection": 6.1
+    },
+    "candidates": [
+      {
+        "id": "fa1",
+        "name": "Example Free RB",
+        "position": "RB",
+        "proTeam": "CCC",
+        "status": "active",
+        "projection": 12.8,
+        "seasonProjection": 95,
+        "percentRostered": 22,
+        "kickoff": "2026-11-08T18:00:00.000Z",
+        "opponent": "DDD",
+        "how": "free agent, open roster spot"
+      },
+      {
+        "id": "fa2",
+        "name": "Example Hurt RB",
+        "position": "RB",
+        "proTeam": "EEE",
+        "status": "questionable",
+        "projection": 9.0,
+        "seasonProjection": 80,
+        "percentRostered": 30,
+        "kickoff": "2026-11-08T21:25:00.000Z",
+        "opponent": "FFF",
+        "how": "free agent, drops Example Spare WR"
+      }
+    ]
+  },
+  "benchFillId": "b1",
+  "outcome": {
+    "b1": 5.4,
+    "fa1": 14.2,
+    "fa2": "DNP"
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "id": "example-04-out-before-t15",
+  "example": true,
+  "note": "Made-up. The usual case: ESPN shows the questionable RB OUT at T-30, after inactives, so the engine never offers him and only the backup reaches the AI.",
+  "tags": [
+    "example",
+    "rb",
+    "late-scratch"
+  ],
+  "start": "2026-10-04T16:40:00.000Z",
+  "kickoff": "2026-10-04T17:00:00.000Z",
+  "roster": {
+    "teamId": "2",
+    "teamName": "Trust The Process",
+    "period": 5,
+    "starterSlots": [
+      "QB",
+      "RB",
+      "RB",
+      "WR",
+      "WR",
+      "FLEX",
+      "DST"
+    ],
+    "entries": [
+      {
+        "slot": "QB",
+        "player": {
+          "id": "4040715",
+          "name": "Jalen Hurts",
+          "position": "QB",
+          "proTeam": "PHI",
+          "status": "active",
+          "eligibleSlots": [
+            "QB",
+            "SUPERFLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 21,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "RB",
+        "player": {
+          "id": "4429160",
+          "name": "De'Von Achane",
+          "position": "RB",
+          "proTeam": "MIA",
+          "status": "out",
+          "eligibleSlots": [
+            "RB",
+            "RB/WR",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 15,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "RB",
+        "player": {
+          "id": "4430807",
+          "name": "Bijan Robinson",
+          "position": "RB",
+          "proTeam": "ATL",
+          "status": "active",
+          "eligibleSlots": [
+            "RB",
+            "RB/WR",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 17,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "WR",
+        "player": {
+          "id": "4262921",
+          "name": "Justin Jefferson",
+          "position": "WR",
+          "proTeam": "MIN",
+          "status": "active",
+          "eligibleSlots": [
+            "WR",
+            "RB/WR",
+            "WR/TE",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 16,
+          "game": {
+            "kickoff": "2026-10-04T20:25:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "WR",
+        "player": {
+          "id": "4374302",
+          "name": "Amon-Ra St. Brown",
+          "position": "WR",
+          "proTeam": "DET",
+          "status": "active",
+          "eligibleSlots": [
+            "WR",
+            "RB/WR",
+            "WR/TE",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 15,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "FLEX",
+        "player": {
+          "id": "4567048",
+          "name": "Kenneth Walker III",
+          "position": "RB",
+          "proTeam": "SEA",
+          "status": "active",
+          "eligibleSlots": [
+            "RB",
+            "RB/WR",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 12,
+          "game": {
+            "kickoff": "2026-10-04T20:25:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "DST",
+        "player": {
+          "id": "-16016",
+          "name": "Vikings D/ST",
+          "position": "D/ST",
+          "proTeam": "MIN",
+          "status": "active",
+          "eligibleSlots": [
+            "DST",
+            "BENCH"
+          ],
+          "projection": 7,
+          "game": {
+            "kickoff": "2026-10-04T20:25:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "BENCH",
+        "player": {
+          "id": "4877706",
+          "name": "Jaylen Wright",
+          "position": "RB",
+          "proTeam": "MIA",
+          "status": "out",
+          "eligibleSlots": [
+            "RB",
+            "RB/WR",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 0,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      },
+      {
+        "slot": "BENCH",
+        "player": {
+          "id": "4597500",
+          "name": "Rashid Shaheed",
+          "position": "WR",
+          "proTeam": "NO",
+          "status": "active",
+          "eligibleSlots": [
+            "WR",
+            "RB/WR",
+            "WR/TE",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 0,
+          "game": null,
+          "locked": false,
+          "percentRostered": 20,
+          "seasonProjection": 50
+        }
+      },
+      {
+        "slot": "IR",
+        "player": {
+          "id": "4366031",
+          "name": "Tank Dell",
+          "position": "WR",
+          "proTeam": "HOU",
+          "status": "ir",
+          "eligibleSlots": [
+            "WR",
+            "RB/WR",
+            "WR/TE",
+            "FLEX",
+            "BENCH",
+            "IR"
+          ],
+          "projection": 0,
+          "game": {
+            "kickoff": "2026-10-04T17:00:00.000Z"
+          },
+          "locked": false
+        }
+      }
+    ],
+    "benchSlots": 2,
+    "irSlots": 1
+  },
+  "freeAgents": [
+    {
+      "player": {
+        "id": "900001",
+        "name": "Questionable Back",
+        "position": "RB",
+        "proTeam": "PPP",
+        "status": "questionable",
+        "eligibleSlots": [
+          "RB",
+          "RB/WR",
+          "FLEX",
+          "BENCH",
+          "IR"
+        ],
+        "projection": 15,
+        "seasonProjection": 140,
+        "percentRostered": 48,
+        "game": {
+          "kickoff": "2026-10-04T17:00:00.000Z",
+          "opponent": "LLL"
+        },
+        "locked": false
+      },
+      "onWaivers": false
+    },
+    {
+      "player": {
+        "id": "900002",
+        "name": "Healthy Backup",
+        "position": "RB",
+        "proTeam": "PPP",
+        "status": "active",
+        "eligibleSlots": [
+          "RB",
+          "RB/WR",
+          "FLEX",
+          "BENCH",
+          "IR"
+        ],
+        "projection": 9.1,
+        "seasonProjection": 60,
+        "percentRostered": 12,
+        "game": {
+          "kickoff": "2026-10-04T17:00:00.000Z",
+          "opponent": "LLL"
+        },
+        "locked": false
+      },
+      "onWaivers": false
+    }
+  ],
+  "droppable": [
+    "4597500"
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-04T16:30:00.000Z",
+      "playerId": "900001",
+      "status": "out",
+      "projection": 0
+    }
+  ],
+  "outcome": {
+    "900001": "DNP",
+    "900002": 10.5,
+    "4429160": "DNP"
+  }
+}

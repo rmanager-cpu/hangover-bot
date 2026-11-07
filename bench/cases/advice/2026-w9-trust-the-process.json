@@ -1,0 +1,31 @@
+{
+  "id": "2026-w9-trust-the-process",
+  "note": "Real. Trust The Process (Live free or die hard RR4L), Week 9, as RosterBots read it Nov 6 2026 8:15 PM PT. No free agents: reading them needs the ESPN sign-in, not on this PC.",
+  "input": {
+    "teamName": "Trust The Process",
+    "week": 9,
+    "now": "2026-11-07T05:00:14Z",
+    "starterSlots": ["QB", "RB", "RB", "WR", "WR", "TE", "DST", "K", "FLEX"],
+    "roster": [
+      { "id": "4262921", "name": "Justin Jefferson", "slot": "WR", "status": "active", "byeWeek": 6, "kickoff": "2026-11-10T01:15:00.000Z", "proTeam": "MIN", "opponent": "BUF", "position": "WR", "projection": 18.2754789, "percentRostered": 99.84, "seasonProjection": 316.22172649 },
+      { "id": "4432665", "name": "Brock Bowers", "slot": "TE", "status": "active", "byeWeek": 13, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "LV", "opponent": "SF", "position": "TE", "projection": 18.21838488, "percentRostered": 99.89, "seasonProjection": 262.47955523 },
+      { "id": "4595348", "name": "Malik Nabers", "slot": "FLEX", "status": "active", "byeWeek": 8, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "NYG", "opponent": "PHI", "position": "WR", "projection": 17.12639157, "percentRostered": 99.39, "seasonProjection": 301.74605978 },
+      { "id": "4612826", "name": "Ladd McConkey", "slot": "BENCH", "status": "active", "byeWeek": 7, "kickoff": "2026-11-08T21:05:00.000Z", "proTeam": "LAC", "opponent": "HOU", "position": "WR", "projection": 10.86433336, "percentRostered": 86.47, "seasonProjection": 243.64542517 },
+      { "id": "4882093", "name": "Bhayshul Tuten", "slot": "RB", "status": "active", "byeWeek": 7, "kickoff": "2026-11-06T01:15:00.000Z", "proTeam": "JAX", "opponent": "BAL", "position": "RB", "projection": 15.37670775, "percentRostered": 94.12, "seasonProjection": 4.73082228 },
+      { "id": "4426385", "name": "Zach Charbonnet", "slot": "BENCH", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T21:25:00.000Z", "proTeam": "SEA", "opponent": "ARI", "position": "RB", "projection": 10.80977972, "percentRostered": 73.26, "seasonProjection": 137.53717287 },
+      { "id": "4685720", "name": "Bryce Young", "slot": "BENCH", "status": "active", "byeWeek": 5, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "CAR", "opponent": "DEN", "position": "QB", "projection": 16.28425876, "percentRostered": 73.37, "seasonProjection": 276.45435928 },
+      { "id": "4870653", "name": "KC Concepcion", "slot": "WR", "status": "active", "byeWeek": 11, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "CLE", "opponent": "NO", "position": "WR", "projection": 11.16710892, "percentRostered": 61.09, "seasonProjection": 161.68505977 },
+      { "id": "4571557", "name": "Spencer Shrader", "slot": "K", "status": "active", "byeWeek": 13, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "IND", "opponent": "DAL", "position": "K", "projection": 10.90421215, "percentRostered": 82.97, "seasonProjection": 132.49546699 },
+      { "id": "4360516", "name": "Tyrone Tracy Jr.", "slot": "BENCH", "status": "ir", "byeWeek": 8, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "NYG", "opponent": "PHI", "position": "RB", "projection": 0, "percentRostered": 4.36, "seasonProjection": 207.70920459 },
+      { "id": "4702555", "name": "Jonah Coleman", "slot": "RB", "status": "active", "byeWeek": 10, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "DEN", "opponent": "CAR", "position": "RB", "projection": 14.47687319, "percentRostered": 80.72, "seasonProjection": 0 },
+      { "id": "3916387", "name": "Lamar Jackson", "slot": "IR", "status": "ir", "byeWeek": 13, "kickoff": "2026-11-06T01:15:00.000Z", "proTeam": "BAL", "opponent": "JAX", "position": "QB", "projection": 0, "percentRostered": 86.88, "seasonProjection": 371.51484409 },
+      { "id": "4869645", "name": "Caleb Douglas", "slot": "BENCH", "status": "active", "byeWeek": 6, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "MIA", "opponent": "DET", "position": "WR", "projection": 9.51059802, "percentRostered": 27.53, "seasonProjection": 152.64229069 },
+      { "id": "4427366", "name": "Breece Hall", "slot": "BENCH", "status": "active", "byeWeek": 13, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "NYJ", "opponent": "KC", "position": "RB", "projection": 10.95603498, "percentRostered": 95.59, "seasonProjection": 226.97287486 },
+      { "id": "4241555", "name": "Elijah Mitchell", "slot": "BENCH", "status": "active", "byeWeek": 10, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "PHI", "opponent": "NYG", "position": "RB", "projection": 8.77488735, "percentRostered": 13.55, "seasonProjection": 0 },
+      { "id": "4360698", "name": "Joe Milton", "slot": "QB", "status": "active", "byeWeek": 10, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "PHI", "opponent": "NYG", "position": "QB", "projection": 14.1152102, "percentRostered": 3.94, "seasonProjection": 2.78360771 },
+      { "id": "-16018", "name": "Saints D/ST", "slot": "DST", "status": "active", "byeWeek": 8, "kickoff": "2026-11-08T18:00:00.000Z", "proTeam": "NO", "opponent": "CLE", "position": "DST", "projection": 5.82198943, "percentRostered": 11.82, "seasonProjection": 62.13562141 }
+    ],
+    "freeAgents": [],
+    "droppable": []
+  }
+}

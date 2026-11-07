@@ -1,0 +1,117 @@
+{
+  "id": "2025-11-09-cooper-kupp-C",
+  "note": "Real. Cooper Kupp (SEA) vs ARI, 2025-11-09, 4:05 PM ET: played. Collector's doubts: Misleading type: stale items. The five Week 9 items (Oct 31 to Nov 2) read like game-day 'unlikely to play' / 'inactive Sunday' news but are about the previous Sunday night game at Washington; on Nov 9 he was active and played (2 rec, 74 yds, 2 targets per ESPN box score). The Rapoport item's own post time is unknown; 8:55 AM is the RotoWire/CBS blurb time, and a later RotoWire blurb calls the Fowler and Rapoport reports 'dueling reports Saturday evening'. The Seahawks' Nov 9 inactives post (x.com/seahawksPR/status/1987604410172891553, 2:33 PM ET) is an image, so the active status is cited from CBS. Kickoff from ESPN (21:05 UTC); NFL.com's official Week 10 report lists him Questionable (hamstring, heel).",
+  "tags": [
+    "2025",
+    "group-C"
+  ],
+  "group": "C",
+  "player": {
+    "name": "Cooper Kupp",
+    "position": "WR",
+    "team": "SEA"
+  },
+  "opponent": "ARI",
+  "kickoff": "2025-11-09T21:05:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-11-09T19:35:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-10-31T20:26:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (heel/hamstring) is listed as questionable for Sunday's game at Washington",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-questionable-for-sunday-night/"
+    },
+    {
+      "at": "2025-11-02T04:23:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Seahawks WR Cooper Kupp, listed as questionable for Sunday night due to a heel and hamstring injury, is unlikely to play vs. the Commanders",
+      "url": "https://x.com/AdamSchefter/status/1984838821243126173"
+    },
+    {
+      "at": "2025-11-02T15:34:00.000Z",
+      "source": "CBS Sports Week 9 inactives live blog",
+      "words": "ESPN reports that Kupp, who is officially listed as questionable with a heel and hamstring injury, is unlikely to play.",
+      "url": "https://www.cbssports.com/nfl/news/nfl-week-9-inactives-injury-tracker-latest-player-news-as-kickoffs-approach/live/"
+    },
+    {
+      "at": "2025-11-02T23:50:00.000Z",
+      "source": "Seahawks PR on X",
+      "words": "Tonight’s @Seahawks inactives: CB Derion Kendrick QB Jalen Milroe (Emergency 3rd QB) WR Cooper Kupp",
+      "url": "https://x.com/seahawksPR/status/1985132464478531867"
+    },
+    {
+      "at": "2025-11-02T23:56:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (heel/hamstring) is inactive for Sunday's contest at Washington.",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-inactive-sunday-as-expected/"
+    },
+    {
+      "at": "2025-11-07T21:59:00.000Z",
+      "source": "FantasyPros (citing Mike Dugar)",
+      "words": "Cooper Kupp is listed as questionable for Sunday's game against the Cardinals.",
+      "url": "https://www.fantasypros.com/nfl/news/550835/cooper-kupp-hamstringheel-listed-questionable-week-10.php"
+    },
+    {
+      "at": "2025-11-09T03:11:00.000Z",
+      "source": "Jeremy Fowler on X",
+      "words": "Seahawks WR Cooper Kupp (questionable, hamstring/heel) is expected to play Sunday vs. Cardinals, per source.",
+      "url": "https://x.com/JFowlerESPN/status/1987357396268949522"
+    },
+    {
+      "at": "2025-11-09T03:32:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (hamstring/heel) remains listed as questionable but is expected to play Sunday against the Cardinals, Jeremy Fowler of ESPN.com reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-expected-to-play-week-10/"
+    },
+    {
+      "at": "2025-11-09T13:55:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "has improved odds of playing this week compared to Week 9, but his status for the contest is \"still up in the air,\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-status-still-up-in-air-for-week-10/"
+    },
+    {
+      "at": "2025-11-09T19:35:00.000Z",
+      "source": "CBS Sports Week 10 inactives live blog",
+      "words": "Seattle wide receiver Cooper Kupp and tight end AJ Barner are both active against the Arizona Cardinals.",
+      "url": "https://www.cbssports.com/nfl/news/nfl-week-10-inactives-injury-tracker-all-the-latest-player-news-as-kickoffs-approach/live/"
+    },
+    {
+      "at": "2025-11-09T19:38:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Kupp (hamstring) is listed as active Sunday versus the Cardinals.",
+      "url": "https://www.cbssports.com/fantasy/football/news/seahawks-cooper-kupp-available-in-week-10/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772773",
+  "aliases": {
+    "Seahawks": "Team A",
+    "Seattle": "Team A",
+    "Seahawks Seattle": "Team A",
+    "Seattle Seahawks": "Team A",
+    "Cardinals": "Team B",
+    "Arizona": "Team B",
+    "Cardinals Arizona": "Team B",
+    "Arizona Cardinals": "Team B",
+    "SEAvsARI": "Team A vs Team B",
+    "ARIvsSEA": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

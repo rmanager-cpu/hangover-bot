@@ -1,0 +1,69 @@
+{
+  "id": "2025-11-02-aaron-rodgers-C",
+  "note": "Real. Aaron Rodgers (PIT) vs IND, 2025-11-02, 1:00 PM ET: played. Collector's doubts: Misleading type: a scary pregame-warmup report 29 and 11 minutes before kickoff, no follow-up before kickoff; he played the whole game (25/35, 203 yds, 1 TD per ESPN box score; Steelers won 27-20). He was not on the Steelers' Week 9 injury report at all (NFL.com reg9 report checked), so there was no Friday doubt; it is a scare, not a report that he would not play. The 4for4 item shows only a date.",
+  "tags": [
+    "2025",
+    "group-C"
+  ],
+  "group": "C",
+  "player": {
+    "name": "Aaron Rodgers",
+    "position": "QB",
+    "team": "PIT"
+  },
+  "opponent": "IND",
+  "kickoff": "2025-11-02T18:00:00.000Z",
+  "designation": "none",
+  "inactiveList": {
+    "at": "2025-11-02T16:30:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2025-11-02T17:31:00.000Z",
+      "source": "NFL on CBS on X",
+      "words": "Aaron Rodgers may have suffered an issue with his hand during pregame warmups.",
+      "url": "https://x.com/NFLonCBS/status/1985036955571106186"
+    },
+    {
+      "at": "2025-11-02T17:49:00.000Z",
+      "source": "CBS Sports Week 9 inactives live blog",
+      "words": "As discussed by The NFL Today crew, Steelers quarterback Aaron Rodgers may have injured his hand during pregame warmups. Something to monitor.",
+      "url": "https://www.cbssports.com/nfl/news/nfl-week-9-inactives-injury-tracker-latest-player-news-as-kickoffs-approach/live/"
+    },
+    {
+      "at": null,
+      "source": "4for4 (citing NFL on CBS), dated Nov 02, 2025",
+      "words": "Steelers quarterback Aaron Rodgers may be dealing with a hand issue during pregame warmups before today’s game against the Colts.",
+      "url": "https://www.4for4.com/news/aaron-rodgers-dealing-hand-issue-during-pregame-warmup"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772766",
+  "aliases": {
+    "Steelers": "Team A",
+    "Pittsburgh": "Team A",
+    "Steelers Pittsburgh": "Team A",
+    "Pittsburgh Steelers": "Team A",
+    "Colts": "Team B",
+    "Indianapolis": "Team B",
+    "Colts Indianapolis": "Team B",
+    "Indianapolis Colts": "Team B",
+    "PITvsIND": "Team A vs Team B",
+    "INDvsPIT": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

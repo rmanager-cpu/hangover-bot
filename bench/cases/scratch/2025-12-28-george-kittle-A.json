@@ -1,0 +1,93 @@
+{
+  "id": "2025-12-28-george-kittle-A",
+  "note": "Real. George Kittle (SF) vs CHI, 2025-12-28, 8:20 PM ET: did not play. Collector's doubts: These items are reused as stale items in group C's Kittle Week 18 case (Jan 3 2026), where he played. I did not find Rapoport's own Saturday post; its time is the CBS blurb time. Schefter's post is trimmed with '...' (the full text runs past 25 words). He is absent from the ESPN box score (49ers won 42-38), and his game log has no Dec 28 game.",
+  "tags": [
+    "2025",
+    "group-A"
+  ],
+  "group": "A",
+  "player": {
+    "name": "George Kittle",
+    "position": "TE",
+    "team": "SF"
+  },
+  "opponent": "CHI",
+  "kickoff": "2025-12-29T01:20:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2025-12-28T23:50:00.000Z",
+    "result": "inactive"
+  },
+  "news": [
+    {
+      "at": "2025-12-26T22:29:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "49ers are listing TE George Kittle and WR Ricky Pearsall as questionable for Sunday night’s game against the Bears.",
+      "url": "https://x.com/AdamSchefter/status/2004680989608673580"
+    },
+    {
+      "at": "2025-12-26T22:36:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "GM John Lynch told KNBR San Francisco on Friday that Kittle likely will be a game-time decision for Week 17 action.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-questionable-for-sunday/"
+    },
+    {
+      "at": "2025-12-28T04:35:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "will go through a pregame workout before a determination is made on whether he'll play, Ian Rapoport of NFL Network reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-shaping-up-as-game-time-decision/"
+    },
+    {
+      "at": "2025-12-28T14:01:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "49ers TE George Kittle ... is “highly unlikely” to play vs. the Bears, per source.",
+      "url": "https://x.com/AdamSchefter/status/2005277863487144025"
+    },
+    {
+      "at": "2025-12-28T23:52:00.000Z",
+      "source": "team",
+      "words": "George Kittle will be inactive for Sunday Night Football.",
+      "url": "https://x.com/49ers/status/2005426566105555139"
+    },
+    {
+      "at": "2025-12-28T23:57:00.000Z",
+      "source": "RotoWire via CBS (citing 49ers.com)",
+      "words": "Kittle (ankle) is listed as inactive Sunday against the Bears, Briana Jeannel of the 49ers' official site reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-officially-inactive-in-week-17/"
+    }
+  ],
+  "confirmedAt": "2025-12-28T23:50:00.000Z",
+  "outcome": "did_not_play",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401772935",
+  "aliases": {
+    "49ers": "Team A",
+    "San Francisco": "Team A",
+    "Niners": "Team A",
+    "49ers San Francisco": "Team A",
+    "49ers Niners": "Team A",
+    "San Francisco 49ers": "Team A",
+    "San Francisco Niners": "Team A",
+    "Niners 49ers": "Team A",
+    "Niners San Francisco": "Team A",
+    "Bears": "Team B",
+    "Chicago": "Team B",
+    "Bears Chicago": "Team B",
+    "Chicago Bears": "Team B",
+    "SFvsCHI": "Team A vs Team B",
+    "CHIvsSF": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}

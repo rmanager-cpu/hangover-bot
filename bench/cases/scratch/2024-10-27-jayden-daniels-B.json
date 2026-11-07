@@ -1,0 +1,93 @@
+{
+  "id": "2024-10-27-jayden-daniels-B",
+  "note": "Real. Jayden Daniels (WAS) vs CHI, 2024-10-27, 4:25 PM ET: played. Collector's doubts: 2024 season. Stats (21/38, 326 yds, 1 TD; 8 rushes, 52 yds) read from ESPN's summary API for gameId 401671599. Rib injury from Week 7; did not practice Wed/Thu, limited Fri. The CBS 1:50 AM item attributes the warmup caveat to Schefter; I could not find his post itself.",
+  "tags": [
+    "2024",
+    "group-B"
+  ],
+  "group": "B",
+  "player": {
+    "name": "Jayden Daniels",
+    "position": "QB",
+    "team": "WAS"
+  },
+  "opponent": "CHI",
+  "kickoff": "2024-10-27T20:25:00.000Z",
+  "designation": "questionable",
+  "inactiveList": {
+    "at": "2024-10-27T18:55:00.000Z",
+    "result": "active"
+  },
+  "news": [
+    {
+      "at": "2024-10-25T16:17:00.000Z",
+      "source": "Tom Pelissero on X (quoting coach Dan Quinn)",
+      "words": "\"We will assess how he responds to the work that we did over the next 48 hours.\"",
+      "url": "https://x.com/TomPelissero/status/1849847649337221508"
+    },
+    {
+      "at": "2024-10-25T20:00:00.000Z",
+      "source": "Adam Schefter on X",
+      "words": "Commanders officially are listing QB Jayden Daniels as questionable for Sunday’s game vs. the Bears.",
+      "url": "https://x.com/AdamSchefter/status/1849903987362775235"
+    },
+    {
+      "at": "2024-10-26T13:49:00.000Z",
+      "source": "Ian Rapoport on X",
+      "words": "The Commanders have backup Marcus Mariota ready and Jeff Driskel is on the 53-man roster — so no QB move is necessary if Daniels can’t go.",
+      "url": "https://x.com/RapSheet/status/1850172837346095566"
+    },
+    {
+      "at": "2024-10-27T05:50:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter)",
+      "words": "looks to be tracking toward playing, but the team will need to see how he feels during pregame warmups before deciding on his status",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-jayden-daniels-seemingly-trending-toward-playing/"
+    },
+    {
+      "at": "2024-10-27T16:09:00.000Z",
+      "source": "RotoWire via CBS (citing Jay Glazer, Fox NFL Sunday)",
+      "words": "will meet with team officials roughly around 12:45 p.m. ET before the Commanders confirm definitively whether or not he'll play Sunday against the Bears",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-jayden-daniels-confirmation-on-status-to-arrive-soon/"
+    },
+    {
+      "at": "2024-10-27T16:55:00.000Z",
+      "source": "RotoWire via CBS (citing Tracy Wolfson, CBS)",
+      "words": "remains listed as questionable but is slated to start Sunday against the Bears, barring a last-minute setback",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-jayden-daniels-slated-to-start-sunday/"
+    },
+    {
+      "at": "2024-10-27T19:00:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Daniels (ribs) is listed as active Sunday versus the Bears.",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-jayden-daniels-active-in-week-8/"
+    }
+  ],
+  "outcome": "played",
+  "outcomeSource": "https://www.espn.com/nfl/boxscore/_/gameId/401671599",
+  "aliases": {
+    "Commanders": "Team A",
+    "Washington": "Team A",
+    "Commanders Washington": "Team A",
+    "Washington Commanders": "Team A",
+    "Bears": "Team B",
+    "Chicago": "Team B",
+    "Bears Chicago": "Team B",
+    "Chicago Bears": "Team B",
+    "WASvsCHI": "Team A vs Team B",
+    "CHIvsWAS": "Team B vs Team A",
+    "Pete Carroll": "the head coach",
+    "Carroll": "the head coach",
+    "Mike Tomlin": "the head coach",
+    "Tomlin": "the head coach",
+    "Dan Quinn": "the head coach",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Sean McDermott": "the head coach",
+    "McDermott": "the head coach",
+    "John Lynch": "the GM",
+    "Dublin": "a neutral site",
+    "Ireland": "abroad",
+    "Croke Park": "the stadium",
+    "Bear Goggles On": "a team fan site"
+  }
+}
