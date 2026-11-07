@@ -8,7 +8,7 @@
 // Never log a request or its headers: they carry the member's cookies.
 
 import type { FreeAgent, Game, Move, Player, Roster, RosterEntry, Slot } from "@rosterbots/core";
-import { AuthError, ProviderError, type AddDrop, type ConnectorCapabilities, type FantasyConnector, type LeagueSummary } from "../types.ts";
+import { AuthError, NoTeamError, ProviderError, type AddDrop, type ConnectorCapabilities, type FantasyConnector, type LeagueSummary } from "../types.ts";
 import { ID_BY_SLOT, positionOf, proTeamOf, slotOf, statusOf } from "./maps.ts";
 
 export interface EspnCredentials {
@@ -38,9 +38,20 @@ interface EspnPlayer {
   eligibleSlots?: number[];
   injuryStatus?: string;
   injured?: boolean;
-  /** statSourceId 1 is a projection; scoringPeriodId 0 is the whole season. */
-  stats?: { statSourceId?: number; scoringPeriodId?: number; statSplitTypeId?: number; appliedTotal?: number }[];
+  /**
+   * statSourceId 1 is a projection. A week's is statSplitTypeId 1 with that scoringPeriodId;
+   * scoringPeriodId 0 with statSplitTypeId 0 is the rest of the season (the sum of the weeks
+   * left, this one included). ESPN sends last season's beside this season's, often first.
+   */
+  stats?: EspnStat[];
   ownership?: { percentOwned?: number };
+}
+interface EspnStat {
+  seasonId?: number;
+  statSourceId?: number;
+  scoringPeriodId?: number;
+  statSplitTypeId?: number;
+  appliedTotal?: number;
 }
 interface EspnEntry {
   playerId: number;
@@ -56,6 +67,7 @@ interface EspnTeam {
   roster?: { entries?: EspnEntry[] };
 }
 export interface EspnLeague {
+  seasonId?: number;
   scoringPeriodId?: number;
   status?: { latestScoringPeriod?: number };
   settings?: { name?: string; rosterSettings?: { lineupSlotCounts?: Record<string, number> } };
@@ -99,10 +111,25 @@ function gamesIn(schedule: EspnSchedule | undefined, period: number) {
   return { gameOf, byeWeekOf };
 }
 
+/**
+ * A projection of this season's, never last season's: ESPN sends both, and last season's
+ * whole-season number read as this one's once called a breakout RB worth 4.7 points (Nov 6).
+ * With no season known, only a stat that names none counts, so a real one is never guessed at.
+ */
+function projected(p: EspnPlayer | undefined, season: number | undefined, period: number, split: number): number | undefined {
+  return p?.stats?.find(
+    (s) =>
+      s.statSourceId === 1 &&
+      s.scoringPeriodId === period &&
+      (s.statSplitTypeId ?? split) === split &&
+      (s.seasonId === undefined || s.seasonId === season),
+  )?.appliedTotal;
+}
+
 /** ESPN's player to core's, for a roster entry or a free agent. */
-function toPlayer(id: number, p: EspnPlayer | undefined, locked: boolean, games: ReturnType<typeof gamesIn>, period: number): Player {
-  const projection = p?.stats?.find((s) => s.statSourceId === 1 && s.scoringPeriodId === period)?.appliedTotal;
-  const season = p?.stats?.find((s) => s.statSourceId === 1 && s.scoringPeriodId === 0)?.appliedTotal;
+function toPlayer(id: number, p: EspnPlayer | undefined, locked: boolean, games: ReturnType<typeof gamesIn>, period: number, year: number | undefined): Player {
+  const projection = projected(p, year, period, 1);
+  const season = projected(p, year, 0, 0);
   const owned = p?.ownership?.percentOwned;
   const bye = games.byeWeekOf(p?.proTeamId);
   return {
@@ -122,11 +149,12 @@ function toPlayer(id: number, p: EspnPlayer | undefined, locked: boolean, games:
   };
 }
 
-/** Pure: ESPN's league + schedule payloads to core's roster. Exported for tests. */
-export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined, swid: string): Roster {
+/** Pure: ESPN's league + schedule payloads to core's roster, for the season asked or the league's own. Exported for tests. */
+export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined, swid: string, season?: number): Roster {
   const team = (league.teams ?? []).find((t) => (t.owners ?? []).includes(swid));
-  if (!team) throw new ProviderError("these credentials manage no team in this league", 200);
+  if (!team) throw new NoTeamError();
   const period = league.scoringPeriodId ?? league.status?.latestScoringPeriod ?? 0;
+  const year = season ?? league.seasonId;
 
   const counts = league.settings?.rosterSettings?.lineupSlotCounts ?? {};
   const starterSlots: Slot[] = [];
@@ -143,7 +171,7 @@ export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined,
   for (const e of team.roster?.entries ?? []) {
     const slot = slotOf(e.lineupSlotId);
     if (!slot) continue; // a slot we do not model (IDP): we never touch it
-    entries.push({ player: toPlayer(e.playerId, e.playerPoolEntry?.player, Boolean(e.playerPoolEntry?.lineupLocked), games, period), slot });
+    entries.push({ player: toPlayer(e.playerId, e.playerPoolEntry?.player, Boolean(e.playerPoolEntry?.lineupLocked), games, period, year), slot });
   }
 
   const name = (team.name ?? `${team.location ?? ""} ${team.nickname ?? ""}`).trim();
@@ -159,13 +187,13 @@ export function toRoster(league: EspnLeague, schedule: EspnSchedule | undefined,
 }
 
 /** Pure: the player pool to free agents. Anyone on a team is left out; waivers are marked. Exported for tests. */
-export function toFreeAgents(pool: EspnPlayers, schedule: EspnSchedule | undefined, period: number): FreeAgent[] {
+export function toFreeAgents(pool: EspnPlayers, schedule: EspnSchedule | undefined, period: number, season?: number): FreeAgent[] {
   const games = gamesIn(schedule, period);
   const out: FreeAgent[] = [];
   for (const e of pool.players ?? []) {
     if (e.onTeamId !== undefined && e.onTeamId !== 0) continue;
     if (e.status !== "FREEAGENT" && e.status !== "WAIVERS") continue;
-    out.push({ player: toPlayer(e.id, e.player, false, games, period), onWaivers: e.status === "WAIVERS" });
+    out.push({ player: toPlayer(e.id, e.player, false, games, period, season), onWaivers: e.status === "WAIVERS" });
   }
   return out;
 }
@@ -299,7 +327,7 @@ export function espnConnector(opts: EspnOptions): FantasyConnector {
 
   async function getRoster(leagueId: string): Promise<Roster> {
     const [lg, sched] = await Promise.all([get<EspnLeague>(`${leagueUrl(leagueId)}?view=mRoster&view=mTeam&view=mSettings&view=mStatus`, "roster"), schedule()]);
-    const roster = toRoster(lg, sched, swid);
+    const roster = toRoster(lg, sched, swid, opts.season);
     teamIds.set(leagueId, roster.teamId);
     return roster;
   }
@@ -332,7 +360,7 @@ export function espnConnector(opts: EspnOptions): FantasyConnector {
     async getMyTeam(leagueId) {
       const lg = await get<EspnLeague>(`${leagueUrl(leagueId)}?view=mTeam&view=mSettings`, "league");
       const team = (lg.teams ?? []).find((t) => (t.owners ?? []).includes(swid));
-      if (!team) throw new ProviderError("these credentials manage no team in league " + leagueId, 200);
+      if (!team) throw new NoTeamError(leagueId);
       teamIds.set(leagueId, String(team.id));
       const teamName = (team.name ?? `${team.location ?? ""} ${team.nickname ?? ""}`).trim();
       return { teamId: String(team.id), teamName, leagueName: lg.settings?.name ?? "" };
@@ -351,7 +379,7 @@ export function espnConnector(opts: EspnOptions): FantasyConnector {
         get<EspnPlayers>(`${leagueUrl(leagueId)}?view=kona_player_info&scoringPeriodId=${period}`, "free agents", { "x-fantasy-filter": JSON.stringify(filter) }),
         schedule(),
       ]);
-      return toFreeAgents(pool, sched, period);
+      return toFreeAgents(pool, sched, period, opts.season);
     },
 
     async addDrop(leagueId, tx, period) {

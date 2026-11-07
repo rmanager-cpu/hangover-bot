@@ -92,7 +92,7 @@ serve("check", async (req) => {
     if (league) {
       const a = await adviseConnection(deps, league);
       advised = a.connectionId;
-      console.log(`advise: ${a.connectionId} ${a.outcome} given=${a.given} recorded=${a.recorded}${a.error ? " " + a.error : ""}`);
+      console.log(`advise: ${a.connectionId} ${a.outcome} given=${a.given} recorded=${a.recorded}${a.rejected?.length ? " rejected=" + a.rejected.join(",") : ""}${a.error ? " " + a.error : ""}`);
     }
   }
 

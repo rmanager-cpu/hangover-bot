@@ -4,11 +4,12 @@
 
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ROBOT_PEEK } from "../../src/brand";
 import { Clock, GearIcon, Tick, Tile } from "../../src/icons";
 import { useData, usePull, type Connection, type Proposal } from "../../src/lib/data";
 import { agoText, kickoffText, protectionLine, slotLabel, statusPill, untilText, whenText } from "../../src/lib/format";
+import { readFailing, staleRead, wrongAccount } from "../../src/lib/health";
 import { usePush } from "../../src/lib/push";
 import { nextKickoff, problems, proposalFor, shortName, starters, type Problem } from "../../src/lib/roster";
 import { useSession } from "../../src/lib/session";
@@ -47,7 +48,13 @@ export default function Home() {
   const actingAsAskMe = (conn.authority === "bench_protection" || conn.authority === "ai_rescue") && !claimed;
   const waitingAdvice = conn.authority === "ai_rescue" ? data.advice.filter((a) => a.connectionId === conn.id && a.status === "pending").length : 0;
   const next = roster ? nextKickoff(roster, now) : null;
-  const weekLine = roster ? `Week ${roster.period} · ${next ? `Next lock ${kickoffText(next.at)}` : "No more kickoffs this week"}` : "Not read yet";
+  // A team from a read that is no longer live says when it is from, never "this week" (Nov 6).
+  const stale = staleRead(conn) && conn.lastRosterAt !== null;
+  const weekLine = !roster
+    ? "Not read yet"
+    : stale
+      ? `Week ${roster.period} · as read ${whenText(conn.lastRosterAt!, now)}`
+      : `Week ${roster.period} · ${next ? `Next lock ${kickoffText(next.at)}` : "No more kickoffs this week"}`;
 
   return (
     <Screen edges={["top", "left", "right"]} {...pull}>
@@ -57,13 +64,9 @@ export default function Home() {
           <GearIcon color={color.muted} size={26} />
         </Pressable>
       </View>
-      {data.connections.length > 1 ? (
-        <Pressable accessibilityRole="button" onPress={() => cycle(data.connections, conn, data.select)} hitSlop={8} style={{ alignSelf: "flex-start", marginBottom: space.md }}>
-          <Pill text={(conn.leagueName ?? "League") + "  ›"} />
-        </Pressable>
-      ) : null}
+      <TeamSwitcher all={data.connections} current={conn} select={data.select} />
 
-      <Status conn={conn} claimed={claimed} needTap={needTap} open={open} scheduled={scheduled} />
+      <Status conn={conn} claimed={claimed} wrong={wrongAccount(conn, data.activity)} needTap={needTap} open={open} scheduled={scheduled} />
 
       {needTap.length ? <Proposals pending={needTap} limit={2} /> : null}
 
@@ -84,6 +87,7 @@ export default function Home() {
         </View>
         <Divider style={{ marginVertical: space.lg }} />
         <Label>Watched starters</Label>
+        {stale ? <Muted style={{ marginBottom: space.sm }}>From the last good read, not live. Statuses may have changed since.</Muted> : null}
         {roster ? (
           starters(roster).map((e, i, all) => {
             const pill = statusPill(e.player.status, e.player.game === null);
@@ -153,18 +157,41 @@ export default function Home() {
   );
 }
 
-function cycle(all: Connection[], cur: Connection, select: (id: string) => void) {
-  const i = all.findIndex((c) => c.id === cur.id);
-  const next = all[(i + 1) % all.length];
-  if (next) select(next.id);
+/**
+ * Every team this account watches, one tap to switch, and one to add a league (owner, Nov 6:
+ * "needs to rotate between teams on a platform easier"). Replaces a pill that cycled.
+ */
+function TeamSwitcher(props: { all: Connection[]; current: Connection; select: (id: string) => void }) {
+  const names = props.all.map((c) => c.teamName ?? c.leagueName ?? "Your team");
+  const label = (c: Connection, i: number) => {
+    const name = names[i]!;
+    // The same team name in two leagues: say which league.
+    return names.filter((n) => n === name).length > 1 && c.leagueName ? `${name} · ${c.leagueName}` : name;
+  };
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: space.md, flexGrow: 0 }} contentContainerStyle={{ gap: space.sm }}>
+      {props.all.map((c, i) => {
+        const on = c.id === props.current.id;
+        return (
+          <Pressable key={c.id} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={`${label(c, i)}, ${c.leagueName ?? "league"}`} onPress={() => props.select(c.id)} hitSlop={6}>
+            <Pill text={label(c, i)} tone={on ? "orange" : "plain"} />
+          </Pressable>
+        );
+      })}
+      <Pressable accessibilityRole="button" accessibilityLabel="Watch another league" onPress={() => router.push("/connect/leagues")} hitSlop={6}>
+        <Pill text="+ League" />
+      </Pressable>
+    </ScrollView>
+  );
 }
 
-function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]; open: Problem[]; scheduled: Proposal[] }) {
+function Status(props: { conn: Connection; claimed: boolean; wrong: boolean; needTap: Proposal[]; open: Problem[]; scheduled: Proposal[] }) {
   const { conn } = props;
   const team = conn.teamName ?? "your team";
   const line = protectionLine(conn.authority, props.claimed, conn.status);
-  const checked = conn.lastCheckedAt
-    ? `Last checked ${agoText(conn.lastCheckedAt)}.`
+  // The last time ESPN was read, not the last time a check ran: a failing check runs too (Nov 6).
+  const checked = conn.lastRosterAt
+    ? `Last read from ESPN ${agoText(conn.lastRosterAt)}.`
     : conn.nextCheckAt
       ? `First check ${untilText(conn.nextCheckAt)}.`
       : "First check coming up.";
@@ -172,9 +199,18 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
   if (conn.status === "needs_reauth") {
     return (
       <>
-        <Headline tone="red" title="Signed out of ESPN" line="ESPN signed RosterBots out." />
+        <Headline
+          tone="red"
+          title={props.wrong ? "Wrong ESPN account" : "Signed out of ESPN"}
+          line={props.wrong ? `The ESPN sign-in I have doesn't manage ${team}.` : "ESPN signed RosterBots out."}
+          {...(conn.lastRosterAt ? { note: `Last good read ${agoText(conn.lastRosterAt)}.` } : {})}
+        />
         <Card tone="warn">
-          <Body>Sign in to ESPN again so I can keep watching {team}. Until then I can't see or fix your lineup.</Body>
+          <Body>
+            {props.wrong
+              ? `Sign in to ESPN with the account that manages ${team}. Until then I can't see or fix your lineup.`
+              : `Sign in to ESPN again so I can keep watching ${team}. Until then I can't see or fix your lineup.`}
+          </Body>
           <Button title="Sign in to ESPN" arrow large onPress={() => router.push({ pathname: "/connect/espn", params: { mode: "reauth" } })} style={{ marginTop: space.lg }} />
         </Card>
       </>
@@ -247,16 +283,6 @@ function Status(props: { conn: Connection; claimed: boolean; needTap: Proposal[]
   );
 }
 
-/**
- * A check that fails still stamps last_checked_at but keeps the last good roster and its time
- * (service protect.ts); a good check stamps both alike. So a gap means the checks since that
- * read have failed.
- */
-function readFailing(conn: Connection): boolean {
-  if (!conn.lastCheckedAt || !conn.lastRosterAt) return false;
-  return Date.parse(conn.lastCheckedAt) - Date.parse(conn.lastRosterAt) > READ_GRACE_MS;
-}
-const READ_GRACE_MS = 10 * 60_000;
 
 /** The big line at the top of Home, with the robot peeking in from the right when asked. */
 function Headline(props: { tone: "green" | "orange" | "red" | "muted"; title: string; line: string; note?: string; robot?: boolean }) {

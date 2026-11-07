@@ -5,7 +5,7 @@
 // still re-read ESPN first and verify after; an add is also re-checked against the No-Cray
 // Rules, where the tap waives only the Droppable switch and data ESPN did not send.
 
-import { BENCH, IR, evaluate, isHole, isStarting, noCray, type Candidate, type Move, type Player, type Room, type Roster, type Settings, type Slot } from "@rosterbots/core";
+import { BENCH, IR, evaluate, isHole, isStarting, noCray, rosterRoom, type Candidate, type Move, type Player, type Room, type Roster, type Settings, type Slot } from "@rosterbots/core";
 import type { FantasyConnector } from "@rosterbots/connectors";
 import {
   announce,
@@ -119,6 +119,12 @@ async function outsideCandidateFor(
   if (!fa) return stale(`${tx.add.name} is no longer a free agent, so this is out of date. Nothing was changed.`);
   if (fa.onWaivers) return stale(`${tx.add.name} is on waivers now, and RosterBots never makes waiver claims. Nothing was changed.`);
   const at = (id: string) => fresh.entries.find((e) => e.player.id === id);
+  // ESPN takes no add or drop while a player who no longer qualifies sits in IR.
+  const blocker = rosterRoom(fresh).irIneligibleInIr[0];
+  if (blocker !== undefined) {
+    const name = shortName(at(blocker)?.player.name ?? "A player");
+    return { refused: { status: "superseded", error: "ir_blocked", message: `${name} is in an IR spot but no longer qualifies, and ESPN won't take any add or drop until he's moved out. Nothing was changed.` } };
+  }
 
   let room: Room;
   if (tx.room.how === "open") room = { how: "open" };

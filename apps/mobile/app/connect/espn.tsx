@@ -136,6 +136,10 @@ export default function EspnSignIn() {
       } catch (e) {
         if (e instanceof ApiError && (e.code === "espn_rejected" || e.code === "bad_request")) {
           await startOver("ESPN didn't accept that sign-in. Please sign in again.");
+        } else if (e instanceof ApiError && e.code === "wrong_team") {
+          // A different ESPN account from the one that owns the watched team (Nov 6). Trying the
+          // same session again can't work: clear it, say why, and let them sign in afresh.
+          await startOver(e.message);
         } else {
           // ESPN's session is still in the store; trying again picks it up without a new sign-in.
           setPhase({ kind: "failed", message: messageOf(e), fresh: false });

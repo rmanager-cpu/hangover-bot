@@ -494,6 +494,28 @@ test("missing credentials are a sign-in problem too", async () => {
   assert.equal(s.store.activity[0]!.title, "Sign in to ESPN again");
 });
 
+test("an ESPN sign-in that manages no team in the league is the wrong account too: needs sign-in, said once, retried quietly, active again on a good read (Nov 6)", async () => {
+  const s = setup({ roster: achaneOut() });
+  s.espn.read = "no_team";
+  const sum = await s.run();
+  assert.equal(sum.outcome, "needs_reauth");
+  assert.equal(s.store.connections.get(s.conn.id)!.status, "needs_reauth");
+  assert.deepEqual(s.store.activity.map((a) => [a.title, a.body]), [
+    ["Sign in to ESPN again", "The ESPN account you're signed in with doesn't manage Trust The Process. Sign in to ESPN again with the account that does."],
+  ]);
+
+  s.clock.set(Date.parse(sum.nextCheckAt));
+  const again = await s.run();
+  assert.equal(again.outcome, "needs_reauth");
+  assert.equal(s.store.activity.length, 1, "said once, not every retry");
+
+  // Signed in with the right account: the next good read is the proof, and watching resumes.
+  s.espn.read = "ok";
+  s.clock.set(Date.parse(again.nextCheckAt));
+  assert.equal((await s.run()).outcome, "ok");
+  assert.equal(s.store.connections.get(s.conn.id)!.status, "active");
+});
+
 test("an ESPN account that manages a different team is never acted for", async () => {
   const r = achaneOut();
   r.teamId = "6";

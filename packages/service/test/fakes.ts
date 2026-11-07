@@ -1,7 +1,7 @@
 // In-memory stand-ins for everything outside the service: the database, ESPN, Expo
 // and the clock. Nothing here reaches a network.
 
-import { AuthError, ProviderError, type AddDrop, type FantasyConnector, type TransactionResult } from "@rosterbots/connectors";
+import { AuthError, NoTeamError, ProviderError, type AddDrop, type FantasyConnector, type TransactionResult } from "@rosterbots/connectors";
 import { BETA_AUTOMATION, type Advice, type AdviceInput, type AiChoice, type Authority, type FreeAgent, type JudgeInput, type Move, type Player, type Roster, type RosterEntry, type Slot } from "@rosterbots/core";
 import { protectConnection } from "../src/index.ts";
 import type { ActionRow, ActivityEntry, AiDeps, ConnectionRow, ConnectionStatus, Deps, NewAction, Push, Store } from "../src/index.ts";
@@ -70,7 +70,8 @@ export class FakeEspn implements FantasyConnector {
   reads = 0;
   writes: { moves: Move[]; period: number }[] = [];
   write: "apply" | "ignore" | "partial" | "throw" | "auth" = "apply";
-  read: "ok" | "auth" | "error" = "ok";
+  /** no_team: ESPN takes the sign-in, but its account manages no team in the league. */
+  read: "ok" | "auth" | "error" | "no_team" = "ok";
   /** Runs before every read with its number: the user or ESPN changing things between reads. */
   onRead?: (n: number, roster: Roster) => void;
 
@@ -93,6 +94,7 @@ export class FakeEspn implements FantasyConnector {
     this.onRead?.(this.reads, this.roster);
     if (this.read === "auth") throw new AuthError(401);
     if (this.read === "error") throw new ProviderError("roster", 503);
+    if (this.read === "no_team") throw new NoTeamError();
     return structuredClone(this.roster);
   }
   async setLineup(_leagueId: string, moves: Move[], period: number): Promise<TransactionResult> {

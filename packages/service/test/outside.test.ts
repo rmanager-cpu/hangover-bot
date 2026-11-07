@@ -50,6 +50,10 @@ test("at T-15 a hole the bench cannot fill is filled from free agency: the AI pi
   assert.equal(ai.picks.length, 1);
   assert.equal(ai.picks[0]!.problem, "Achane was ruled OUT at RB");
   assert.deepEqual(ai.picks[0]!.candidates.map((c) => [c.id, c.how]), [[MASON, "free agent, dropping Rashid Shaheed"]]);
+  // And who that costs: a bye-week player the user switched to Droppable (owner, Nov 6).
+  assert.deepEqual(ai.picks[0]!.candidates[0]!.room, {
+    how: "drop", name: "Rashid Shaheed", position: "WR", status: "active", projection: 0, seasonProjection: 50, percentRostered: 20, onBye: true, userMarkedDroppable: true,
+  });
   assert.deepEqual(s.espn.freeAgentReads, [{ period: 5, slots: ["RB"] }, { period: 5, slots: ["RB"] }], "read once to build the options, once more before the write");
 
   assert.deepEqual(s.espn.addDrops, [{ tx: { add: { playerId: MASON, toSlot: "BENCH" }, drop: { playerId: SHAHEED, fromSlot: "BENCH" } }, period: 5 }]);
@@ -214,6 +218,9 @@ test("an open IR slot is used before any drop: the OUT starter goes to IR, the a
   assert.equal(entry(s.espn.roster, ACHANE).slot, "IR");
   assert.equal(entry(s.espn.roster, MASON).slot, "RB");
   assert.equal(s.store.activity.at(-1)!.body, "Achane was ruled OUT. Added Jordan Mason, moving De'Von Achane to IR. Moved Jordan Mason from bench to RB. Done at 12:45 PM ET.");
+  // The AI was told the room is an IR move of the OUT starter: no drop, so no Droppable flag.
+  const room = (s.ai as FakeAi).picks[0]!.candidates[0]!.room!;
+  assert.ok(room.how === "ir" && room.name === "De'Von Achane" && room.status === "out" && !("userMarkedDroppable" in room));
 });
 
 test("an add ESPN does not show is a failed write: said once, with how far it got, and the week holds", async () => {

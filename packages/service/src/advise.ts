@@ -3,7 +3,7 @@
 // with an action is a pending `advise` row the user carries out with one tap through
 // decideAction, under the same No-Cray Rules (the Droppable switch alone is theirs to waive).
 
-import { BENCH, IR, noCray, outsideCandidates, rosterLooksSane, type Advice, type AdviceInput, type AdvicePlayer, type Candidate, type FreeAgent, type Player, type Room, type Roster, type RosterEntry, type Settings } from "@rosterbots/core";
+import { BENCH, IR, checkAdviceMove, noCray, outsideCandidates, qualifiesForIr, rosterLooksSane, rosterRoom, type Advice, type AdviceInput, type AdvicePlayer, type Candidate, type FreeAgent, type MoveProblem, type Player, type Room, type Roster, type RosterEntry, type Settings } from "@rosterbots/core";
 import { announce, connect, isSignedOut, outsideHistory, readTeamPatiently, settingsFor, signature, signedOut, storedTransaction } from "./ops.ts";
 import type { ConnectionRow, Deps } from "./types.ts";
 import { adviceNotice } from "./words.ts";
@@ -42,7 +42,7 @@ export function adviceDue(conn: ConnectionRow, now: Date): boolean {
   return conn.advisedAt === null || Date.parse(conn.advisedAt) < moment.getTime();
 }
 
-function advicePlayer(p: Player, slot?: RosterEntry["slot"], onWaivers?: boolean): AdvicePlayer {
+function advicePlayer(p: Player, slot?: RosterEntry["slot"], onWaivers?: boolean, irEligible?: boolean): AdvicePlayer {
   return {
     id: p.id,
     name: p.name,
@@ -57,19 +57,21 @@ function advicePlayer(p: Player, slot?: RosterEntry["slot"], onWaivers?: boolean
     ...(p.game?.kickoff ? { kickoff: p.game.kickoff } : {}),
     ...(p.game?.opponent ? { opponent: p.game.opponent } : {}),
     ...(onWaivers !== undefined ? { onWaivers } : {}),
+    ...(irEligible ? { irEligible } : {}),
   };
 }
 
-/** Exported for tests. */
+/** Exported for tests. The room is worked out here, by the app, never left to the AI (owner, Nov 7). */
 export function adviceInput(conn: ConnectionRow, roster: Roster, freeAgents: FreeAgent[], settings: Settings, now: Date): AdviceInput {
   return {
     teamName: roster.teamName || conn.teamName || "your team",
     week: roster.period,
     now: now.toISOString(),
     starterSlots: roster.starterSlots,
-    roster: roster.entries.map((e) => advicePlayer(e.player, e.slot)),
+    roster: roster.entries.map((e) => advicePlayer(e.player, e.slot, undefined, e.slot !== IR && qualifiesForIr(e.player))),
     freeAgents: freeAgents.map((f) => advicePlayer(f.player, undefined, f.onWaivers)),
     droppable: settings.droppable,
+    room: rosterRoom(roster),
   };
 }
 
@@ -88,12 +90,16 @@ function candidateOf(item: Advice, roster: Roster, freeAgents: FreeAgent[], sett
   const fa = freeAgents.find((f) => f.player.id === addId);
   if (!fa) return "unknown";
   if (fa.onWaivers) return undefined;
+  // ESPN takes no add or drop while a player who no longer qualifies sits in IR.
+  if (rosterRoom(roster).irIneligibleInIr.length) return undefined;
   const ctx = { roster, settings, now, history, slot: BENCH, baseline: 0, purpose: "advice" as const };
   const dropId = item.action?.drop;
   if (dropId) {
     const e = roster.entries.find((x) => x.player.id === dropId);
     if (!e) return "unknown";
     if (e.slot === IR) return undefined;
+    // His game has started: ESPN won't let him go until the week turns. The tap re-checks too.
+    if (e.player.locked || (e.player.game ? Date.parse(e.player.game.kickoff) <= now.getTime() : false)) return undefined;
     const player: Player = item.action?.outForSeason ? { ...e.player, outForSeason: true } : e.player;
     const room: Room = { how: "drop", player, from: e.slot };
     const v = noCray({ add: fa.player, room }, ctx);
@@ -114,14 +120,16 @@ export interface AdviceSummary {
   /** Items the Advisor gave, and of those, new ones recorded. */
   given: number;
   recorded: number;
+  /** Items thrown out because their move failed the integrity check, by reason. Never a player's name. */
+  rejected?: MoveProblem[];
   error?: string;
 }
 
 /** One advice run for one league. Never throws: a failure is this run's outcome. */
 export async function adviseConnection(deps: Deps, conn: ConnectionRow): Promise<AdviceSummary> {
   const now = deps.now();
-  const out = (outcome: AdviceSummary["outcome"], given = 0, recorded = 0, error?: string): AdviceSummary => ({
-    connectionId: conn.id, outcome, given, recorded, ...(error !== undefined ? { error } : {}),
+  const out = (outcome: AdviceSummary["outcome"], given = 0, recorded = 0, error?: string, rejected: MoveProblem[] = []): AdviceSummary => ({
+    connectionId: conn.id, outcome, given, recorded, ...(rejected.length ? { rejected } : {}), ...(error !== undefined ? { error } : {}),
   });
   const advisor = deps.ai?.advisor;
   if (!advisor || !adviceDue(conn, now)) return out("skipped");
@@ -138,10 +146,19 @@ export async function adviseConnection(deps: Deps, conn: ConnectionRow): Promise
     // Marked before the call, answer or not: a run the wall clock kills must not bill its
     // searches again every minute; the next moment brings the next run.
     await deps.store.setAdvised(conn.id, now.toISOString());
-    const items = await advisor.advise(adviceInput(conn, roster, freeAgents, settings, now));
+    const input = adviceInput(conn, roster, freeAgents, settings, now);
+    const items = await advisor.advise(input);
     const history = await outsideHistory(deps.store, conn.id, roster.period);
     const titles: string[] = [];
+    const rejected: MoveProblem[] = [];
     for (const item of items) {
+      // Ids and words checked in code first, whatever the model says: a move that doesn't agree
+      // with the roster or with its own words is not advice, words and all (owner, Nov 7).
+      const problem = checkAdviceMove(item, input);
+      if (problem) {
+        rejected.push(problem);
+        continue;
+      }
       const found = item.action?.add ? candidateOf(item, roster, freeAgents, settings, now, history) : undefined;
       if (found === "unknown") continue; // names a player who is not there: not advice at all
       const candidate = found;
@@ -158,7 +175,7 @@ export async function adviseConnection(deps: Deps, conn: ConnectionRow): Promise
       titles.push(item.title);
     }
     if (titles.length) await announce(deps, conn, adviceNotice(titles), { kind: "advice", count: titles.length });
-    return out("ok", items.length, titles.length);
+    return out("ok", items.length, titles.length, undefined, rejected);
   } catch (e) {
     if (isSignedOut(e)) {
       try {

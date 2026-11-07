@@ -6,7 +6,7 @@
 // all; errors carry HTTP statuses and connection ids, never cookies.
 
 import { applied, DEFAULT_SETTINGS, IR, type Candidate, type Finding, type Move, type OutsideHistory, type Player, type Roster, type Settings } from "@rosterbots/core";
-import { AuthError, ProviderError, type FantasyConnector } from "@rosterbots/connectors";
+import { AuthError, NoTeamError, ProviderError, type FantasyConnector } from "@rosterbots/connectors";
 import { inMinutes, minuteWindow, nextCheckAt } from "./read.ts";
 import type { ActionKind, ActionRow, ActivityType, ConnectionRow, Deps, Store, StoredTransaction } from "./types.ts";
 import { failure, signIn, type Lookup } from "./words.ts";
@@ -17,11 +17,15 @@ export const RETRY_PAUSE_MS = 3_000;
 /** How soon a connection waiting for a new sign-in is tried again: a passing refusal costs minutes, not the window. */
 export const REAUTH_RETRY_MIN = 5;
 
-/** The signed-in ESPN account manages a different team from the one this connection is for. */
+/**
+ * The signed-in ESPN account is not the one that manages this connection's team: it manages
+ * another team in the league (`teamId`), or none at all (null; owner, Nov 6, after a phone's
+ * sign-in that managed nothing was retried silently for 12 days as a plain error).
+ */
 export class WrongTeamError extends Error {
-  readonly teamId: string;
-  constructor(teamId: string) {
-    super("the ESPN account manages team " + teamId + ", not this connection's team");
+  readonly teamId: string | null;
+  constructor(teamId: string | null) {
+    super(teamId === null ? "the ESPN account manages no team in this league" : "the ESPN account manages team " + teamId + ", not this connection's team");
     this.teamId = teamId;
   }
 }
@@ -54,7 +58,14 @@ export async function connect(deps: Deps, conn: ConnectionRow): Promise<FantasyC
 }
 
 export async function readTeam(espn: FantasyConnector, conn: ConnectionRow): Promise<Roster> {
-  const roster = await espn.getRoster(conn.leagueId);
+  let roster: Roster;
+  try {
+    roster = await espn.getRoster(conn.leagueId);
+  } catch (e) {
+    // ESPN took the sign-in but it manages no team here: a different ESPN account, not a passing failure.
+    if (e instanceof NoTeamError) throw new WrongTeamError(null);
+    throw e;
+  }
   // ESPN returns whichever team the cookies manage. Never act on one this connection was not set up for.
   if (conn.teamId !== null && roster.teamId !== conn.teamId) throw new WrongTeamError(roster.teamId);
   return roster;

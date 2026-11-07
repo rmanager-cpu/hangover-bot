@@ -76,12 +76,35 @@ call: the Judge answered in 5 seconds.
   - a running back who got hurt, yours or any team's, and whether his backup is a free agent
     worth grabbing now, before the waiver run;
   - next week's bye problems ("three starters on bye in Week 9");
-  - a position with no backup at all (your only TE, your only QB);
+  - a real roster-construction problem: a starting slot you can't fill soon, or depth where
+    your league needs it. A missing backup is not a problem by itself (owner's basics §4,
+    Nov 7; until then this read "a position with no backup at all", and most models on the
+    waiver bench suggested a backup tight end);
+  - and when no move is worth making, it says so, with what it checked and what to watch. It
+    never invents a move to have something to say (owner, Nov 7: suggesting nothing is not a
+    good answer, and basics §16: "Do not manufacture transactions").
   - a free agent who fits a weak spot better than what you have.
 - **One tap** from the **Advice** list carries it out: same checks, same verifying read,
   same receipt as any move. Nothing happens without that tap. An item whose move a rule
   forbids keeps its words and loses its tap (a heads-up); one naming a player who is not
   there is not advice at all.
+- **The room is the app's arithmetic, not the AI's** (owner, Nov 7: "the model is being asked
+  to compensate for missing application logic"). Before the Advisor runs, the app works out,
+  from the league's own slot counts: bench and IR spots and how many are used, the open
+  roster spots, who qualifies for IR, anyone in IR who no longer qualifies (ESPN refuses
+  every add and drop until he moves out), and whether an add needs a drop. The Advisor gets
+  these as `room`, told they are final. An add that needs no drop names none, and the app
+  makes the room: an open spot, else an IR move, else a drop.
+- **Every move is checked in code, whatever the model says** (owner: Kimi's "drop Joe Milton"
+  carrying Chig Okonkwo's id is "a potential transaction-integrity failure"). The add must be
+  a free agent in the list and not on the roster, the drop one of this roster, never the same
+  player, and the words must name the players the ids name: the full name, or a last name no
+  other listed player shares, a defense by its team and "D/ST" or "defense". A suggestion
+  that fails is thrown out whole, words and move; the run's summary counts it by reason,
+  never by name. Then legality, where the words stay and the tap goes: an add on waivers, no
+  place on the roster to put him, a drop whose game has started, a healthy player left in
+  IR, or a No-Cray rule. The tap checks again on a fresh read. On the Nov 7 waiver bench
+  this threw out 3 of 67 suggested moves, all three mix-ups and none good.
 - **Web search, limited:** Claude's own web search in Anthropic's API (no new vendor), at
   most six searches a run, for injury news, depth charts and named players only. Queries
   never carry your email, league name or anything else about you. Search is billed per use
@@ -157,12 +180,22 @@ only ever suggests drops that pass rules 3 to 10.
   either is gone, and a tap on one is re-checked against the hole first.
 - **What Anthropic sees:** your roster's players, statuses, projections and kickoffs, and the
   candidates. Never ESPN cookies, never your email.
+- **The Judge sees who makes room for a free agent** (owner, Nov 6: "the model absolutely
+  should see that you marked him droppable; that's what that's for"): an open roster spot, or
+  the player moved to IR or dropped, with his status, this week's and the season's projection,
+  percent rostered, a bye, and for a drop that you switched him to Droppable. Every drop the
+  Judge is offered is one you switched to Droppable (rule 2 sends any other to you as a
+  question), and it is told so.
+- **The Judge is told what "leave it" costs** (owner, Nov 6: not "the worst thing you can
+  do, but damn close"): with no bench fill, null leaves the slot empty, a sure 0, close to
+  the worst outcome; the only worse one is a player who does not play, the same 0 with the
+  add or the drop spent for nothing. With a bench fill, null keeps the fill.
 
 ## Interfaces, as built
 
 | Where | What |
 |---|---|
-| `packages/core` | `Player` gains `percentRostered`, `seasonProjection`, `outForSeason`, `byeWeek`; `Roster` gains `benchSlots`, `irSlots`; `FreeAgent`; `Candidate.add?: { to, room }` with `Room` open / ir / drop; `Settings.droppable`. `outside.ts`: `NO_CRAY`, `AI_WINDOW`, `noCray(transaction, context)` → a verdict (ok, or the rule, why, and whether a tap may waive it), `outsideCandidates(freeAgents, context)` → `{ moves, asks, rejected }`. `ai.ts`: `Judge`, `Advisor` and their inputs. `plan` consults the AI for a hole only; `permitted` needs the add and drop permissions for an add. |
+| `packages/core` | `Player` gains `percentRostered`, `seasonProjection`, `outForSeason`, `byeWeek`; `Roster` gains `benchSlots`, `irSlots`; `FreeAgent`; `Candidate.add?: { to, room }` with `Room` open / ir / drop; `Settings.droppable`. `outside.ts`: `NO_CRAY`, `AI_WINDOW`, `noCray(transaction, context)` → a verdict (ok, or the rule, why, and whether a tap may waive it), `outsideCandidates(freeAgents, context)` → `{ moves, asks, rejected }`, `qualifiesForIr`. `advice.ts` (Nov 7): `rosterRoom(roster)` → `AdviceRoom`, `checkAdviceMove(item, input)` → a `MoveProblem` or nothing; `AdviceInput.room`, `AdvicePlayer.irEligible`. `ai.ts`: `Judge`, `Advisor` and their inputs; a free agent's `JudgeCandidate.room` is `JudgeRoom` (open, or the IR move or drop with the player's status, projections, percent rostered, `onBye`, and `userMarkedDroppable` on a drop; Nov 6). `plan` consults the AI for a hole only; `permitted` needs the add and drop permissions for an add. |
 | `packages/ai` (new) | `anthropicAi({ apiKey, model?, ... })` → `{ judge, advisor }` over `@anthropic-ai/sdk`: the Judge with structured output (`output_config.format`), the Advisor with `web_search_20260209` and one strict `report_advice` tool, adaptive thinking, `pause_turn` continued. Errors are names only, never bodies. |
 | `packages/connectors` | ESPN `getFreeAgents(leagueId, period, { slots?, limit? })` (view `kona_player_info`, header `x-fantasy-filter`), `addDrop(leagueId, { add, drop? }, period)` (the FREEAGENT transaction), percent rostered, season projection, bye week and the league's bench and IR sizes on every read. All `unverified` until seen on a real league. |
 | `packages/service` | `check.ts` (what a check carries); `outside.ts` (the T-15 step: targets, the AI, `executeOutside`); `advise.ts` (`adviseConnection`, `adviceDue`); `ops.writeOutsideAndVerify`; the T-3 all-clear in `protect.ts`; `decideAction` approves an add (rebuilt on fresh reads, the rules re-checked); `Deps.ai?: { judge, advisor? }`; a bench move and an add for the same hole are two separate questions. |

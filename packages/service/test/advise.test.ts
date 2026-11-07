@@ -16,7 +16,8 @@ const fa = (id: string, name: string, over: Partial<Player> = {}, onWaivers = fa
 // Tuesday 10:00 ET, Oct 6 2026, is 14:00 UTC.
 const TUESDAY_10 = "2026-10-06T14:00:00.000Z";
 
-const item = (over: Partial<Advice> = {}): Advice => ({ kind: "rb_backup", title: "Mason is the backup to grab", body: "Achane is hurt; Mason is free.", sources: ["https://example.com/news"], ...over });
+// The words name every player a move touches, or the item is thrown out (owner, Nov 7).
+const item = (over: Partial<Advice> = {}): Advice => ({ kind: "rb_backup", title: "Mason is the backup to grab", body: "Achane is hurt; Mason is free. Rashid Shaheed can go.", sources: ["https://example.com/news"], ...over });
 
 function league(items: Advice[], at = TUESDAY_10, benchSlots = 2) {
   const r = team();
@@ -64,13 +65,16 @@ test("the Advisor sees the roster and the free agents, never a cookie; its items
   assert.equal(input.roster.find((p) => p.id === JEFFERSON)?.slot, "WR");
   assert.deepEqual(input.freeAgents.map((p) => [p.id, p.onWaivers]), [[MASON, false], ["w1", true]]);
   assert.equal(JSON.stringify(input).includes("espn"), false);
+  // The room is the app's arithmetic, not the AI's: 7 starters and 2 bench spots all taken, the
+  // one IR spot holding Tank Dell, so an add needs a drop.
+  assert.deepEqual(input.room, { benchSpots: 2, benchUsed: 2, irSpots: 1, irUsed: 1, openRosterSpots: 0, irEligible: [], irIneligibleInIr: [], addNeedsDrop: true });
 
   const rows = s.store.actions.filter((a) => a.kind === "advise");
   assert.equal(rows.length, 2);
   const add = rows.find((a) => a.transaction)!;
   assert.equal(add.status, "pending");
   assert.equal(add.summary, "Mason is the backup to grab");
-  assert.equal(add.reason, "Achane is hurt; Mason is free.");
+  assert.equal(add.reason, "Achane is hurt; Mason is free. Rashid Shaheed can go.");
   assert.deepEqual(add.sources, ["https://example.com/news"]);
   assert.deepEqual(add.transaction, { add: { playerId: MASON, name: "Jordan Mason", position: "RB", to: "BENCH" }, room: { how: "drop", playerId: SHAHEED, name: "Rashid Shaheed", from: "BENCH" } });
   assert.deepEqual(add.moves, [], "advice only adds him to the bench");
@@ -97,6 +101,7 @@ test("an item whose move breaks a rule keeps its words and loses its tap; one na
   ]);
   const sum = await adviseConnection(s.deps, s.conn);
   assert.deepEqual([sum.given, sum.recorded], [4, 3]);
+  assert.deepEqual(sum.rejected, ["add_unknown"]);
   const rows = s.store.actions.filter((a) => a.kind === "advise");
   assert.deepEqual(rows.map((a) => [a.summary, a.transaction ? "tap" : "heads-up"]), [
     ["Waiver guy", "heads-up"],
@@ -108,7 +113,7 @@ test("an item whose move breaks a rule keeps its words and loses its tap; one na
 
 test("a season-ending injury the AI read about makes the drop a one-tap suggestion, though ESPN still shows him playing (rule 4); never a move", async () => {
   // A bench spot is open for the add; dropping a starter frees none, and Mason cannot play WR.
-  const s = league([item({ kind: "injury", title: "Jefferson tore his ACL", body: "Out for the year per two reports; ESPN still lists him active.", action: { add: MASON, drop: JEFFERSON, outForSeason: true } })], TUESDAY_10, 3);
+  const s = league([item({ kind: "injury", title: "Jefferson tore his ACL", body: "Out for the year per two reports; ESPN still lists him active. Add Jordan Mason.", action: { add: MASON, drop: JEFFERSON, outForSeason: true } })], TUESDAY_10, 3);
   const sum = await adviseConnection(s.deps, s.conn);
   assert.equal(sum.recorded, 1);
   const row = s.store.actions.find((a) => a.kind === "advise")!;
@@ -120,7 +125,7 @@ test("a season-ending injury the AI read about makes the drop a one-tap suggesti
   assert.equal(entry(s.espn.roster, MASON).slot, "BENCH");
 
   // With the bench full, the same item has nowhere to put Mason: a heads-up, no tap.
-  const full = league([item({ kind: "injury", title: "Jefferson tore his ACL", body: "Out for the year.", action: { add: MASON, drop: JEFFERSON, outForSeason: true } })]);
+  const full = league([item({ kind: "injury", title: "Jefferson tore his ACL", body: "Out for the year. Add Jordan Mason.", action: { add: MASON, drop: JEFFERSON, outForSeason: true } })]);
   await adviseConnection(full.deps, full.conn);
   assert.equal(full.store.actions.find((a) => a.kind === "advise")!.transaction, null);
 });
@@ -131,7 +136,7 @@ test("the tap carries an advice item out: the add is verified and receipted; a d
   const [add, note] = s.store.actions.filter((a) => a.kind === "advise");
   const r = await decideAction(s.deps, "user-1", add!.id, "approve");
   assert.equal(r.ok, true, JSON.stringify(r));
-  assert.equal(r.ok && r.message, "Achane is hurt; Mason is free. Added Jordan Mason, dropping Rashid Shaheed. Done at 10:00 AM ET.");
+  assert.equal(r.ok && r.message, "Achane is hurt; Mason is free. Rashid Shaheed can go. Added Jordan Mason, dropping Rashid Shaheed. Done at 10:00 AM ET.");
   assert.equal(entry(s.espn.roster, MASON).slot, "BENCH");
   assert.equal(s.espn.roster.entries.some((e) => e.player.id === SHAHEED), false);
   assert.equal(s.store.actions.find((a) => a.id === add!.id)!.status, "done");
@@ -140,6 +145,42 @@ test("the tap carries an advice item out: the add is verified and receipted; a d
   assert.equal(d.ok && d.status, "declined");
   const again = await decideAction(s.deps, "user-1", note!.id, "approve");
   assert.equal(!again.ok && again.error, "not_pending");
+});
+
+test("a move whose words name someone else is thrown out whole, words and all: Kimi's mix-up never reaches the user", async () => {
+  const s = league([
+    // The words say Shaheed goes; the id is Jefferson's.
+    item({ title: "Mason for Shaheed", body: "Add Jordan Mason and drop Rashid Shaheed.", action: { add: MASON, drop: JEFFERSON } }),
+    // The words say Waiver Guy; the id is Mason's.
+    item({ title: "Grab Waiver Guy", body: "Add Waiver Guy for depth.", action: { add: MASON } }),
+    item({ title: "Mason in", body: "Add Jordan Mason; drop Rashid Shaheed.", action: { add: MASON, drop: SHAHEED } }),
+  ]);
+  const sum = await adviseConnection(s.deps, s.conn);
+  assert.deepEqual([sum.given, sum.recorded, sum.rejected], [3, 1, ["drop_not_named", "add_not_named"]]);
+  assert.deepEqual(s.store.actions.filter((a) => a.kind === "advise").map((a) => a.summary), ["Mason in"]);
+});
+
+test("no tap on a drop whose game has started, or while a healthy player sits in IR; the tap checks the IR again", async () => {
+  const locked = league([item({ title: "Mason in", body: "Add Jordan Mason; drop Rashid Shaheed.", action: { add: MASON, drop: SHAHEED } })]);
+  entry(locked.espn.roster, SHAHEED).player.locked = true;
+  await adviseConnection(locked.deps, locked.conn);
+  assert.equal(locked.store.actions.find((a) => a.kind === "advise")!.transaction, null, "ESPN won't drop him until the week turns");
+
+  const healed = league([item({ title: "Mason in", body: "Add Jordan Mason; drop Rashid Shaheed.", action: { add: MASON, drop: SHAHEED } })]);
+  const dell = healed.espn.roster.entries.find((e) => e.slot === "IR")!;
+  dell.player.status = "active"; // Tank Dell is healthy, still in IR
+  await adviseConnection(healed.deps, healed.conn);
+  assert.equal(healed.store.actions.find((a) => a.kind === "advise")!.transaction, null);
+
+  // A tap offered before Dell healed is refused at the tap, with nothing written.
+  const s = league([item({ title: "Mason in", body: "Add Jordan Mason; drop Rashid Shaheed.", action: { add: MASON, drop: SHAHEED } })]);
+  await adviseConnection(s.deps, s.conn);
+  const row = s.store.actions.find((a) => a.kind === "advise" && a.transaction)!;
+  s.espn.roster.entries.find((e) => e.slot === "IR")!.player.status = "active";
+  const r = await decideAction(s.deps, "user-1", row.id, "approve");
+  assert.equal(!r.ok && r.error, "ir_blocked");
+  assert.match(!r.ok ? r.message : "", /Tank Dell|Dell is in an IR spot but no longer qualifies/);
+  assert.equal(s.espn.addDrops.length, 0);
 });
 
 test("an Advisor that fails, or a league with no AI, records nothing and does not throw", async () => {

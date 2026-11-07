@@ -18,7 +18,9 @@ import {
   type Finding,
   type FreeAgent,
   type JudgeInput,
+  type JudgeRoom,
   type Player,
+  type Room,
   type Roster,
   type Slot,
   type Step,
@@ -105,8 +107,34 @@ const inWindow = (t: Target, now: Date, untilMinutes: number): boolean => {
 };
 const lastTry = (t: Target, now: Date): boolean => now.getTime() >= Date.parse(t.deadline) - AI_WINDOW.lastTryMinutes * MIN;
 
+/** Who makes room for a free agent, as the AI sees him. A drop says whether the user switched him to Droppable. */
+function roomFor(room: Room, droppable: readonly string[]): JudgeRoom {
+  if (room.how === "open") return { how: "open" };
+  const p = room.player;
+  return {
+    how: room.how,
+    name: p.name,
+    position: p.position,
+    status: p.status,
+    ...(p.projection !== undefined ? { projection: p.projection } : {}),
+    ...(p.seasonProjection !== undefined ? { seasonProjection: p.seasonProjection } : {}),
+    ...(p.percentRostered !== undefined ? { percentRostered: p.percentRostered } : {}),
+    // null is a bye; undefined is a schedule we do not know, never a bye.
+    ...(p.game === null ? { onBye: true } : {}),
+    ...(room.how === "drop" ? { userMarkedDroppable: droppable.includes(p.id) } : {}),
+  };
+}
+
 /** What the AI is asked about one hole: the problem, the slot, when it locks, and the options the code built. */
-export function judgeInputFor(problem: string, slot: Slot, kickoff: string | undefined, options: Candidate[], now: Date, benchFill?: { name: string; projection?: number }): JudgeInput {
+export function judgeInputFor(
+  problem: string,
+  slot: Slot,
+  kickoff: string | undefined,
+  options: Candidate[],
+  now: Date,
+  benchFill?: { name: string; projection?: number },
+  droppable: readonly string[] = [],
+): JudgeInput {
   return {
     problem: `${problem} at ${slot}`,
     slot,
@@ -125,13 +153,14 @@ export function judgeInputFor(problem: string, slot: Slot, kickoff: string | und
       ...(o.player.game?.kickoff ? { kickoff: o.player.game.kickoff } : {}),
       ...(o.player.game?.opponent ? { opponent: o.player.game.opponent } : {}),
       how: o.add ? `free agent, ${howText(o.add.room)}` : "bench",
+      ...(o.add ? { room: roomFor(o.add.room, droppable) } : {}),
     })),
   };
 }
 
 function judgeInput(c: Check, t: Target, options: Candidate[], now: Date): JudgeInput {
   const fill = t.kind === "fill" && t.occupant ? { name: t.occupant.name, ...(t.occupant.projection !== undefined ? { projection: t.occupant.projection } : {}) } : undefined;
-  return judgeInputFor(reasonOf(c, t.finding), t.slot, t.deadline, options, now, fill);
+  return judgeInputFor(reasonOf(c, t.finding), t.slot, t.deadline, options, now, fill, c.settings.droppable);
 }
 
 const askFor = (t: Target, candidate: Candidate, why: string): Extract<Step, { do: "propose" }> => ({

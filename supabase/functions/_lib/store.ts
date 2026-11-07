@@ -164,7 +164,7 @@ export interface AppStore extends Store {
   /** Vault: create or replace this user's ESPN credential. Returns its id. */
   storeCredential(userId: string, creds: { swid: string; espnS2: string }): Promise<string>;
   /** The leagues this user watches, oldest first: a new sign-in is checked against one of them. */
-  watchedLeagues(userId: string): Promise<{ leagueId: string; season: number }[]>;
+  watchedLeagues(userId: string): Promise<{ leagueId: string; season: number; teamId: string | null; teamName: string | null }[]>;
   /** After a fresh sign-in, leagues that were waiting for one are watched again from now. */
   resumeAfterSignIn(credentialId: string, nowIso: string): Promise<void>;
   upsertConnection(c: {
@@ -412,11 +412,11 @@ export function createStore(db: SupabaseClient): AppStore {
     },
 
     async watchedLeagues(userId) {
-      const rows = must<{ league_id: string; season: number }[]>(
-        await db.from("connections").select("league_id,season").eq("user_id", userId).order("created_at"),
+      const rows = must<{ league_id: string; season: number; team_id: string | null; team_name: string | null }[]>(
+        await db.from("connections").select("league_id,season,team_id,team_name").eq("user_id", userId).order("created_at"),
         "watched leagues",
       );
-      return rows.map((r) => ({ leagueId: r.league_id, season: r.season }));
+      return rows.map((r) => ({ leagueId: r.league_id, season: r.season, teamId: r.team_id, teamName: r.team_name }));
     },
 
     async resumeAfterSignIn(credentialId, nowIso) {

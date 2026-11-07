@@ -27,7 +27,30 @@ export interface JudgeCandidate {
   opponent?: string;
   /** Where he comes from and what it costs: "bench", "free agent, open roster spot", "free agent, drops X". */
   how: string;
+  /** A free agent's: who makes room for him. */
+  room?: JudgeRoom;
 }
+
+/**
+ * How a free agent's roster spot is made: an open spot, or a player moved to IR or dropped,
+ * with what the code knows of him, so the AI can weigh what the move costs.
+ */
+export type JudgeRoom =
+  | { how: "open" }
+  | {
+      how: "ir" | "drop";
+      name: string;
+      position: string;
+      status: Status;
+      /** This week. */
+      projection?: number;
+      seasonProjection?: number;
+      percentRostered?: number;
+      /** No game this week. */
+      onBye?: boolean;
+      /** On a drop: the user switched him to Droppable. The code offers the AI no other drop. */
+      userMarkedDroppable?: boolean;
+    };
 
 export interface JudgeInput {
   /** What is wrong, in words: "Achane was ruled OUT at RB". */
@@ -62,6 +85,28 @@ export interface AdvicePlayer {
   opponent?: string;
   /** On waivers rather than free: never an add. */
   onWaivers?: boolean;
+  /** On the roster, not in IR, and he qualifies for it: worked out by the app. */
+  irEligible?: boolean;
+}
+
+/**
+ * The room on the roster, worked out by the app from the league's own slot counts before the
+ * AI sees it (owner, Nov 7: "the model is being asked to compensate for missing application
+ * logic"). The AI takes it as given. A size ESPN didn't send stays unknown, never guessed.
+ */
+export interface AdviceRoom {
+  benchSpots?: number;
+  benchUsed: number;
+  irSpots?: number;
+  irUsed: number;
+  /** Roster spots free right now: an add that needs nothing moved. */
+  openRosterSpots?: number;
+  /** Ids of players not in IR who qualify for it: one can move there if an IR spot is free. */
+  irEligible: string[];
+  /** Ids of players in an IR spot who no longer qualify. ESPN refuses every add and drop until they move out. */
+  irIneligibleInIr: string[];
+  /** An add needs a drop: no open spot, and no IR move that makes one. Absent when the sizes are unknown. */
+  addNeedsDrop?: boolean;
 }
 
 export interface AdviceInput {
@@ -73,6 +118,8 @@ export interface AdviceInput {
   freeAgents: AdvicePlayer[];
   /** Ids the user switched to Droppable. */
   droppable: string[];
+  /** Worked out by the app; absent only for inputs built before Nov 7. */
+  room?: AdviceRoom;
 }
 
 export type AdviceKind = "injury" | "rb_backup" | "bye" | "construction" | "fit";

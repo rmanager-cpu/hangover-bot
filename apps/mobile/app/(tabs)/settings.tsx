@@ -5,6 +5,7 @@ import { Alert, StyleSheet, Switch, View } from "react-native";
 import { api, messageOf } from "../../src/lib/api";
 import { dbMessage, useData } from "../../src/lib/data";
 import { agoText, AUTHORITY, levelOf } from "../../src/lib/format";
+import { readFailing, wrongAccount } from "../../src/lib/health";
 import { usePush } from "../../src/lib/push";
 import { useSession } from "../../src/lib/session";
 import { supabase } from "../../src/lib/supabase";
@@ -86,14 +87,21 @@ export default function Settings() {
   const authority = AUTHORITY[level].name;
   const waitingAdvice = data.advice.filter((a) => a.connectionId === conn.id && a.status === "pending").length;
   const watching = conn.status === "active";
+  // The last read from ESPN, not the last check: a failing check runs too (Nov 6, "Last checked
+  // 2 min ago" over a team two weeks old).
+  const lastRead = conn.lastRosterAt ? ` Last good read ${agoText(conn.lastRosterAt)}.` : "";
   const statusLine =
     conn.status === "needs_reauth"
-      ? "ESPN signed RosterBots out. Sign in again below."
+      ? wrongAccount(conn, data.activity)
+        ? `Wrong ESPN account: the sign-in I have doesn't manage ${conn.teamName ?? "this team"}. Sign in again below with the one that does.${lastRead}`
+        : `ESPN signed RosterBots out. Sign in again below.${lastRead}`
       : conn.status === "paused"
         ? "Paused. I'm not checking this league."
-        : conn.lastCheckedAt
-          ? `Watching. Last checked ${agoText(conn.lastCheckedAt)}.`
-          : "Watching. First check coming up.";
+        : readFailing(conn)
+          ? `Can't read ESPN right now; trying again every few minutes.${lastRead}`
+          : conn.lastRosterAt
+            ? `Watching. Last read from ESPN ${agoText(conn.lastRosterAt)}.`
+            : "Watching. First check coming up.";
 
   const setWatching = async (on: boolean) => {
     setSaving(true);

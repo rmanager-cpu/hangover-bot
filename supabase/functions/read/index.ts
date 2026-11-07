@@ -2,6 +2,8 @@
 //   { connectionId } -> ReadSummary
 // Saves the roster; the check schedule is the checker's business, so it is left alone.
 
+import { NoTeamError } from "@rosterbots/connectors";
+import type { Roster } from "@rosterbots/core";
 import { summarizeRead } from "@rosterbots/service";
 import { requireUser } from "../_lib/auth.ts";
 import { makeDeps } from "../_lib/deps.ts";
@@ -20,13 +22,19 @@ serve("read", async (req) => {
   if (!creds) throw espnRejected();
 
   const now = new Date();
-  const roster = await makeDeps(store).connector(creds, conn.season).getRoster(conn.leagueId);
+  const wrongTeam = () =>
+    new HttpError(409, "wrong_team", `The ESPN account you're signed in with doesn't manage ${conn.teamName ?? "this team"}. Sign in to ESPN again with the account that does.`);
+  let roster: Roster;
+  try {
+    roster = await makeDeps(store).connector(creds, conn.season).getRoster(conn.leagueId);
+  } catch (e) {
+    // ESPN took the sign-in, but its account manages no team in this league (Nov 6).
+    if (e instanceof NoTeamError) throw wrongTeam();
+    throw e;
+  }
   // ESPN answers with whichever team the cookies manage. Showing, or saving, someone
   // else's team as this one would make the test swap and Home lie (service WrongTeamError).
-  if (conn.teamId !== null && roster.teamId !== conn.teamId) {
-    const team = conn.teamName ?? "this team";
-    throw new HttpError(409, "wrong_team", `The ESPN account you're signed in with doesn't manage ${team}. Sign in to ESPN again with the account that does.`);
-  }
+  if (conn.teamId !== null && roster.teamId !== conn.teamId) throw wrongTeam();
   await store.saveRoster(conn.id, roster, now.toISOString());
   return json(summarizeRead(roster, now));
 });

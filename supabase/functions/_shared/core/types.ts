@@ -38,8 +38,9 @@ export interface Player {
   /** Percent of the provider's leagues that roster him, 0 to 100, when the provider says (No-Cray rule 5). */
   percentRostered?: number;
   /**
-   * The provider's projection for the whole season: the rest-of-season value the No-Cray
-   * Rules judge a drop by, for now (AI-NATIVE.md, rules 6 and 7).
+   * The provider's projection for the rest of this season (ESPN's: the weeks left, this one
+   * included; never last season's): the value the No-Cray Rules judge a drop by, for now
+   * (AI-NATIVE.md, rules 6 and 7).
    */
   seasonProjection?: number;
   /**

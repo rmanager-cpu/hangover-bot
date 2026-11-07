@@ -11,7 +11,8 @@ framework, database, AI provider or push service that is not listed there.
 
 Target: the Google Play closed test (friends, a fake league), AI Native included, since a
 runaway AI is the risk that matters (owner). The contracts: `docs/BETA.md` for the beta,
-`docs/AI-NATIVE.md` for AI Native; change them before changing an interface. `docs/DEPLOY.md`
+`docs/AI-NATIVE.md` for AI Native; change them before changing an interface. `docs/FANTASY.md`
+is the fantasy judgment the AI, the bench and you are held to (owner's word). `docs/DEPLOY.md`
 is the backend deploy for a session with the Supabase and Expo MCP connectors;
 `apps/mobile/README.md` is the app build. The company is Turbo Devs; the app id is
 `com.rosterbots.app`; support is support@rosterbots.com.

@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { AuthError, espnConnector, freeAgentFilter, statusOf, toAddDrop, toFreeAgents, toLeagues, toRoster, toTransaction } from "../src/index.ts";
+import { AuthError, espnConnector, freeAgentFilter, NoTeamError, ProviderError, statusOf, toAddDrop, toFreeAgents, toLeagues, toRoster, toTransaction } from "../src/index.ts";
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"));
 const league = fixture("league");
@@ -79,8 +79,11 @@ test("a starter ESPN sent without player data is unknown, never on bye", () => {
   assert.equal(by("1002").status, "unknown", "no player data at all: never moved");
 });
 
-test("credentials that manage no team are refused", () => {
-  assert.throws(() => toRoster(league, schedule, "{STRANGER}"), /no team/);
+test("credentials that manage no team are refused as the wrong account: a NoTeamError, still a ProviderError with ESPN's 200", () => {
+  assert.throws(
+    () => toRoster(league, schedule, "{STRANGER}"),
+    (e: unknown) => e instanceof NoTeamError && e instanceof ProviderError && e.httpStatus === 200 && /no team/.test(e.message),
+  );
 });
 
 test("the lineup write is ESPN's ROSTER transaction with ESPN's slot ids", () => {
@@ -117,6 +120,38 @@ test("a rostered player's rest-of-season projection, percent rostered and bye we
   assert.deepEqual([p.seasonProjection, p.percentRostered, p.byeWeek], [240.5, 99.7, 9]);
   const plain = toRoster(league, schedule, SWID).entries.find((e) => e.player.id === "4262921")!.player;
   assert.deepEqual([plain.seasonProjection, plain.percentRostered], [undefined, undefined], "absent, never guessed");
+});
+
+test("only this season's projections count: ESPN sends last season's beside them, often first (Tuten, Nov 6)", () => {
+  const both = structuredClone(league);
+  both.seasonId = 2026;
+  const team = both.teams.find((t: { owners?: string[] }) => (t.owners ?? []).includes(SWID));
+  const jj = team.roster.entries.find((e: { playerId: number }) => e.playerId === 4262921).playerPoolEntry.player;
+  jj.stats = [
+    { seasonId: 2025, statSourceId: 1, scoringPeriodId: 0, statSplitTypeId: 0, appliedTotal: 4.7 }, // last season's whole season
+    { seasonId: 2025, statSourceId: 1, scoringPeriodId: 5, statSplitTypeId: 1, appliedTotal: 0 }, // last season's week 5
+    { seasonId: 2026, statSourceId: 0, scoringPeriodId: 0, statSplitTypeId: 0, appliedTotal: 127.2 }, // this season's actual
+    { seasonId: 2026, statSourceId: 1, scoringPeriodId: 0, statSplitTypeId: 2, appliedTotal: 180.6 }, // another split, not the rest of the season
+    { seasonId: 2026, statSourceId: 1, scoringPeriodId: 5, statSplitTypeId: 1, appliedTotal: 15.3 },
+    { seasonId: 2026, statSourceId: 1, scoringPeriodId: 0, statSplitTypeId: 0, appliedTotal: 161.9 },
+  ];
+  const pick = (r: ReturnType<typeof toRoster>) => {
+    const p = r.entries.find((e) => e.player.id === "4262921")!.player;
+    return [p.projection, p.seasonProjection];
+  };
+  assert.deepEqual(pick(toRoster(both, schedule, SWID, 2026)), [15.3, 161.9]);
+  assert.deepEqual(pick(toRoster(both, schedule, SWID)), [15.3, 161.9], "the league's own season when the caller names none");
+  const unnamed = structuredClone(both);
+  delete unnamed.seasonId;
+  assert.deepEqual(pick(toRoster(unnamed, schedule, SWID)), [undefined, undefined], "no season known: a dated number is never guessed at");
+
+  const pool = fixture("free-agents");
+  pool.players[0].player.stats.unshift(
+    { seasonId: 2025, statSourceId: 1, scoringPeriodId: 0, statSplitTypeId: 0, appliedTotal: 4.7 },
+    { seasonId: 2025, statSourceId: 1, scoringPeriodId: 5, statSplitTypeId: 1, appliedTotal: 0 },
+  );
+  const mason = toFreeAgents(pool, schedule, 5, 2026)[0]!.player;
+  assert.deepEqual([mason.projection, mason.seasonProjection], [11.4, 95.2]);
 });
 
 test("the player pool yields free agents, marks waivers, and leaves out anyone on a team", () => {

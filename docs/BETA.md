@@ -264,9 +264,9 @@ Deno. Shared code is copied from `packages/*/src` into `supabase/functions/_shar
 
 | Function | Auth | Request → response |
 |---|---|---|
-| `espn-connect` | user JWT | `{swid, espnS2, season?}` → `{credentialId, leagues: LeagueSummary[], leagueLookupFailed}`. The fan-profile lookup never refuses the sign-in (any failure is `leagueLookupFailed`). When the user already watches a league, the cookies are tried against it first: 401 `{error:"espn_rejected"}` keeps the stored sign-in; 502 replaces nothing either. |
+| `espn-connect` | user JWT | `{swid, espnS2, season?}` → `{credentialId, leagues: LeagueSummary[], leagueLookupFailed}`. The fan-profile lookup never refuses the sign-in (any failure is `leagueLookupFailed`). When the user already watches a league, the cookies are tried against it first: 401 `{error:"espn_rejected"}` keeps the stored sign-in; 409 `{error:"wrong_team"}` when they are a different ESPN account from the one that owns the watched team (none, or another team; Nov 6), nothing stored; 502 replaces nothing either. |
 | `connection-setup` | user JWT | `{credentialId, leagueId, season?}` → `{connection, read: ReadSummary}` |
-| `read` | user JWT | `{connectionId}` → `ReadSummary` (fresh read, saves `last_roster`); 409 `wrong_team` if the sign-in now manages a different team |
+| `read` | user JWT | `{connectionId}` → `ReadSummary` (fresh read, saves `last_roster`); 409 `wrong_team` if the sign-in now manages a different team, or none in the league |
 | `decide` | user JWT | `{actionId, decision}` → `DecisionResult` |
 | `swap` | user JWT | `{connectionId, playerIdA, playerIdB}` → `SwapResult` |
 | `check` | `x-cron-secret` | runs `protectConnection` for up to 25 due connections, then Roster Advice for one AI Native league whose moment has come → `{checked, deferred, results: CheckSummary[], advised?}`; 503 `not_configured` while `CRON_SECRET` is unset |
@@ -397,6 +397,13 @@ automatic move into a proposal.
   them (a bad sign-in never replaces a good one; a first sign-in is stored as it is, and
   `connection-setup` is its proof), then makes that user's `needs_reauth` connections
   `active`. The fan-profile lookup, unproven, can only set `leagueLookupFailed`, never refuse.
+  A sign-in ESPN takes but whose account manages no team, or another team, in the watched
+  league is a different ESPN account: refused with 409 `wrong_team`, never stored (owner, Nov 6).
+  Switching ESPN accounts on purpose is "Forget my ESPN sign-in" first, which stops watching.
+- The checker treats a sign-in that manages no team in the league as the wrong account (a
+  `NoTeamError` from the connector becomes the service's `WrongTeamError`): `needs_reauth`,
+  "Sign in to ESPN again" said once, retried quietly, `active` again on a good read. Before
+  Nov 6 it was a plain error: `active`, silent, retried every 5 minutes.
 - Setting a league up again keeps its status: a pause is the user's off switch. Only a
   league waiting for a sign-in resumes, since the setup read is one.
 - Stricter than the table: a connection's credential must belong to the same user (composite

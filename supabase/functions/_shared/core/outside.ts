@@ -117,7 +117,8 @@ function cannotStart(p: Player, ctx: NoCrayContext): string | undefined {
   return undefined;
 }
 
-const qualifiesForIr = (p: Player): boolean => p.eligibleSlots.includes(IR) && (p.status === "ir" || p.status === "out");
+/** He may sit in an IR slot: ESPN lists IR among his slots and shows him OUT or on IR. */
+export const qualifiesForIr = (p: Player): boolean => p.eligibleSlots.includes(IR) && (p.status === "ir" || p.status === "out");
 
 /**
  * Making room, in the owner's order: an open roster spot needs nothing; else an open IR slot

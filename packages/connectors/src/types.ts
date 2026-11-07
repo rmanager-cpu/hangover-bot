@@ -95,6 +95,17 @@ export class ProviderError extends Error {
   }
 }
 
+/**
+ * The credentials work (the provider answered 200), but the account they belong to manages no
+ * team in the league: a different account from the one that owns the team. Only signing in
+ * with the right account fixes it.
+ */
+export class NoTeamError extends ProviderError {
+  constructor(leagueId?: string) {
+    super("these credentials manage no team in " + (leagueId ? "league " + leagueId : "this league"), 200);
+  }
+}
+
 /** Every host the picker shows. Only ESPN is built; the rest say "coming soon". */
 export type ProviderId = "espn" | "sleeper" | "yahoo" | "cbs" | "nfl";
 export const PROVIDERS: readonly { id: ProviderId; name: string; status: "available" | "coming_soon" }[] = [
