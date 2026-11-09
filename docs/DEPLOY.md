@@ -273,7 +273,8 @@ At `https://console.cloud.google.com`, signed in as the owner. Menu names as of 
    **Allow manual linking: on** (it is what lets an anonymous account link Google and keep
    its leagues; off, the app says so). **Allow anonymous sign-ins** stays on.
 3. The Web client's id goes into `apps/mobile/eas.json` as `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
-   in both profiles. It is public, so committing it is fine. The secret never leaves Supabase.
+   in both profiles (add the line then: EAS refuses to build while the value is an empty
+   string). It is public, so committing it is fine. The secret never leaves Supabase.
    Then push and build (step 8): the button stays disabled in a build made without the id.
 
 An account claimed by email before Oct 26 is reached by signing in with Google as the same
