@@ -1,0 +1,55 @@
+{
+  "id": "2024-deshaun-watson-achilles",
+  "note": "Real. Deshaun Watson (CLE) ruptured his right Achilles in Week 7 (Sun Oct 20 vs CIN); on Mon Oct 21 the team said he would have surgery and miss the rest of 2024; surgery Oct 25. His ESPN 2024 game log has no game after Week 7, so group A. Times come from each page's own metadata (the CBS pages' and the Browns site's JSON-LD). Doubts: I did not find Rapoport's own Sunday post; his report is cited through the RotoWire blurb. The Browns' words are from the team site's announcement article, not the statement as posted on X.",
+  "tags": ["2024", "group-A", "QB"],
+  "group": "A",
+  "season": 2024,
+  "player": { "name": "Deshaun Watson", "position": "QB", "team": "CLE", "espnId": "3122840" },
+  "injury": "ruptured right Achilles tendon, Week 7 (Oct 20)",
+  "asks": [
+    { "at": "2024-10-22T14:00:00.000Z", "week": 8 }
+  ],
+  "news": [
+    {
+      "at": "2024-10-20T18:59:47.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Watson won't return to Sunday's game against the Bengals after suffering an Achilles injury... it is feared that Watson suffered a torn Achilles, and if that's the case, the QB would face an extended absence.",
+      "url": "https://www.cbssports.com/fantasy/football/news/browns-deshaun-watson-sustains-achilles-injury-sunday/"
+    },
+    {
+      "at": "2024-10-20T20:55:20.000Z",
+      "source": "RotoWire via CBS (citing Daniel Oyefusi, ESPN)",
+      "words": "Browns head coach Kevin Stefanski noted after Sunday's 21-14 loss to the Bengals that Watson is believed to have suffered a season-ending Achilles injury but will undergo testing to confirm the severity of the issue.",
+      "url": "https://www.cbssports.com/fantasy/football/news/browns-deshaun-watson-could-be-done-for-season/"
+    },
+    {
+      "at": "2024-10-21T16:36:26.000Z",
+      "source": "team (Browns site)",
+      "words": "The Browns announced that starting QB Deshaun Watson will undergo surgery to repair his Achilles injury, which will end his 2024 season. Magnetic Resonance Imaging (MRI) confirmed on Monday morning that Watson sustained a ruptured right Achilles tendon.",
+      "url": "https://www.clevelandbrowns.com/news/deshaun-watson-to-undergo-season-ending-surgery-to-repair-achilles-injury"
+    },
+    {
+      "at": "2024-10-21T17:27:00.000Z",
+      "source": "CBS Sports (citing Jonathan Jones)",
+      "words": "An MRI Monday revealed Watson indeed suffered a tear... The severity of the injury means Watson is done for the year... He could come back for Week 1 of the 2025 season if the surgery on the area is successful.",
+      "url": "https://www.cbssports.com/nfl/news/deshaun-watson-injury-update-mri-reveals-browns-qb-suffered-achilles-tear-will-miss-remainder-of-2024-season/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3122840/type/nfl/year/2024",
+  "aliases": {
+    "Browns": "Team A",
+    "Cleveland": "Team A",
+    "Cleveland Browns": "Team A",
+    "Kevin Stefanski": "the head coach",
+    "Stefanski": "the head coach",
+    "Andrew Berry": "the GM",
+    "Huntington Bank Field": "the stadium",
+    "Cleveland Browns Stadium": "the stadium",
+    "Bengals": "Team B",
+    "Cincinnati": "Team B",
+    "Cincinnati Bengals": "Team B",
+    "Zac Taylor": "the opposing coach"
+  }
+}

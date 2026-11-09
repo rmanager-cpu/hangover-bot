@@ -10,6 +10,8 @@ doesn't change which provider production uses (`docs/STACK.md`).
 |---|---|---|
 | **Judge** | T-90 and T-15, when a starting slot has a hole: picks one candidate the code built, or keeps the bench fill | Against what actually happened: who played, who scored |
 | **Advisor** (Roster Advice) | 10 AM ET Tue–Sat and 6 PM Sat: suggests up to 5 moves | Rule checks automatically, then your own blind review |
+| **Injury judge** (not built) | Planned: before WaiverBot drops a hurt player, is his season over? | Against what happened: his ESPN game log |
+| **Shared research** (not built) | Planned: Sunday, Monday after the late game, early Tuesday, once for everyone; WaiverBot and GameDayBot read its brief | Fact checks automatically (ids, names, labels, sources, byes), coverage counted, then your own read |
 
 Every model gets **production's exact request**: the bench calls `packages/ai` with a fake
 fetch, captures the system prompt, input and schema it would send, and sends those to every
@@ -51,6 +53,8 @@ node --env-file=.env bench/run.ts judge --tag late-scratch    # only cases tagge
 node bench/run.ts judge --dry                                 # how many calls, spending nothing
 node --env-file=.env bench/run.ts advice                      # web search off for OpenRouter rows
 node --env-file=.env bench/run.ts advice --web                # OpenRouter rows get OpenRouter's web plugin
+node bench/run.ts research-case --week 10                     # who the research covers, ESPN's statuses fresh (free, no cookie)
+node --env-file=.env bench/run.ts research                    # every model, every tool, the owner's question
 node bench/run.ts report bench/results/judge-....jsonl        # re-score a run (after grading more cases)
 node bench/review.ts export bench/results/advice-....jsonl    # blind review sheet for the advice
 node bench/review.ts tally  bench/results/advice-...-review.csv
@@ -135,6 +139,55 @@ game-day doubt (Odunze, ruled out at T-5 after being active, is the anchor), B p
 it, C carry misleading items (last week's "inactive" showing on this week's game day). The
 prompt is the bench's own (`lib/scratch.ts`); when the feature is built, capture its real request
 instead, as the Judge's is.
+
+## The injury bench (is his season over?)
+
+A draft of a judgment the app doesn't make yet. WaiverBot may drop a hurt player only when his
+season is over (owner, Nov 7), and how to know it is the AI's confidence, not which site said it
+(Nov 8: "Let's go by AI confidence... Team site is a wild benchmark to use for the truth"). Each
+case is a real injury from a past season, asked on the Tuesday after it (waiver day) and sometimes
+once more, from the news as it was published by then. Every model gives its probability that the
+player plays no more regular-season games through week 17, and its guess at the week he's back.
+
+```
+node bench/run.ts season-check                                   # every case against its ESPN game log (free)
+node --env-file=.env.local bench/run.ts season --models "opus-5.5,gpt-6.1-sol"
+node --env-file=.env.local bench/run.ts season --names hidden    # only the run a model can't remember
+```
+
+| Column | Means |
+|---|---|
+| **Came back, but it was sure he was done** | Reached 0.95 (the owner's "wild confidence"), or 0.8, and he played again by week 17. RosterBots would have dropped a player who came back. The worst outcome. |
+| **Season over, and it was sure** | He didn't play again, and it reached the bar. |
+| Brier | Mean squared error of every answer against what happened. Always answering 0.5 scores 0.25. |
+| Calibration | Every model's hidden-name answers by how sure they were, and how often the season really was over. 0.95 should mean about 95%. |
+| Names | Real, or hidden behind Player A / Team A, coaches and dates taken out, times shown as "3 days before now". |
+
+Cases (`bench/cases/season/*.json`, `SeasonCase` in `lib/types.ts`): group A didn't play again by
+week 17, group B did. `season-check` must agree with every case's `backWeek` before a run means
+anything.
+
+## The shared research bench (what do I need to know this week?)
+
+A draft of a job that isn't built (owner, Nov 7): one research run a few times a week, for
+everyone, instead of every team's Advisor searching on its own. Every model gets the owner's
+question word for word, "Tell me what I need to know about week 10, please?", and every player
+on the RosterBots rosters and free-agent lists, and returns a brief: facts labeled confirmed
+(the team or league, a national newsroom such as ESPN, or the same fact on two or more sites),
+reported (one other source) or speculation (a take, not a fact: rankings, start-or-sit calls,
+who to add), each with its sources, plus a summary of at most 10 lines (owner, Nov 8). Every tool its provider offers, no search cap,
+medium effort for all; Grok is told to search X.
+
+`research-case --week N` builds the case from `cases/advice-live/`, every player once, with
+status, % rostered and the week's projection read from ESPN's public player data (no league,
+no cookie). Build it right before the run: a brief is only as fresh as the statuses it starts from.
+
+Code checks each fact the way the app would have to before acting on it: the id is one we sent
+and the words name him (Roster Advice's own check), "confirmed" is backed by a team, league or
+national-newsroom page or by two different sites, every fact
+but a bye cites a page, and a bye matches ESPN's schedule. Coverage is counted: the listed
+players ESPN shows hurt that a fact covers, and the week's bye teams the brief names. Whether
+the facts are true, and are the ones that matter, is yours to read in the run-by-run section.
 
 ## Cases
 

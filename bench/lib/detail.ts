@@ -2,12 +2,12 @@
 // tools did, reasoning, any failures, and the final output). Pure: records in, markdown out.
 
 import type { AdviceInput, AdvicePlayer } from "@rosterbots/core";
-import type { AdviceCase, AdviceRecord, Trace } from "./types.ts";
+import type { AdviceCase, AdviceRecord, Trace, Usage } from "./types.ts";
 
 const REASONING_CHARS = 1800;
 const CITED = 8;
 
-const host = (url: string): string => {
+export const host = (url: string): string => {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
   } catch {
@@ -15,7 +15,7 @@ const host = (url: string): string => {
   }
 };
 
-const cut = (s: string, n: number): string => (s.length > n ? `${s.slice(0, n - 1)}… (${s.length.toLocaleString()} characters in all; full text in the results file)` : s);
+export const cut = (s: string, n: number): string => (s.length > n ? `${s.slice(0, n - 1)}… (${s.length.toLocaleString()} characters in all; full text in the results file)` : s);
 
 function who(input: AdviceInput): (id: string | undefined) => string {
   const all = new Map<string, { p: AdvicePlayer; free: boolean }>();
@@ -32,7 +32,7 @@ function who(input: AdviceInput): (id: string | undefined) => string {
   };
 }
 
-function toolLines(t: Trace | undefined): string[] {
+export function toolLines(t: Trace | undefined): string[] {
   if (!t) return ["- Not recorded."];
   const out: string[] = [];
   // Claude's newer web search filters its results by running code: one line for all of it.
@@ -53,7 +53,8 @@ function toolLines(t: Trace | undefined): string[] {
   return out.length ? out : ["- None."];
 }
 
-function summaryLine(r: AdviceRecord): string {
+/** One run's time, cost, searches and pages read, for any job with tools. */
+export function runLine(r: Usage & { latencyMs: number; trace?: Trace }): string {
   const secs = r.latencyMs / 1000;
   const parts = [
     // Speed is reported, not judged: advice runs on a schedule (owner, Nov 7: "kill the 100 second rule").
@@ -78,7 +79,7 @@ export function adviceDetails(cases: AdviceCase[], records: AdviceRecord[]): str
     const models = [...new Set(mine.map((r) => r.model))];
     for (const model of models) {
       for (const r of mine.filter((x) => x.model === model).sort((a, b) => a.rep - b.rep)) {
-        lines.push(`#### ${model}, run ${r.rep}`, "", summaryLine(r), "");
+        lines.push(`#### ${model}, run ${r.rep}`, "", runLine(r), "");
         lines.push("**Tools**", "", ...toolLines(r.trace), "");
         const cited = r.trace?.citations ?? [];
         const read = r.trace?.tools.flatMap((t) => t.results ?? []) ?? [];

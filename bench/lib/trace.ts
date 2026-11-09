@@ -9,12 +9,12 @@ import type { ToolUse, Trace } from "./types.ts";
  * added to production's system prompt, which caps searches. Grok is told to search X
  * (owner: "specifically tell Grok to use its X tools"); only xAI's models can.
  */
-export function allToolsNote(xSearch: boolean): string {
+export function allToolsNote(xSearch: boolean, report = "report_advice"): string {
   return [
     "For this run you may use every tool you have, as often as you need: search the web, read whole pages, check today's date.",
     "The search limit above does not apply.",
     ...(xSearch ? ["You can also search X: use X search for the latest injury, practice and depth-chart news from team beat reporters and NFL insiders."] : []),
-    "Still finish by calling report_advice exactly once.",
+    `Still finish by calling ${report} exactly once.`,
   ].join(" ");
 }
 

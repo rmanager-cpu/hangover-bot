@@ -1,0 +1,83 @@
+{
+  "id": "2024-tua-tagovailoa-concussion",
+  "note": "Real. Tua Tagovailoa (MIA) was concussed in Week 2 (Thu Sep 12 vs BUF), his third diagnosed NFL concussion after two in 2022. The IR move was reported on the afternoon of Tue Sep 17, after the first ask; he was cleared Oct 25. His ESPN 2024 game log shows his first game back in Week 8 (Oct 27 vs ARI), so group B, backWeek 8. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Doubts: the IR item is NFL.com's story (19:59Z) citing Rapoport and Garafolo; I did not find their own posts. McDaniel's remark that Tagovailoa would meet outside neurologists 'this week' was made on Tue Sep 24 at a time I could not find (likely after 10 AM ET), so it is left out. McDaniel's Oct 14 'I do expect him to see him playing football in 2024' came after the last ask and is not included.",
+  "tags": ["2024", "group-B", "QB"],
+  "group": "B",
+  "season": 2024,
+  "player": { "name": "Tua Tagovailoa", "position": "QB", "team": "MIA", "espnId": "4241479" },
+  "injury": "concussion, Week 2 (Sep 12), after two diagnosed concussions in 2022",
+  "asks": [
+    { "at": "2024-09-17T14:00:00.000Z", "week": 3 },
+    { "at": "2024-09-24T14:00:00.000Z", "week": 4 }
+  ],
+  "news": [
+    {
+      "at": "2024-09-13T02:34:54.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Tagovailoa was diagnosed with a concussion and ruled out from returning after exiting Thursday's game against the Bills... Tagovailoa's status will be uncertain -- particularly given his history of concussions.",
+      "url": "https://www.cbssports.com/fantasy/football/news/dolphins-tua-tagovailoa-diagnosed-with-concussion/"
+    },
+    {
+      "at": "2024-09-13T04:29:57.000Z",
+      "source": "Mike McDaniel, postgame (via ProFootballTalk)",
+      "words": "\"It's more about getting a proper procedural evaluation tomorrow and taking it one day at a time. The furthest thing from my mind is what is the timeline... I'm just worried about my teammate.\"",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/mike-mcdaniel-tua-tagovailoa-will-get-proper-evaluation-on-friday-and-well-take-it-one-day-at-a-time"
+    },
+    {
+      "at": "2024-09-13T15:10:56.000Z",
+      "source": "Mike McDaniel, press conference (via ProFootballTalk)",
+      "words": "\"If I'm a betting man ... I don't see how he would play the next game.\" Asked whether Tagovailoa could consider retirement: \"I think it would be so wrong of me to even sniff that subject.\"",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/mike-mcdaniel-bringing-up-tua-tagovailoas-future-is-not-in-his-best-interest"
+    },
+    {
+      "at": "2024-09-15T09:16:15.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Dolphins quarterback Tua Tagovailoa, who suffered another concussion during his team's Thursday night game against Buffalo, is scheduled to meet early this week with neurologists, per league sources.",
+      "url": "https://x.com/AdamSchefter/status/1835246240633696512"
+    },
+    {
+      "at": "2024-09-15T13:38:27.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#Dolphins QB Tua Tagovailoa has no plans to retire, sources say. He's already begun seeing concussion specialists... but there is no timeline to return. Tua will be back when he and his doctors deem him healthy and ready.",
+      "url": "https://x.com/RapSheet/status/1835312223889104932"
+    },
+    {
+      "at": "2024-09-16T18:57:51.000Z",
+      "source": "Mike McDaniel, press conference (via ProFootballTalk)",
+      "words": "On injured reserve: \"Not enough information quite yet. That's gonna be driven by medical experts.\" McDaniel said Tagovailoa is \"doing well today\" and was \"smiling with teammates\" at the facility.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/mike-mcdaniel-not-enough-information-to-decide-on-ir-for-tua-tagovailoa"
+    },
+    {
+      "at": "2024-09-17T19:59:18.000Z",
+      "source": "NFL.com (citing Ian Rapoport and Mike Garafolo, NFL Network)",
+      "words": "The Miami Dolphins are placing Tagovailoa on injured reserve... to give Tagovailoa ample time to progress through the stages of league's concussion protocol and meet with outside neurologists. The earliest he could return is Week 8.",
+      "url": "https://www.nfl.com/news/dolphins-placing-qb-tua-tagovailoa-concussion-on-injured-reserve"
+    },
+    {
+      "at": "2024-09-18T17:38:45.000Z",
+      "source": "Mike McDaniel, press conference (via ProFootballTalk)",
+      "words": "\"The great thing about IR is, for a month's time, there's no timelines.\" McDaniel said Tagovailoa did not fight the decision and is focused on getting healthy.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/mike-mcdaniel-on-putting-tua-tagovailoa-on-ir-great-to-have-month-without-timelines"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 8,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4241479/type/nfl/year/2024",
+  "aliases": {
+    "Dolphins": "Team A",
+    "Miami": "Team A",
+    "Miami Dolphins": "Team A",
+    "Fins": "Team A",
+    "Mike McDaniel": "the head coach",
+    "McDaniel": "the head coach",
+    "Chris Grier": "the GM",
+    "Grier": "the GM",
+    "Hard Rock Stadium": "the stadium",
+    "Bills": "Team B",
+    "Buffalo": "Team B",
+    "Buffalo Bills": "Team B",
+    "Sean McDermott": "the opposing coach",
+    "Damar Hamlin": "an opposing safety",
+    "Hamlin": "the safety"
+  }
+}

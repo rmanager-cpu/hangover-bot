@@ -1,0 +1,103 @@
+{
+  "id": "2022-cooper-kupp-ankle",
+  "note": "Real. Cooper Kupp (LAR) sprained his right ankle (high ankle sprain) early in the fourth quarter vs ARI, Week 10 (Nov 13, 2022); tightrope surgery Nov 16 and IR. His 2022 ESPN game log (JSON endpoint) ends at Week 10 vs ARI, with nothing through Week 18, so group A, backWeek null. First ask Tue Nov 15, 10 AM EST: before McVay's Tuesday surgery and IR news (ESPN 12:19 PM ET). Second ask Tue Nov 22: adds the surgery, IR and Schefter's six-to-eight-week report. Times: X posts from their status ids (syndication created_at); ESPN from datePublished; FantasyPros from the time it shows (EST), converted. Doubts: the McVay postgame quote is from ESPN's story first published 8:50 PM ET Nov 13; the presser itself was earlier, time not found. Rodrigue's 'avoided a worst-case scenario' and FantasyPros' 'won't be season-ending' are hopeful items that turned out wrong about the season, kept on purpose. I did not use PFT for 2022 times: its 2022 metadata carries Eastern time mislabeled as Z.",
+  "tags": [
+    "2022",
+    "group-A",
+    "WR"
+  ],
+  "group": "A",
+  "season": 2022,
+  "player": {
+    "name": "Cooper Kupp",
+    "position": "WR",
+    "team": "LAR",
+    "espnId": "2977187"
+  },
+  "injury": "right ankle, Week 10 (Nov 13)",
+  "asks": [
+    {
+      "at": "2022-11-15T15:00:00.000Z",
+      "week": 11
+    },
+    {
+      "at": "2022-11-22T15:00:00.000Z",
+      "week": 12
+    }
+  ],
+  "news": [
+    {
+      "at": "2022-11-14T01:50:00.000Z",
+      "source": "Sean McVay, postgame (ESPN, Sarah Barshop)",
+      "words": "McVay said he didn't have an update on the ankle injury Kupp suffered Sunday but noted, \"I just know it didn't look good. It didn't sound good.\"",
+      "url": "https://www.espn.com/nfl/story/_/id/35023166/rams-cooper-kupp-injures-ankle-look-good-sean-mcvay-says"
+    },
+    {
+      "at": "2022-11-14T02:19:22.000Z",
+      "source": "Jourdan Rodrigue, The Athletic, on X",
+      "words": "Multiple sources said that after initial testing on Cooper Kupp's ankle, he appears to have avoided a worst-case scenario with the injury. Important to remember, though, that he'll go through more testing in the coming days",
+      "url": "https://x.com/JourdanRodrigue/status/1591979068949307392"
+    },
+    {
+      "at": "2022-11-15T00:54:36.000Z",
+      "source": "Jourdan Rodrigue, The Athletic, on X",
+      "words": "Kupp's initial X-rays were negative so more likely looking at a high ankle sprain instead of serious fracture or break... Kupp will miss time; what is still being determined is how much.",
+      "url": "https://x.com/JourdanRodrigue/status/1592320126669697024"
+    },
+    {
+      "at": "2022-11-15T01:04:17.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Rams' WR Cooper Kupp suffered a high ankle sprain Sunday vs. the Cardinals, per one source. Another familiar with his prognosis said it \"doesn't sound good.\"",
+      "url": "https://x.com/AdamSchefter/status/1592322560573571077"
+    },
+    {
+      "at": "2022-11-15T01:07:00.000Z",
+      "source": "FantasyPros (citing Adam Schefter and Jourdan Rodrigue)",
+      "words": "Kupp suffered a high-ankle sprain... He will receive further testing to determine the extent of the injury. A high-ankle sprain would take Kupp out for multiple weeks most likely, but it won't be season-ending.",
+      "url": "https://www.fantasypros.com/nfl/news/380613/cooper-kupp-suffers-high-ankle-sprain-negative-x-rays.php"
+    },
+    {
+      "at": "2022-11-15T17:19:00.000Z",
+      "source": "Sean McVay, press conference (ESPN, Sarah Barshop)",
+      "words": "Kupp will have ankle surgery Wednesday and be placed on injured reserve... McVay did not rule the receiver out for the rest of the season. The \"tightrope\" procedure typically has a recovery time of five to six weeks.",
+      "url": "https://www.espn.com/nfl/story/_/id/35032570/rams-wr-cooper-kupp-ankle-surgery-go-ir"
+    },
+    {
+      "at": "2022-11-20T09:55:00.000Z",
+      "source": "Adam Schefter, ESPN",
+      "words": "Kupp is expected to miss six to eight weeks after undergoing surgery this past week for a high ankle sprain... if Los Angeles' struggles continue, Kupp would not be likely to play again until the 2023 season.",
+      "url": "https://www.espn.com/nfl/story/_/id/35063005/sources-rams-star-wr-cooper-kupp-expected-miss-6-8-weeks"
+    },
+    {
+      "at": "2022-11-20T14:21:00.000Z",
+      "source": "FantasyPros (citing Adam Schefter)",
+      "words": "Cooper Kupp is expected to miss six to eight weeks after surgery for a high right ankle sprain... The timeline does not favor a return in 2022 unless the Rams quickly turn around their season.",
+      "url": "https://www.fantasypros.com/nfl/news/381412/cooper-kupp-expected-to-be-out-six-to-eight-weeks.php"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/2977187/type/nfl/year/2022",
+  "aliases": {
+    "Rams": "Team A",
+    "Los Angeles": "Team A",
+    "Los Angeles Rams": "Team A",
+    "Rams Los Angeles": "Team A",
+    "L.A.": "Team A",
+    "Sean McVay": "the head coach",
+    "McVay": "the head coach",
+    "Les Snead": "the GM",
+    "Snead": "the GM",
+    "SoFi Stadium": "the stadium",
+    "Cardinals": "Team B",
+    "Arizona": "Team B",
+    "Arizona Cardinals": "Team B",
+    "Cardinals Arizona": "Team B",
+    "ARI": "Team B",
+    "Kliff Kingsbury": "the opposing head coach",
+    "Kingsbury": "the opposing head coach",
+    "Jourdan Rodrigue": "a team beat reporter",
+    "Sarah Barshop": "a team beat reporter",
+    "John Wolford": "the backup QB"
+  }
+}

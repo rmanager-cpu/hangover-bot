@@ -1,0 +1,56 @@
+{
+  "id": "2025-tucker-kraft-knee",
+  "note": "Real. Tucker Kraft (GB TE) was carted off with a right knee injury in the third quarter of the Week 9 loss to Carolina (Nov 2, 2025, 1 PM ET). Rapoport reported that night the fear was a torn ACL; Monday's MRI confirmed it (Rapoport, Schefter, Fowler), and ESPN wrote that his season was over. His ESPN 2025 game log ends at Week 9: group A, backWeek null. One ask only: nothing later changed the picture before he was done. Times: PFT's parse.ly time (21:43Z, Josh Alper), NFL.com's datePublished (16:53Z), the CBS page timestamp of the RotoWire blurb, and ESPN's datePublished (17:32Z); ESPN's story may have been updated later the same day with LaFleur's Monday quotes, so I quote only its lead. The injury field says torn ACL and not season-ending, since the team itself had not said 'season' by the ask as far as I found.",
+  "tags": ["2025", "group-A", "TE"],
+  "group": "A",
+  "season": 2025,
+  "player": { "name": "Tucker Kraft", "position": "TE", "team": "GB", "espnId": "4572680" },
+  "injury": "torn ACL, right knee, Week 9 (Nov 2)",
+  "asks": [
+    { "at": "2025-11-04T15:00:00.000Z", "week": 10 }
+  ],
+  "news": [
+    {
+      "at": "2025-11-02T21:43:00.000Z",
+      "source": "ProFootballTalk (Matt LaFleur via Mike Garafolo; Ian Rapoport, NFL Network)",
+      "words": "Kraft was carted off with a knee injury in the third quarter. LaFleur said Kraft's injury doesn't look good: \"It's going to be tough.\" Rapoport reports a torn ACL is the concern as Kraft goes for further tests.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/matt-lafleur-tucker-krafts-knee-injury-doesnt-look-good"
+    },
+    {
+      "at": "2025-11-03T16:53:07.000Z",
+      "source": "NFL.com (citing Ian Rapoport, NFL Network)",
+      "words": "An MRI confirmed that Kraft suffered a torn ACL in the Green Bay Packers' loss to the Carolina Panthers as initially feared, NFL Network Insider Ian Rapoport reported on Monday.",
+      "url": "https://www.nfl.com/news/packers-te-tucker-kraft-to-miss-remainder-of-season-with-torn-acl"
+    },
+    {
+      "at": "2025-11-03T16:54:56.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Kraft is slated to miss the remainder of the season after tests on his right knee confirmed that he suffered an ACL tear. The Packers haven't revealed whether he sustained any additional ligament damage.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-tucker-kraft-out-for-season-with-acl-tear/"
+    },
+    {
+      "at": "2025-11-03T17:32:58.000Z",
+      "source": "Rob Demovsky, ESPN (sources: tests confirm torn ACL)",
+      "words": "Tucker Kraft's breakout season with the Green Bay Packers is over.",
+      "url": "https://www.espn.com/nfl/story/_/id/46834117/packers-te-tucker-kraft-torn-acl-return-unclear"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4572680/type/nfl/year/2025",
+  "aliases": {
+    "Packers": "Team A",
+    "Green Bay": "Team A",
+    "Green Bay Packers": "Team A",
+    "Matt LaFleur": "the head coach",
+    "LaFleur": "the head coach",
+    "Brian Gutekunst": "the GM",
+    "Gutekunst": "the GM",
+    "Lambeau Field": "the stadium",
+    "Tuck": "Player A",
+    "Panthers": "Team B",
+    "Carolina": "Team B",
+    "Carolina Panthers": "Team B",
+    "CAR": "Team B"
+  }
+}

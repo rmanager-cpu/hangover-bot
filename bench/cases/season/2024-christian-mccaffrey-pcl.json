@@ -1,0 +1,89 @@
+{
+  "id": "2024-christian-mccaffrey-pcl",
+  "note": "Real. Christian McCaffrey (SF) hurt his knee (PCL) in the second quarter at Buffalo, Week 13 (Sunday night, Dec 1, 2024). Shanahan called it potentially season-ending after the game; on Monday he said IR, no surgery, at least six weeks. His 2024 ESPN game log (JSON endpoint) ends with Week 13 at BUF: no game after it, so group A, backWeek null. The official IR move (49ers.com, Dec 3 22:00Z) came after the ask and is left out. Times come from each page's datePublished metadata. Doubts: Schefter's item is 4for4's dated blurb, not his own post, which I could not open. Wagoner's ESPN story is cited from the ABC7 copy (06:54Z); ESPN's original was probably a little earlier. The two RotoWire blurbs show a later dateModified (Dec 2 20:00Z and Dec 3 20:44Z), so their wording may have been edited after publishing. NFL.com says left knee and ESPN says right knee, so the injury line names no side.",
+  "tags": [
+    "2024",
+    "group-A",
+    "RB"
+  ],
+  "group": "A",
+  "season": 2024,
+  "player": {
+    "name": "Christian McCaffrey",
+    "position": "RB",
+    "team": "SF",
+    "espnId": "3117251"
+  },
+  "injury": "PCL knee injury, Week 13 (Dec 1)",
+  "asks": [
+    {
+      "at": "2024-12-03T15:00:00.000Z",
+      "week": 14
+    }
+  ],
+  "news": [
+    {
+      "at": "2024-12-02T04:33:00.000Z",
+      "source": "Adam Schefter, ESPN (via 4for4)",
+      "words": "49ers head coach Kyle Shanahan said after Sunday's game that running back Christian McCaffrey suffered a potential season-ending PCL injury in his knee.",
+      "url": "https://www.4for4.com/news/shanahan-potential-season-ending-pcl-injury-christian-mccaffrey"
+    },
+    {
+      "at": "2024-12-02T04:35:00.000Z",
+      "source": "Myles Simmons, Pro Football Talk",
+      "words": "Christian McCaffrey may be done for the rest of 2024. Shanahan told reporters in his postgame press conference that McCaffrey suffered a PCL injury that could be season-ending.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/christian-mccaffrey-potentially-out-for-season-with-pcl-injury"
+    },
+    {
+      "at": "2024-12-02T04:39:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Head coach Kyle Shanahan said after Sunday's loss to the Bills that McCaffrey (knee) suffered a PCL injury in the contest that may be season-ending.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-christian-mccaffrey-pcl-injury-could-end-season/"
+    },
+    {
+      "at": "2024-12-02T06:54:00.000Z",
+      "source": "Kyle Shanahan, postgame press conference (Nick Wagoner, ESPN, via ABC7)",
+      "words": "\"I think potentially (it's season-ending). I think PCL is usually a couple weeks, but I'm not exactly sure yet.\" McCaffrey is slated to undergo further testing Monday.",
+      "url": "https://abc7news.com/post/san-francisco-49ers-rb-christian-mccaffrey-injures-pcl-loss-bills-shanahan-describes-potentially-season-ending/15612428/"
+    },
+    {
+      "at": "2024-12-02T21:46:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Head coach Kyle Shanahan said Monday that McCaffrey is headed to injured reserve and is expected to need at least six weeks to recover from the PCL injury.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-christian-mccaffrey-headed-to-ir-out-at-least-six-weeks/"
+    },
+    {
+      "at": "2024-12-02T21:49:00.000Z",
+      "source": "Grant Gordon, NFL.com",
+      "words": "McCaffrey is being placed on injured reserve due to a PCL injury. Shanahan added that it won't require surgery and he will miss at least six weeks. With five weeks left, he would return only for a playoff run.",
+      "url": "https://www.nfl.com/news/niners-placing-christian-mccaffrey-knee-on-injured-reserve-rb-to-miss-at-least-six-weeks"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3117251/type/nfl/year/2024",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "49ers San Francisco": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Levi's Stadium": "the stadium",
+    "ABC7": "a local TV station",
+    "CMC": "Player A",
+    "Run CMC": "Player A",
+    "Bills": "Team B",
+    "Buffalo": "Team B",
+    "Buffalo Bills": "Team B",
+    "Bills Buffalo": "Team B",
+    "BUF": "Team B",
+    "Highmark Stadium": "the stadium",
+    "Orchard Park": "the opponent's city",
+    "Sean McDermott": "the opposing head coach",
+    "McDermott": "the opposing head coach"
+  }
+}

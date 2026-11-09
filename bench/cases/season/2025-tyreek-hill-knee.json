@@ -1,0 +1,76 @@
+{
+  "id": "2025-tyreek-hill-knee",
+  "note": "Real. Tyreek Hill (MIA) dislocated his left knee early in the third quarter against the Jets on Monday Night Football, Week 4 (Sep 29, 2025). By Tuesday morning Schefter reported multiple torn ligaments, including the ACL, with surgery that day. McDaniel confirmed season-ending surgery that afternoon (RotoWire, 18:25Z), after the ask, so it is left out. His 2025 ESPN game log (JSON endpoint) ends with Week 4 vs NYJ: no game after it, so group A, backWeek null. The ask comes about 15 hours after the injury. Times come from each page's datePublished metadata. Doubts: the 12:35Z RotoWire blurb was retitled and modified at 18:12Z, after the ask, so its wording may have changed; the sentence used is the diagnosis itself. I did not open Schefter's own post; his report is cited through SI (11:59Z, never modified) and RotoWire. RotoWire's 03:01Z line that Hill 'will be sidelined for the rest of the season' is the fantasy site's own reading, not the team's.",
+  "tags": [
+    "2025",
+    "group-A",
+    "WR"
+  ],
+  "group": "A",
+  "season": 2025,
+  "player": {
+    "name": "Tyreek Hill",
+    "position": "WR",
+    "team": "MIA",
+    "espnId": "3116406"
+  },
+  "injury": "dislocated left knee, Week 4 (Monday night, Sep 29)",
+  "asks": [
+    {
+      "at": "2025-09-30T14:00:00.000Z",
+      "week": 5
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-30T03:01:00.000Z",
+      "source": "RotoWire via CBS (citing David Furones, South Florida Sun Sentinel)",
+      "words": "Hill dislocated his left knee in the third quarter of Monday's win and was carted off. He'll stay in the hospital overnight. Hill will be sidelined for the rest of the season, with a shift to injured reserve likely.",
+      "url": "https://www.cbssports.com/fantasy/football/news/dolphins-tyreek-hill-diagnosis-confirmed/"
+    },
+    {
+      "at": "2025-09-30T03:12:00.000Z",
+      "source": "Zachary Pereles, CBS Sports (Mike McDaniel, postgame)",
+      "words": "He was carted off the field, quickly ruled out and taken to a local hospital, the team announced. After the game, Mike McDaniel confirmed Hill dislocated his kneecap, as several reports indicated, and Hill will stay overnight.",
+      "url": "https://www.cbssports.com/nfl/news/tyreek-hill-injury-dolphins-wr-carted-off-with-gruesome-knee-injury-vs-jets-on-monday-night-football/"
+    },
+    {
+      "at": "2025-09-30T11:59:00.000Z",
+      "source": "Tim Capurso, Sports Illustrated (citing Adam Schefter, ESPN)",
+      "words": "In addition to dislocating his knee, Hill also tore multiple ligaments in his knee, including his ACL, according to ESPN's Adam Schefter. Hill remains at the hospital and will undergo surgery on Tuesday.",
+      "url": "https://www.si.com/nfl/tyreek-hill-injury-update-knee"
+    },
+    {
+      "at": "2025-09-30T12:35:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Hill was diagnosed with multiple ligament tears, including one to his ACL, after dislocating his left knee. He is slated to undergo surgery Tuesday and faces a lengthy recovery that could extend into the start of next season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/dolphins-tyreek-hill-slated-to-undergo-knee-surgery/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3116406/type/nfl/year/2025",
+  "aliases": {
+    "Dolphins": "Team A",
+    "Miami": "Team A",
+    "Miami Dolphins": "Team A",
+    "Dolphins Miami": "Team A",
+    "Fins": "Team A",
+    "Mike McDaniel": "the head coach",
+    "McDaniel": "the head coach",
+    "Chris Grier": "the GM",
+    "Grier": "the GM",
+    "Hard Rock Stadium": "the stadium",
+    "Miami Gardens": "the team's home city",
+    "South Florida": "the team's home region",
+    "South Florida Sun Sentinel": "a local newspaper",
+    "Cheetah": "Player A",
+    "Jets": "Team B",
+    "New York Jets": "Team B",
+    "Jets New York": "Team B",
+    "NY Jets": "Team B",
+    "Gang Green": "Team B",
+    "NYJ": "Team B",
+    "Aaron Glenn": "the opposing head coach"
+  }
+}

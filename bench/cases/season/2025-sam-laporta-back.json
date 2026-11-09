@@ -1,0 +1,77 @@
+{
+  "id": "2025-sam-laporta-back",
+  "note": "Real. Sam LaPorta (DET TE) played his normal workload in the Week 10 win at Washington (Nov 9, 2025: 5-53), then was a non-participant at practice from Wednesday Nov 12 with a back injury, was ruled out of Week 11 and went on IR Nov 15. On Nov 21 Dan Campbell said he had a back procedure and his chances of returning this season were 'very, very slim'. His ESPN 2025 game log ends at Week 10: group A, backWeek null (your guess of Week 9 was a week early). The first ask is Nov 18, not Nov 11: the injury was not public until the Nov 12 practice report, so a Nov 11 ask would have had no news. Times are CBS page timestamps (RotoWire blurbs, one CBS Sports story) and FantasyPros' article time. The SI (All Lions) story with Campbell's Monday quotes shows only 'Published Nov 17, 2025', so its 17:00Z is a guess, and the article does not date the quotes. I did not open Pelissero's or Birkett's own posts.",
+  "tags": ["2025", "group-A", "TE"],
+  "group": "A",
+  "season": 2025,
+  "player": { "name": "Sam LaPorta", "position": "TE", "team": "DET", "espnId": "4430027" },
+  "injury": "back injury, first reported Nov 12 (after Week 10); ruled out for Week 11 and placed on IR Nov 15",
+  "asks": [
+    { "at": "2025-11-18T15:00:00.000Z", "week": 12 },
+    { "at": "2025-11-25T15:00:00.000Z", "week": 13 }
+  ],
+  "news": [
+    {
+      "at": "2025-11-12T21:23:49.000Z",
+      "source": "RotoWire via CBS",
+      "words": "LaPorta was a non-participant at Wednesday's practice due to a back injury. If he isn't able to participate Thursday or Friday, he could be at risk of missing his first contest of the campaign.",
+      "url": "https://www.cbssports.com/fantasy/football/news/lions-sam-laporta-dnp-due-to-back-injury/"
+    },
+    {
+      "at": "2025-11-13T21:12:59.000Z",
+      "source": "RotoWire via CBS",
+      "words": "LaPorta (back) didn't practice Thursday. He has yet to mix into any drills this week, leaving him just one more chance to do so Friday.",
+      "url": "https://www.cbssports.com/fantasy/football/news/lions-sam-laporta-still-not-practicing-616648/"
+    },
+    {
+      "at": "2025-11-14T20:53:05.000Z",
+      "source": "RotoWire via CBS",
+      "words": "LaPorta (back) has been ruled out for Sunday's game at Philadelphia. LaPorta handled his normal workload in last week's 44-22 win at Washington, but he didn't practice at all this week.",
+      "url": "https://www.cbssports.com/fantasy/football/news/lions-sam-laporta-wont-play-at-philadelphia/"
+    },
+    {
+      "at": "2025-11-15T21:08:11.000Z",
+      "source": "FantasyPros (citing Tom Pelissero, NFL Network)",
+      "words": "Sam LaPorta (back) has been placed on injured reserve by the Detroit Lions. He will now be sidelined for at least the next four games.",
+      "url": "https://www.fantasypros.com/nfl/news/552635/sam-laporta-back-placed-on-injured-reserve.php"
+    },
+    {
+      "at": "2025-11-17T17:00:00.000Z",
+      "source": "Dan Campbell, press conference (SI, All Lions)",
+      "words": "Asked whether LaPorta could return this season: \"Hopeful, but I really don't know.\" \"Obviously, we're gonna hope that this thing calms down, and after those four games we can get him back.\"",
+      "url": "https://www.si.com/nfl/lions/onsi/news/lions-hopeful-for-star-te-to-return-in-2025-season"
+    },
+    {
+      "at": "2025-11-21T17:04:42.000Z",
+      "source": "RotoWire via CBS (Dan Campbell, via Dave Birkett, Detroit Free Press)",
+      "words": "LaPorta (back) has undergone surgery, and head coach Dan Campbell described LaPorta's chances of returning this season as \"very, very slim\" Friday. Campbell didn't completely shut the door on him returning.",
+      "url": "https://www.cbssports.com/fantasy/football/news/lions-sam-laporta-slim-chance-of-return-this-season/"
+    },
+    {
+      "at": "2025-11-21T17:36:22.000Z",
+      "source": "CBS Sports (Dan Campbell, Friday press conference)",
+      "words": "Campbell told reporters Friday that LaPorta \"had a procedure,\" and that he's going \"to be out for awhile.\" He did say that the procedure went well.",
+      "url": "https://www.cbssports.com/nfl/news/sam-laporta-injury-updates-lions-te-2025/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4430027/type/nfl/year/2025",
+  "aliases": {
+    "Lions": "Team A",
+    "Detroit": "Team A",
+    "Detroit Lions": "Team A",
+    "Dan Campbell": "the head coach",
+    "Campbell": "the head coach",
+    "Brad Holmes": "the GM",
+    "Holmes": "the GM",
+    "Ford Field": "the stadium",
+    "Commanders": "Team B",
+    "Washington": "Team B",
+    "Washington Commanders": "Team B",
+    "WSH": "Team B",
+    "Eagles": "Team C",
+    "Philadelphia": "Team C",
+    "Philadelphia Eagles": "Team C"
+  }
+}

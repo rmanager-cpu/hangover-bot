@@ -4,22 +4,28 @@
 //   node bench/run.ts advice  [--models a,b] [--repeats 2] [--cases dir] [--examples] [--web] [--tools all] [--concurrency 2] [--dry]
 //   node bench/run.ts replay  [--models a,b] [--repeats 2] [--cases dir] [--examples] [--tag t] [--concurrency 4] [--dry]
 //   node bench/run.ts scratch [--models a,b] [--repeats 1] [--cases dir] [--examples] [--names real|hidden|both] [--tag t] [--concurrency 6] [--dry]
+//   node bench/run.ts research-case --week 10 [--season 2026] [--from bench/cases/advice-live]   (who the research covers, ESPN's statuses fresh)
+//   node bench/run.ts research [--models a,b] [--repeats 1] [--cases dir] [--examples] [--concurrency 4] [--dry]
+//   node bench/run.ts season  [--models a,b] [--repeats 1] [--cases dir] [--names real|hidden|both] [--tag t] [--concurrency 8] [--dry]
+//   node bench/run.ts season-check [--cases dir]                  (every injury case against its ESPN game log; free, no cookie)
 //   node bench/run.ts report  bench/results/judge-....jsonl     (re-score a run, e.g. after grading more cases)
 //   node bench/run.ts models  [author ...]                       (OpenRouter's current ids, newest first)
 //
 // Keys come from the environment: OPENROUTER_API_KEY, ANTHROPIC_API_KEY. Node loads a .env
 // with `node --env-file=.env bench/run.ts ...`.
 
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { appendRecord, BENCH, loadJson, loadModels, readRecords, stamp } from "./lib/files.ts";
 import { contender, openRouterCatalog, preflight, type Contender } from "./lib/providers.ts";
 import { replay } from "./lib/replay.ts";
 import { asksFor, parseScratch, scratchInput, SCRATCH_SCHEMA, SCRATCH_SYSTEM } from "./lib/scratch.ts";
+import { calibrationTable, espnBackWeek, parseSeason, SEASON_FOOTER, SEASON_SCHEMA, SEASON_SYSTEM, seasonCaseProblems, seasonCaseTable, seasonInput, seasonTable, summarizeSeason } from "./lib/season.ts";
 import { adviceDetails } from "./lib/detail.ts";
+import { BRIEF_TOOL, buildResearchCase, parseBrief, usableBrief, RESEARCH_FOOTER, RESEARCH_SYSTEM, researchDetails, researchTable, researchUser, summarizeResearch } from "./lib/research.ts";
 import { adviceTable, CONFIDENCE_FLOOR, judgeTable, replayTable, scratchCaseTable, scratchTable, summarizeAdvice, summarizeJudge, summarizeReplay, summarizeScratch, ungraded, WILD } from "./lib/score.ts";
-import type { AdviceCase, AdviceRecord, Call, JudgeCase, JudgeRecord, ModelEntry, ReplayCase, ReplayRecord, RunRecord, ScratchCase, ScratchRecord } from "./lib/types.ts";
+import type { AdviceCase, AdviceRecord, Call, JudgeCase, JudgeRecord, ModelEntry, ReplayCase, ReplayRecord, ResearchCase, ResearchRecord, RunRecord, ScratchCase, ScratchRecord, SeasonCase, SeasonRecord } from "./lib/types.ts";
 import type { AiChoice, JudgeInput } from "@rosterbots/core";
 
 const { values: opts, positionals } = parseArgs({
@@ -37,6 +43,9 @@ const { values: opts, positionals } = parseArgs({
     floor: { type: "string" },
     names: { type: "string" },
     out: { type: "string" },
+    week: { type: "string" },
+    season: { type: "string" },
+    from: { type: "string" },
     dry: { type: "boolean", default: false },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -315,14 +324,162 @@ async function scratch(): Promise<void> {
   save(path, `Scratch bench, ${new Date().toLocaleString()}`, scratchReport(cases, records), SCRATCH_FOOTER);
 }
 
+/** The injury cases that pass their own checks; the rest are named and left out. */
+function seasonCases(): SeasonCase[] {
+  const all = loadJson<SeasonCase>(opts.cases ?? join(BENCH, "cases", "season")).filter((c) => (opts.examples || !c.example) && (!opts.tag || c.tags?.includes(opts.tag)));
+  return all.filter((c) => {
+    const problems = seasonCaseProblems(c);
+    for (const p of problems) log(`left out ${c.id}: ${p}`);
+    return !problems.length;
+  });
+}
+
+async function seasonCheck(): Promise<void> {
+  const cases = seasonCases();
+  let bad = 0;
+  for (const c of cases) {
+    const espn = await espnBackWeek(c);
+    const ok = espn !== undefined && espn === c.backWeek;
+    if (!ok) bad++;
+    log(`${ok ? "ok  " : "BAD "} ${c.id}: case says ${c.backWeek ?? "not back"}, ESPN's game log says ${espn === undefined ? "nothing readable" : (espn ?? "not back")}`);
+  }
+  log(`${cases.length - bad} of ${cases.length} match their game logs.`);
+  if (bad) process.exitCode = 1;
+}
+
+async function season(): Promise<void> {
+  const repeats = Number(opts.repeats ?? 1);
+  const cases = seasonCases();
+  const modes = opts.names === "real" ? [false] : opts.names === "hidden" ? [true] : [false, true];
+  const models = pickModels(loadModels());
+  const asks = cases.reduce((n, c) => n + c.asks.length, 0);
+  const over = cases.filter((c) => c.backWeek === null).length;
+  log(`${cases.length} case(s) (${over} season over, ${cases.length - over} came back), ${asks} ask(s) × ${modes.length} name mode(s) × ${models.length} model(s) × ${repeats} = ${asks * modes.length * models.length * repeats} calls.`);
+  if (!cases.length) return log("Nothing to run. Add cases to bench/cases/season.");
+  log(`Models: ${models.map((m) => m.name).join(", ")}`);
+  if (opts.dry) return;
+  const contenders = await ready(models);
+  const path = opts.out ?? join(BENCH, "results", `season-${stamp()}.jsonl`);
+  let done = 0;
+  const tasks: (() => Promise<SeasonRecord>)[] = [];
+  for (let rep = 1; rep <= repeats; rep++)
+    for (const c of cases)
+      for (const hidden of modes)
+        for (const ask of c.asks)
+          for (const k of contenders)
+            tasks.push(async () => {
+              const call = await k.ask({ system: SEASON_SYSTEM, user: JSON.stringify(seasonInput(c, ask, hidden)), schema: SEASON_SCHEMA });
+              const a = parseSeason(call.answer);
+              const r: SeasonRecord = {
+                job: "season",
+                model: k.entry.name,
+                caseId: c.id,
+                rep,
+                at: new Date().toISOString(),
+                latencyMs: call.latencyMs,
+                ...call.usage,
+                hidden,
+                asked: ask.at,
+                ...(a ? { over: a.over, backWeek: a.backWeek, reason: a.reason } : {}),
+                ...(a ? {} : { error: call.error ?? "unparseable answer" }),
+              };
+              appendRecord(path, r);
+              progress(++done, tasks.length);
+              return r;
+            });
+  const records = await pool(tasks, Number(opts.concurrency ?? 8));
+  if (process.stderr.isTTY) log("");
+  save(path, `Injury bench, ${new Date().toLocaleString()}`, seasonReport(cases, records), SEASON_FOOTER);
+}
+
+const seasonReport = (cases: SeasonCase[], records: SeasonRecord[]): string =>
+  [
+    seasonTable(summarizeSeason(cases, records)),
+    "",
+    "### Calibration, every model's answers together (names hidden)",
+    "",
+    calibrationTable(cases, records, true),
+    "",
+    "### Case by case: each model's last probability his season was over (real names · hidden)",
+    "",
+    seasonCaseTable(cases, records),
+  ].join("\n");
+
 const scratchReport = (cases: ScratchCase[], records: ScratchRecord[]): string =>
   [scratchTable(summarizeScratch(cases, records)), "", "### Case by case: when each model first reached 0.95 (real names · hidden)", "", scratchCaseTable(cases, records)].join("\n");
+
+/** The owner's question for the shared research bench (Nov 7), word for word. */
+const RESEARCH_QUESTION = (week: number) => `Tell me what I need to know about week ${week}, please?`;
+
+async function researchCase(): Promise<void> {
+  const week = Number(opts.week);
+  if (!Number.isInteger(week) || week < 1) throw new Error("Which week? node bench/run.ts research-case --week 10");
+  const season = Number(opts.season ?? 2026);
+  const from = opts.from ?? join(BENCH, "cases", "advice-live");
+  const inputs = loadJson<AdviceCase>(from).filter((c) => !c.example).map((c) => c.input);
+  if (!inputs.length) throw new Error(`No advice cases in ${from} to take the players from.`);
+  const c = await buildResearchCase(inputs, season, week, RESEARCH_QUESTION(week));
+  const dir = join(BENCH, "cases", "research");
+  mkdirSync(dir, { recursive: true });
+  const path = opts.out ?? join(dir, `${c.id}.json`);
+  writeFileSync(path, JSON.stringify(c, null, 2) + "\n");
+  log(`${c.targets.length} players, ${c.note}`);
+  log(`Case: ${path}`);
+}
+
+async function research(): Promise<void> {
+  const repeats = Number(opts.repeats ?? 1);
+  const dir = opts.cases ?? join(BENCH, "cases", "research");
+  const cases = loadJson<ResearchCase>(dir).filter((c) => opts.examples || !c.example);
+  const models = pickModels(loadModels());
+  log(`${cases.length} case(s) × ${models.length} model(s) × ${repeats} = ${cases.length * models.length * repeats} runs, every tool each provider offers (search, fetch, date; X search for Grok), no search cap.`);
+  if (!cases.length) return log("Nothing to run. Build a case first: node bench/run.ts research-case --week 10");
+  log(`Models: ${models.map((m) => m.name).join(", ")}`);
+  if (opts.dry) return;
+  const contenders = await ready(models);
+  const path = opts.out ?? join(BENCH, "results", `research-${stamp()}.jsonl`);
+  let done = 0;
+  const tasks: (() => Promise<ResearchRecord>)[] = [];
+  for (let rep = 1; rep <= repeats; rep++)
+    for (const c of cases)
+      for (const k of contenders)
+        tasks.push(async () => {
+          const call = await k.research({ system: RESEARCH_SYSTEM(c.week), user: researchUser(c, new Date().toISOString()), report: BRIEF_TOOL, accept: usableBrief });
+          const brief = parseBrief(call.answer);
+          // Facts that didn't parse are kept as sent, so what went wrong can be read.
+          if (brief?.malformed && call.trace && !call.trace.rawReport) call.trace.rawReport = JSON.stringify(call.answer).slice(0, 40000);
+          const r: ResearchRecord = {
+            job: "research",
+            model: k.entry.name,
+            caseId: c.id,
+            rep,
+            at: new Date().toISOString(),
+            latencyMs: call.latencyMs,
+            ...call.usage,
+            ...(brief ? { brief } : {}),
+            ...(call.error ? { error: call.error } : brief ? {} : { error: "no brief" }),
+            ...(call.trace ? { trace: call.trace } : {}),
+          };
+          appendRecord(path, r);
+          progress(++done, tasks.length);
+          return r;
+        });
+  const records = await pool(tasks, Number(opts.concurrency ?? 4));
+  if (process.stderr.isTTY) log("");
+  save(path, `Shared research bench, ${new Date().toLocaleString()}`, researchTable(summarizeResearch(cases, records)), [...RESEARCH_FOOTER, "", researchDetails(cases, records)]);
+}
 
 function report(): void {
   const path = positionals[1];
   if (!path) throw new Error("Which results file? node bench/run.ts report bench/results/judge-....jsonl");
   const records: RunRecord[] = readRecords(path);
-  if (records[0]?.job === "scratch") {
+  if (records[0]?.job === "season") {
+    const cases = loadJson<SeasonCase>(opts.cases ?? join(BENCH, "cases", "season"));
+    save(path, "Injury bench (re-scored)", seasonReport(cases, records as SeasonRecord[]), SEASON_FOOTER);
+  } else if (records[0]?.job === "research") {
+    const cases = loadJson<ResearchCase>(opts.cases ?? join(BENCH, "cases", "research"));
+    save(path, "Shared research bench (re-scored)", researchTable(summarizeResearch(cases, records as ResearchRecord[])), [...RESEARCH_FOOTER, "", researchDetails(cases, records as ResearchRecord[])]);
+  } else if (records[0]?.job === "scratch") {
     const cases = loadJson<ScratchCase>(opts.cases ?? join(BENCH, "cases", "scratch"));
     save(path, "Scratch bench (re-scored)", scratchReport(cases, records as ScratchRecord[]), SCRATCH_FOOTER);
   } else if (records[0]?.job === "replay") {
@@ -355,7 +512,7 @@ async function models(): Promise<void> {
   }
 }
 
-const HELP = `node bench/run.ts <judge|advice|replay|scratch|report|models> [options]   (details in bench/README.md)`;
+const HELP = `node bench/run.ts <judge|advice|replay|scratch|research-case|research|season|season-check|report|models> [options]   (details in bench/README.md)`;
 
 try {
   if (opts.help || !command) console.log(HELP);
@@ -363,7 +520,11 @@ try {
   else if (command === "advice") await advice();
   else if (command === "replay") await replayCmd();
   else if (command === "scratch") await scratch();
+  else if (command === "research-case") await researchCase();
+  else if (command === "research") await research();
   else if (command === "report") report();
+  else if (command === "season") await season();
+  else if (command === "season-check") await seasonCheck();
   else if (command === "models") await models();
   else throw new Error(`Unknown command "${command}". ${HELP}`);
 } catch (e) {

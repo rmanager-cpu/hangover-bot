@@ -1,0 +1,92 @@
+{
+  "id": "2025-george-kittle-hamstring",
+  "note": "Real. George Kittle (SF) hurt his hamstring in the first half at Seattle, Week 1 (Sep 7, 2025). Shanahan said 'a few weeks' on Monday. IR on Tuesday, Sep 9, after the first ask. On Oct 3 Shanahan said Week 7 was more likely than Week 6. His 2025 ESPN game log (JSON endpoint) has Week 1, then nothing until Week 7 vs ATL (Oct 19, 0 catches on 2 targets; RotoWire's Oct 19 blurb confirms he played). So group B, backWeek 7. Second ask: the Tuesday after Shanahan's Week 7 remark. Times come from each page's datePublished metadata. Doubts: Rapoport's 3-5 week tweet and Schefter's Oct 3 post are cited from NBC Sports Bay Area (Sep 8, 23:22Z) and iHeart (Oct 3, 19:16Z) because I could not open the X posts. The posts themselves were probably a few hours earlier. The Sep 9 RotoWire blurbs show later dateModified times the same day.",
+  "tags": [
+    "2025",
+    "group-B",
+    "TE"
+  ],
+  "group": "B",
+  "season": 2025,
+  "player": {
+    "name": "George Kittle",
+    "position": "TE",
+    "team": "SF",
+    "espnId": "3040151"
+  },
+  "injury": "hamstring, Week 1 (Sep 7)",
+  "asks": [
+    {
+      "at": "2025-09-09T14:00:00.000Z",
+      "week": 2
+    },
+    {
+      "at": "2025-10-07T14:00:00.000Z",
+      "week": 6
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-07T21:21:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Kittle won't return to Sunday's game at Seattle due to a hamstring injury. He paid a visit to the blue medical tent in the first half before being ruled out.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-out-with-hamstring-injury/"
+    },
+    {
+      "at": "2025-09-08T22:48:00.000Z",
+      "source": "RotoWire via CBS (citing David Lombardi, SF Standard)",
+      "words": "Coach Kyle Shanahan said Monday that Kittle will be out a \"few weeks\" due to the hamstring injury. After an MRI, it's been determined that the tight end will need to miss some time.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-out-a-few-weeks/"
+    },
+    {
+      "at": "2025-09-08T23:22:00.000Z",
+      "source": "NBC Sports Bay Area (Ian Rapoport, NFL Network, and Kyle Shanahan, conference call)",
+      "words": "Kittle \"likely\" is out three to five weeks, Rapoport reported, an IR candidate. Shanahan: \"When they tell me a few weeks, it's always a possibility... it's got to be a four-week injury. I don't think we've decided.\"",
+      "url": "https://www.nbcsportsbayarea.com/nfl/san-francisco-49ers/george-kittle-jauan-jennings-injury/1873160/"
+    },
+    {
+      "at": "2025-09-09T17:13:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "The 49ers are expected to place Kittle (hamstring) on injured reserve within the next few days, which indicates they are preparing for him to miss at least the next four games.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-headed-for-ir/"
+    },
+    {
+      "at": "2025-09-09T20:30:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "The 49ers placed Kittle (hamstring) on injured reserve Tuesday. Kittle will miss at least the next four games before potentially returning to action Week 6.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-george-kittle-move-to-ir-official/"
+    },
+    {
+      "at": "2025-10-03T19:16:00.000Z",
+      "source": "Kyle Shanahan, via Adam Schefter on X (iHeartRadio)",
+      "words": "Shanahan told reporters that Kittle, on IR with a hamstring injury, is more likely to return in Week 7 than next week in Week 6. A return for next Sunday is considered a 'long shot.'",
+      "url": "https://wrno.iheart.com/content/2025-10-03-george-kittles-expected-timeline-for-return-revealed/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 7,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3040151/type/nfl/year/2025",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "49ers San Francisco": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Levi's Stadium": "the stadium",
+    "NBC Sports Bay Area": "a regional sports network",
+    "Bay Area": "the team's home region",
+    "SF Standard": "a local outlet",
+    "Seahawks": "Team B",
+    "Seattle": "Team B",
+    "Seattle Seahawks": "Team B",
+    "Seahawks Seattle": "Team B",
+    "SEA": "Team B",
+    "Lumen Field": "the stadium",
+    "Mike Macdonald": "the opposing head coach",
+    "Macdonald": "the opposing head coach"
+  }
+}

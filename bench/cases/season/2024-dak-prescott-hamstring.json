@@ -1,0 +1,83 @@
+{
+  "id": "2024-dak-prescott-hamstring",
+  "note": "Real. Dak Prescott (DAL) partially tore his right hamstring tendon off the bone (a partial avulsion) in Week 9 (Sun Nov 3 at ATL); after several opinions he had surgery in New York on Wed Nov 13 and was out for the season. His ESPN 2024 game log has no game after Week 9, so group A. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Doubts: on Nov 12 Jerry Jones confirmed the surgery on 105.3 The Fan around 10 AM ET; Jon Machota's post is 14:56Z and Todd Archer's 14:58Z, two to four minutes before the second ask, so Machota's is included. ProFootballTalk's write-up came at 15:11Z, after the ask, and is left out. Schefter's Nov 9 post is cut off in X's embed after 'already believe he needs the'; I quoted only the part before. Left out for length: Sunday's MRI news and Prescott's 'felt something I've never felt' (Nov 3).",
+  "tags": ["2024", "group-A", "QB"],
+  "group": "A",
+  "season": 2024,
+  "player": { "name": "Dak Prescott", "position": "QB", "team": "DAL", "espnId": "2577417" },
+  "injury": "hamstring, Week 9 (Nov 3)",
+  "asks": [
+    { "at": "2024-11-05T15:00:00.000Z", "week": 10 },
+    { "at": "2024-11-12T15:00:00.000Z", "week": 11 }
+  ],
+  "news": [
+    {
+      "at": "2024-11-04T18:50:51.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Prescott is expected to miss multiple weeks with the hamstring injury he suffered in Sunday's loss to the Falcons... The injury is worse than initially feared, Rapoport added, and Prescott will get a second opinion to confirm the diagnosis.",
+      "url": "https://www.cbssports.com/fantasy/football/news/cowboys-dak-prescott-expected-to-miss-multiple-weeks/"
+    },
+    {
+      "at": "2024-11-04T21:51:29.000Z",
+      "source": "RotoWire via CBS (citing Todd Archer, ESPN)",
+      "words": "Coach Mike McCarthy said Monday that Prescott (hamstring) will not play Week 10... The exact timeline of Prescott's recovery remains unclear, and a trip to injured reserve is on the table of possibilities.",
+      "url": "https://www.cbssports.com/fantasy/football/news/cowboys-dak-prescott-ruled-out-for-week-10/"
+    },
+    {
+      "at": "2024-11-05T14:34:22.000Z",
+      "source": "105.3 The Fan (Dallas radio) on X",
+      "words": "Jerry Jones on how long Dak Prescott will be out: \"It's likely we'll IR him.\"",
+      "url": "https://x.com/1053thefan/status/1853808075926299135"
+    },
+    {
+      "at": "2024-11-06T23:00:18.000Z",
+      "source": "Jane Slater, NFL Network, on X",
+      "words": "Sources tell me the initial diagnosis is a partial avulsion of his hamstring tendon which is partially torn off the bone. I'm told it typically takes more than a 4 week recovery.",
+      "url": "https://x.com/SlaterNFL/status/1854297788827542012"
+    },
+    {
+      "at": "2024-11-09T00:45:00.000Z",
+      "source": "RotoWire via CBS (citing Todd Archer, ESPN)",
+      "words": "Jerry Jones: \"He doesn't want surgery. He wants to be on the field and go for it. We'll see how it goes here.\" Stephen Jones: \"I think it's probably no way he can be back in the four-week timeframe.\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/cowboys-dak-prescott-ir-stint-likely/"
+    },
+    {
+      "at": "2024-11-09T20:56:02.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Cowboys QB Dak Prescott is planning to undergo season-ending surgery on his partially torn hamstring, pending the opinion of one final specialist, sources told ESPN. Prescott is flying to New York to meet with the specialist.",
+      "url": "https://x.com/AdamSchefter/status/1855353678145761315"
+    },
+    {
+      "at": "2024-11-11T01:00:27.000Z",
+      "source": "Ed Werder, WFAA, on X",
+      "words": "Dak Prescott confirmed he will be in NY tomorrow for a final medical evaluation... If this specialist recommends surgery, Prescott will have it Wednesday in NY. He said full recovery with surgery is approximately 3 months.",
+      "url": "https://x.com/WerderEdNFL/status/1855777574548389901"
+    },
+    {
+      "at": "2024-11-12T14:56:10.000Z",
+      "source": "Jon Machota, The Athletic, on X",
+      "words": "Cowboys owner Jerry Jones said on @1053thefan that Dak Prescott will have season-ending hamstring surgery tomorrow in New York",
+      "url": "https://x.com/jonmachota/status/1856350279450480849"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/2577417/type/nfl/year/2024",
+  "aliases": {
+    "Cowboys": "Team A",
+    "Dallas": "Team A",
+    "Dallas Cowboys": "Team A",
+    "Mike McCarthy": "the head coach",
+    "McCarthy": "the head coach",
+    "Jerry Jones": "the owner",
+    "Stephen Jones": "the team executive",
+    "AT&T Stadium": "the stadium",
+    "105.3 The Fan": "a local radio station",
+    "@1053thefan": "a local radio station",
+    "Falcons": "Team B",
+    "Atlanta": "Team B",
+    "Atlanta Falcons": "Team B",
+    "Raheem Morris": "the opposing coach",
+    "WFAA": "a local TV station"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "id": "2024-christian-mccaffrey-achilles",
+  "note": "Real. Christian McCaffrey (SF) had a calf strain and Achilles tendinitis from early August 2024, was a surprise inactive in Week 1 (Mon Sep 9) and went on IR on Sat Sep 14; on Sep 30 the coach confirmed the tendinitis was in both legs. His ESPN 2024 game log shows his first game in Week 10 (Nov 10 at TB), so group B, backWeek 10; he then played Weeks 10-13 before a separate knee injury. Doubts: the brief said he went on IR before Week 1, but the IR move was Sep 14, before Week 2, so the first ask is the first Tuesday after the IR move (Sep 17), not the Tuesday before Week 1. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Schefter's remark on The Pat McAfee Show was made on Monday Sep 30 at a time I could not pin down, so its time is that of the CBS Sports article that quoted it (23:31Z). The Shanahan quote at 22:46Z is theScore's, relayed from Schefter. Left out for length: Shanahan's Sep 10 'day-to-day' remarks and his Sep 27 'start hitting the rehab here harder on Monday'.",
+  "tags": ["2024", "group-B", "RB"],
+  "group": "B",
+  "season": 2024,
+  "player": { "name": "Christian McCaffrey", "position": "RB", "team": "SF", "espnId": "3117251" },
+  "injury": "Achilles tendinitis and a calf strain since early August; inactive Week 1 (Sep 9), placed on IR Sep 14",
+  "asks": [
+    { "at": "2024-09-17T14:00:00.000Z", "week": 3 },
+    { "at": "2024-10-01T14:00:00.000Z", "week": 5 }
+  ],
+  "news": [
+    {
+      "at": "2024-09-13T21:00:15.000Z",
+      "source": "Nick Wagoner, ESPN, on X",
+      "words": "#49ers coach Kyle Shanahan says that RB Christian McCaffrey had his worst day health wise yesterday in terms of pain. IR is now under consideration, which would mean missing at least the next four games.",
+      "url": "https://x.com/nwagoner/status/1834698632983200054"
+    },
+    {
+      "at": "2024-09-14T17:15:57.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "49ers officially are placing All-Pro RB Christian McCaffrey on injured reserve due to his calf tightness and Achilles tendinitis. McCaffrey now will miss the next four games, at least, before the team assesses whether he can return in mid-October.",
+      "url": "https://x.com/AdamSchefter/status/1835004572634321213"
+    },
+    {
+      "at": "2024-09-15T13:17:37.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "From @NFLGameDay: #49ers RB Christian McCaffrey may need as much as 6 weeks to heal from his Achilles tendinitis, a frustrating injury.",
+      "url": "https://x.com/RapSheet/status/1835306982028255382"
+    },
+    {
+      "at": "2024-09-15T21:01:28.000Z",
+      "source": "Kyle Shanahan, postgame (via ProFootballTalk)",
+      "words": "\"Nobody knows. We're dealing with tendinitis, so there's not one person [who] knows. He doesn't know. We don't know... By putting him on IR, it's at least four weeks.\" No setback, and no surgery talk.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/kyle-shanahan-christian-mccaffreys-timeline-is-unknown"
+    },
+    {
+      "at": "2024-09-23T22:47:06.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "49ers RB Christian McCaffrey is seeing a specialist in Germany regarding his Achilles tendinitis.",
+      "url": "https://x.com/AdamSchefter/status/1838349399165898964"
+    },
+    {
+      "at": "2024-09-29T13:17:24.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "From @NFLGameDay: #49ers RB Christian McCaffrey is back from Germany and could run on hard ground this week. He should be back, at least, by early November.",
+      "url": "https://x.com/RapSheet/status/1840380357054439744"
+    },
+    {
+      "at": "2024-09-30T22:46:13.000Z",
+      "source": "Kyle Shanahan, press conference (via theScore, citing Adam Schefter)",
+      "words": "\"I think it started in one (leg), you overcompensate, it went to the other. But mainly one of them has just been bothering him, but he's had it in both.\"",
+      "url": "https://www.thescore.com/nfl/news/3088374"
+    },
+    {
+      "at": "2024-09-30T23:31:00.000Z",
+      "source": "Adam Schefter on The Pat McAfee Show (via CBS Sports)",
+      "words": "\"I don't think Christian McCaffrey knows when he's coming back. I don't think the 49ers know when he's coming back... They are going to begin to ramp up Christian McCaffrey, potentially even this week.\"",
+      "url": "https://www.cbssports.com/nfl/news/christian-mccaffrey-injury-update-49ers-star-rb-has-achilles-tendinitis-in-both-legs-kyle-shanahan-confirms/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 10,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3117251/type/nfl/year/2024",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Levi's Stadium": "the stadium",
+    "CMC": "Player A",
+    "Germany": "another country"
+  }
+}

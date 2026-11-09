@@ -1,0 +1,82 @@
+{
+  "id": "2025-james-conner-foot",
+  "note": "Real. James Conner (ARI) was carted off early in the third quarter at San Francisco, Week 3 (Sep 21, 2025). It was first called a right ankle injury; Schefter reported season-ending surgery that night. On Monday Gannon said it was the foot: surgery, out for the rest of the season. His 2025 ESPN game log (JSON endpoint) ends with Week 3 at SF: no game after it, so group A, backWeek null. The IR move (PFT, Sep 23 20:33Z) came after the ask and is left out. Times come from each page's datePublished metadata. Doubts: Schefter's X post could not be opened; his report is cited from FantasyPros and PFT (both 01:37Z), so the post itself came a little earlier. ESPN's time (7:10 PM ET) is the one the page shows, read through a fetch tool.",
+  "tags": [
+    "2025",
+    "group-A",
+    "RB"
+  ],
+  "group": "A",
+  "season": 2025,
+  "player": {
+    "name": "James Conner",
+    "position": "RB",
+    "team": "ARI",
+    "espnId": "3045147"
+  },
+  "injury": "right foot (first reported as ankle), Week 3 (Sep 21)",
+  "asks": [
+    {
+      "at": "2025-09-23T14:00:00.000Z",
+      "week": 4
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-22T01:37:00.000Z",
+      "source": "FantasyPros (citing Adam Schefter on X)",
+      "words": "James Conner (ankle) suffered a season-ending ankle injury in the Cardinals' loss to the 49ers that will require surgery. The extent of the damage to his ankle is unknown.",
+      "url": "https://www.fantasypros.com/nfl/news/541529/james-conner-ankle-suffers-season-ending-ankle-injury-against-49ers.php"
+    },
+    {
+      "at": "2025-09-22T01:37:00.000Z",
+      "source": "Charean Williams, Pro Football Talk",
+      "words": "Conner was carted off with a right ankle injury. Schefter reports that the injury will require season-ending surgery, though further testing Monday will provide the full extent. Gannon said after the loss he didn't know the severity.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/report-james-conners-ankle-injury-will-require-season-ending-surgery"
+    },
+    {
+      "at": "2025-09-22T21:58:00.000Z",
+      "source": "RotoWire via CBS (citing Darren Urban, Cardinals official site)",
+      "words": "Coach Jonathan Gannon said Monday that Conner will undergo season-ending foot surgery.",
+      "url": "https://www.cbssports.com/fantasy/football/news/cardinals-james-conner-slated-for-season-ending-surgery/"
+    },
+    {
+      "at": "2025-09-22T22:28:00.000Z",
+      "source": "Sports Illustrated",
+      "words": "Cardinals head coach Jonathan Gannon confirmed the team's worst fears and announced that running back James Conner will miss the rest of the season. Gannon says he will undergo surgery and miss the remainder of the 2025 campaign.",
+      "url": "https://www.si.com/nfl/james-conner-injury-update-cardinals-coach-confirms-veteran-rb-will-miss-rest-of-season"
+    },
+    {
+      "at": "2025-09-22T23:10:00.000Z",
+      "source": "Josh Weinfuss, ESPN",
+      "words": "Conner suffered a right foot injury, coach Jonathan Gannon said Monday, not the ankle as previously believed. Conner will still have to have surgery and will miss the rest of the season, Gannon said.",
+      "url": "https://www.espn.com/nfl/story/_/id/46350202/cardinals-confirm-james-conner-needs-surgery-foot-not-ankle"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3045147/type/nfl/year/2025",
+  "aliases": {
+    "Cardinals": "Team A",
+    "Arizona": "Team A",
+    "Cards": "Team A",
+    "Arizona Cardinals": "Team A",
+    "Cardinals Arizona": "Team A",
+    "AZCardinals": "Team A",
+    "Jonathan Gannon": "the head coach",
+    "Gannon": "the head coach",
+    "Monti Ossenfort": "the GM",
+    "Ossenfort": "the GM",
+    "State Farm Stadium": "the stadium",
+    "Darren Urban": "the team's site writer",
+    "49ers": "Team B",
+    "Niners": "Team B",
+    "San Francisco": "Team B",
+    "San Francisco 49ers": "Team B",
+    "49ers San Francisco": "Team B",
+    "SF": "Team B",
+    "Levi's Stadium": "the stadium",
+    "Kyle Shanahan": "the opposing head coach",
+    "Shanahan": "the opposing head coach"
+  }
+}

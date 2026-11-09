@@ -1,0 +1,79 @@
+{
+  "id": "2025-austin-ekeler-achilles",
+  "note": "Real. Austin Ekeler (WSH) went down without contact running a route late in the fourth quarter at Green Bay, Thursday night of Week 2 (Sep 11, 2025). That night the team believed it was a torn Achilles. The MRI confirmed it on Saturday, and he went on IR Monday. His 2025 ESPN game log (JSON endpoint) ends with Week 2 at GB: no game after it, so group A, backWeek null. Times come from each page's datePublished metadata. ESPN's time (11:58 AM ET) is the one the page shows, read through a fetch tool. Doubts: RotoWire's first blurb says late in the third quarter and later ones say the fourth (ESPN: 5:50 left in the game); the fourth is right. The IR blurb was modified again on Sep 17, after the ask, but its first sentence is the transaction itself. I did not open the Rapoport or Schefter posts themselves.",
+  "tags": [
+    "2025",
+    "group-A",
+    "RB"
+  ],
+  "group": "A",
+  "season": 2025,
+  "player": {
+    "name": "Austin Ekeler",
+    "position": "RB",
+    "team": "WSH",
+    "espnId": "3068267"
+  },
+  "injury": "right Achilles, Week 2 (Thursday night, Sep 11)",
+  "asks": [
+    {
+      "at": "2025-09-16T14:00:00.000Z",
+      "week": 3
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-12T03:23:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Ekeler will not return to Thursday's game against the Packers due to an Achilles injury. He suffered it on a non-contact play and was ruled out quickly after being spotted on a cart headed to the locker room.",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-austin-ekeler-quickly-ruled-out/"
+    },
+    {
+      "at": "2025-09-12T04:34:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Ekeler is set to undergo an MRI on Friday, but the Commanders believe that he suffered a torn Achilles. If Friday's tests confirm the team's fears, Ekeler will be sidelined for the rest of the season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-austin-ekeler-set-for-imaging-friday/"
+    },
+    {
+      "at": "2025-09-13T15:52:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Ekeler suffered a torn Achilles during Thursday's loss to the Packers, an MRI confirmed Saturday. His 2025 season is over. He is expected to be placed on injured reserve at some point in the next week.",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-austin-ekeler-torn-achilles-confirmed/"
+    },
+    {
+      "at": "2025-09-13T15:58:00.000Z",
+      "source": "John Keim, ESPN (Dan Quinn, postgame)",
+      "words": "Ekeler suffered a torn right Achilles that will keep him out for the rest of the season, a source told ESPN on Saturday. \"That will be significant,\" Quinn said after the game.",
+      "url": "https://www.espn.com/nfl/story/_/id/46243669/commanders-rb-austin-ekeler-tore-achilles-source-says"
+    },
+    {
+      "at": "2025-09-15T19:15:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "The Commanders officially placed Ekeler (Achilles) on injured reserve Monday. After the necessary tests, a torn Achilles was confirmed, wiping out the rest of his 2025 campaign.",
+      "url": "https://www.cbssports.com/fantasy/football/news/commanders-austin-ekeler-officially-on-injured-reserve/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3068267/type/nfl/year/2025",
+  "aliases": {
+    "Commanders": "Team A",
+    "Washington": "Team A",
+    "Washington Commanders": "Team A",
+    "Commanders Washington": "Team A",
+    "WAS": "Team A",
+    "Dan Quinn": "the head coach",
+    "Quinn": "the head coach",
+    "Adam Peters": "the GM",
+    "Northwest Stadium": "the stadium",
+    "Landover": "the team's home city",
+    "Packers": "Team B",
+    "Green Bay": "Team B",
+    "Green Bay Packers": "Team B",
+    "Packers Green Bay": "Team B",
+    "GB": "Team B",
+    "Lambeau Field": "the stadium",
+    "Matt LaFleur": "the opposing head coach",
+    "LaFleur": "the opposing head coach"
+  }
+}

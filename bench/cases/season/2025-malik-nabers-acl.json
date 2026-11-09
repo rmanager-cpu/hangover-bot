@@ -1,0 +1,82 @@
+{
+  "id": "2025-malik-nabers-acl",
+  "note": "Real. Malik Nabers (NYG) hurt his right knee leaping for a deep ball in the second quarter against the Chargers, Week 4 (Sep 28, 2025), and was carted off. A torn ACL was feared Sunday, and Monday's MRI confirmed it; Daboll said he was out for the rest of the season, and he went on IR Monday. His 2025 ESPN game log (JSON endpoint) ends with Week 4 vs LAC: no game after it, so group A, backWeek null. Times come from each page's datePublished metadata. Doubts: the ESPN (Jordan Raanan) item is the ABC7NY copy, dated by its dateModified (22:39Z), because the IR line may have been added in that update; the first version was 15:25Z. The Sep 29 RotoWire blurb was modified again at 00:32Z Sep 30, still before the ask. I did not open the Rapoport, Schefter or Russini posts themselves.",
+  "tags": [
+    "2025",
+    "group-A",
+    "WR"
+  ],
+  "group": "A",
+  "season": 2025,
+  "player": {
+    "name": "Malik Nabers",
+    "position": "WR",
+    "team": "NYG",
+    "espnId": "4595348"
+  },
+  "injury": "right knee (torn ACL), Week 4 (Sep 28)",
+  "asks": [
+    {
+      "at": "2025-09-30T14:00:00.000Z",
+      "week": 5
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-28T19:02:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Nabers is believed to have suffered a torn ACL Sunday against the Chargers. Nabers has been ruled out for the remainder of the contest.",
+      "url": "https://www.cbssports.com/fantasy/football/news/giants-malik-nabers-torn-acl-feared/"
+    },
+    {
+      "at": "2025-09-28T19:39:00.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Nabers is slated for an MRI on his right knee Monday to determine if he indeed suffered a torn ACL. He grabbed at his right knee and remained on the turf before being carted off the field.",
+      "url": "https://www.cbssports.com/fantasy/football/news/giants-malik-nabers-mri-to-determine-fate/"
+    },
+    {
+      "at": "2025-09-29T15:20:00.000Z",
+      "source": "RotoWire via CBS (citing Dianna Russini, The Athletic, and Adam Schefter, ESPN)",
+      "words": "Nabers (knee) suffered a season-ending torn right ACL in Sunday's win over the Chargers. The nature of the injury was confirmed Monday via an MRI.",
+      "url": "https://www.cbssports.com/fantasy/football/news/giants-malik-nabers-acl-tear-confirmed/"
+    },
+    {
+      "at": "2025-09-29T17:57:00.000Z",
+      "source": "Brian Daboll, press conference (AP via FOX Sports)",
+      "words": "Malik Nabers has a torn ACL in his right knee and the New York Giants' top wide receiver is out for the rest of the season, coach Brian Daboll said Monday.",
+      "url": "https://www.foxsports.com/articles/nfl/mri-confirms-giants-receiver-malik-nabers-has-a-torn-acl-coach-brian-daboll-says"
+    },
+    {
+      "at": "2025-09-29T22:39:00.000Z",
+      "source": "Jordan Raanan, ESPN (via ABC7NY)",
+      "words": "The Giants had their worst fears confirmed Monday with an MRI showing that Nabers suffered a season-ending torn ACL in his right knee, coach Brian Daboll announced. He was officially placed on injured reserve later Monday.",
+      "url": "https://abc7ny.com/post/source-mri-confirms-torn-acl-giants-malik-nabers/17904017/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4595348/type/nfl/year/2025",
+  "aliases": {
+    "Giants": "Team A",
+    "New York": "Team A",
+    "New York Giants": "Team A",
+    "Giants New York": "Team A",
+    "NY Giants": "Team A",
+    "Big Blue": "Team A",
+    "Brian Daboll": "the head coach",
+    "Daboll": "the head coach",
+    "Joe Schoen": "the GM",
+    "Schoen": "the GM",
+    "MetLife Stadium": "the stadium",
+    "East Rutherford": "the team's home city",
+    "ABC7NY": "a local TV station",
+    "Chargers": "Team B",
+    "Los Angeles Chargers": "Team B",
+    "Chargers Los Angeles": "Team B",
+    "LA Chargers": "Team B",
+    "Bolts": "Team B",
+    "LAC": "Team B",
+    "Jim Harbaugh": "the opposing head coach",
+    "Harbaugh": "the opposing head coach"
+  }
+}

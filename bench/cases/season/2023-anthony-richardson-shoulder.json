@@ -1,0 +1,105 @@
+{
+  "id": "2023-anthony-richardson-shoulder",
+  "note": "Real. Anthony Richardson (IND) sprained the AC joint in his right (throwing) shoulder on a first-half run vs TEN, Week 5 (Oct 8, 2023). IR Oct 11. Rapoport reported Oct 15 that he was strongly considering season-ending surgery; owner Jim Irsay told ESPN Oct 16 he was probably done; the Colts announced season-ending surgery Wed Oct 18, after the second ask. His 2023 ESPN game log (JSON endpoint) ends at Week 5 (Week 3 is missing too: a concussion). Group A, backWeek null. Asks: Tue Oct 10 and Tue Oct 17, 10 AM EDT. Times: X posts from their status ids (syndication created_at); NFL.com, ESPN and FOX Sports from datePublished. Doubts: NFL.com's Oct 15 piece was modified 44 minutes after publishing; the words are from the current page. ESPN now lists him as Anthony Richardson Sr.",
+  "tags": [
+    "2023",
+    "group-A",
+    "QB"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Anthony Richardson",
+    "position": "QB",
+    "team": "IND",
+    "espnId": "4429084"
+  },
+  "injury": "right (throwing) shoulder, Week 5 (Oct 8)",
+  "asks": [
+    {
+      "at": "2023-10-10T14:00:00.000Z",
+      "week": 6
+    },
+    {
+      "at": "2023-10-17T14:00:00.000Z",
+      "week": 7
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-10-08T18:42:30.000Z",
+      "source": "Jonathan Jones, CBS Sports, on X",
+      "words": "Colts QB Anthony Richardson has been ruled out the remainder of the game with an injury to his right throwing shoulder",
+      "url": "https://x.com/jjones9/status/1711089703045189994"
+    },
+    {
+      "at": "2023-10-08T22:22:47.000Z",
+      "source": "Josina Anderson on X",
+      "words": "I'm told #Colts QB Anthony Richardson received an MRI for his shoulder at an imaging center. He did not go to a hospital. Richardson will seek a second opinion, regardless of results from his initial scan, per source.",
+      "url": "https://x.com/JosinaAnderson/status/1711145138032959693"
+    },
+    {
+      "at": "2023-10-09T10:01:50.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "Sources: #Colts starting QB Anthony Richardson received an initial diagnosis of a Grade 3 AC joint sprain, which would mean he'd miss a month or more. He has an MRI this morning to confirm.",
+      "url": "https://x.com/RapSheet/status/1711321062577774679"
+    },
+    {
+      "at": "2023-10-09T18:35:12.000Z",
+      "source": "Jonathan Jones, CBS Sports, on X (Shane Steichen, Monday)",
+      "words": "Colts head coach Shane Steichen only goes so far as to say QB Anthony Richardson will miss \"some time\" with his right shoulder injury. Still unclear how much time, but IR a possibility for the rookie.",
+      "url": "https://x.com/jjones9/status/1711450252744536446"
+    },
+    {
+      "at": "2023-10-11T16:35:55.000Z",
+      "source": "Shane Steichen, press conference (NFL.com)",
+      "words": "The Colts officially placed Richardson on injured reserve on Wednesday... \"Don't have a timetable to return.\" Steichen... telling reporters the Colts will \"look at everything\" as it pertains to treatment options, including surgery.",
+      "url": "https://www.nfl.com/news/colts-hc-shane-steichen-says-no-timeline-for-anthony-richardson-s-return-from-sh"
+    },
+    {
+      "at": "2023-10-15T10:04:44.000Z",
+      "source": "Ian Rapoport, NFL Network (NFL.com)",
+      "words": "Richardson is strongly considering season-ending shoulder surgery on his damaged AC joint, sources say... There was some thought initially that Richardson could rehab and attempt to come back before the end of the season",
+      "url": "https://www.nfl.com/news/colts-qb-anthony-richardson-considering-season-ending-shoulder-surgery"
+    },
+    {
+      "at": "2023-10-16T19:36:58.000Z",
+      "source": "Shane Steichen, Monday (AP via FOX Sports)",
+      "words": "Coach Shane Steichen said Monday a final decision has neither been made nor was imminent. \"Like I said, we'll make that decision when the time is right. We're still evaluating that process.\"",
+      "url": "https://www.foxsports.com/articles/nfl/colts-qb-anthony-richardson-continues-to-ponder-decision-over-seasonending-shoulder-surgery"
+    },
+    {
+      "at": "2023-10-17T00:49:00.000Z",
+      "source": "Jim Irsay to ESPN (Stephen Holder)",
+      "words": "\"The most likelihood is he's probably going to be gone for the year... it's not definite but [he] probably misses this year.\" Irsay said surgery seems likelier.",
+      "url": "https://www.espn.com/nfl/story/_/id/38675826"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4429084/type/nfl/year/2023",
+  "aliases": {
+    "Colts": "Team A",
+    "Indianapolis": "Team A",
+    "Indianapolis Colts": "Team A",
+    "Colts Indianapolis": "Team A",
+    "Indy": "Team A",
+    "Shane Steichen": "the head coach",
+    "Steichen": "the head coach",
+    "Chris Ballard": "the GM",
+    "Ballard": "the GM",
+    "Jim Irsay": "the team owner",
+    "Irsay": "the team owner",
+    "Lucas Oil Stadium": "the stadium",
+    "Titans": "Team B",
+    "Tennessee": "Team B",
+    "Tennessee Titans": "Team B",
+    "Titans Tennessee": "Team B",
+    "TEN": "Team B",
+    "Mike Vrabel": "the opposing head coach",
+    "Vrabel": "the opposing head coach",
+    "Gardner Minshew": "the backup QB",
+    "Minshew": "the backup QB",
+    "Stephen Holder": "a team beat reporter"
+  }
+}

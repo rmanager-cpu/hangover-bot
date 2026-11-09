@@ -22,6 +22,14 @@
       "note": "Same adapter, the biggest model. Listed in docs/STACK.md."
     },
     {
+      "name": "fable-5.1",
+      "via": "anthropic",
+      "model": "claude-fable-5-1",
+      "priceFrom": "anthropic/claude-fable-5.1",
+      "off": true,
+      "note": "Anthropic's most capable model, $10 in / $50 out. Off by default: name it to run it."
+    },
+    {
       "name": "sonnet-5.5 (openrouter)",
       "via": "openrouter",
       "model": "anthropic/claude-sonnet-5.5",
@@ -42,6 +50,30 @@
       "reasoning": "low"
     },
     {
+      "name": "gpt-6-astra",
+      "via": "openrouter",
+      "model": "openai/gpt-6-astra",
+      "reasoning": "low",
+      "off": true,
+      "note": "OpenAI's top model, $10 in / $50 out. Off by default: name it to run it."
+    },
+    {
+      "name": "gpt-6-luna",
+      "via": "openrouter",
+      "model": "openai/gpt-6-luna",
+      "reasoning": "low",
+      "off": true,
+      "note": "OpenAI's small model, $0.10 in / $0.50 out."
+    },
+    {
+      "name": "gemini-3.8-flash",
+      "via": "openrouter",
+      "model": "google/gemini-3.8-flash",
+      "reasoning": "low",
+      "off": true,
+      "note": "Google's fast model, $0.83 in / $4.13 out."
+    },
+    {
       "name": "gemini-4-argon",
       "via": "openrouter",
       "model": "google/gemini-4-argon",
@@ -53,6 +85,53 @@
       "model": "x-ai/grok-4.7",
       "reasoning": "low",
       "note": "xAI native web search through OpenRouter; with --tools all, X search too, and told to use it."
+    },
+    {
+      "name": "muse-wonder",
+      "via": "openrouter",
+      "model": "meta/muse-wonder",
+      "reasoning": "low",
+      "note": "Meta Muse Wonder (Oct 2026), Meta's flagship, $4 in / $20 out. Cheaper sibling: meta/muse-spark-1.3."
+    },
+    {
+      "name": "muse-spark-1.3",
+      "via": "openrouter",
+      "model": "meta/muse-spark-1.3",
+      "reasoning": "low",
+      "off": true,
+      "note": "Meta's mid model, $1.25 in / $4.25 out."
+    },
+    {
+      "name": "glm-5.3-prime",
+      "via": "openrouter",
+      "model": "z-ai/glm-5.3-prime",
+      "reasoning": "low",
+      "off": true,
+      "note": "Z.ai's flagship, $2.80 in / $8.80 out."
+    },
+    {
+      "name": "deepseek-v4-pro",
+      "via": "openrouter",
+      "model": "deepseek/deepseek-v4-pro-0813",
+      "reasoning": "low",
+      "off": true,
+      "note": "DeepSeek's flagship (Aug 13 build), $0.11 in / $4.44 out."
+    },
+    {
+      "name": "qwen3.8-max",
+      "via": "openrouter",
+      "model": "qwen/qwen3.8-max-prime",
+      "reasoning": "low",
+      "off": true,
+      "note": "Alibaba's flagship, $4 in / $12 out."
+    },
+    {
+      "name": "minimax-m3",
+      "via": "openrouter",
+      "model": "minimax/minimax-m3",
+      "reasoning": "low",
+      "off": true,
+      "note": "MiniMax M3, $0.30 in / $1.20 out."
     },
     {
       "name": "glm-5.3",

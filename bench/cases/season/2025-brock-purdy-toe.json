@@ -1,0 +1,92 @@
+{
+  "id": "2025-brock-purdy-toe",
+  "note": "Real. Brock Purdy (SF) hurt his right big toe (turf toe) in Week 1, missed Weeks 2 and 3, and came back in Week 4 against Jacksonville (Sep 28, 2025). He was sore the next morning, and an MRI showed he had aggravated it. This case is the Week 4 aggravation, the longer absence; the Week 1 injury (back in Week 4) would be a separate case. His 2025 ESPN game log (JSON endpoint) has Weeks 1 and 4, then nothing until Week 11 at ARI (Nov 16): no IR. So group B, backWeek 11. Second ask: the Tuesday after Shanahan's 'week to week, don't know how it will heal'. Times come from each page's datePublished metadata. Doubts: the NFL.com item is dated by its dateModified (04:12Z), since Shanahan's postgame quote must have been added after the game. It was first published at 23:45Z with Rapoport's pregame report. NBC Sports Bay Area's Oct 2 story was updated overnight. PFR's Oct 1 update sits on a Sep 30 post whose original time I could not see; the time used is the update's.",
+  "tags": [
+    "2025",
+    "group-B",
+    "QB"
+  ],
+  "group": "B",
+  "season": 2025,
+  "player": {
+    "name": "Brock Purdy",
+    "position": "QB",
+    "team": "SF",
+    "espnId": "4361741"
+  },
+  "injury": "right toe sore again (turf toe from Week 1) after Week 4 (Sep 28)",
+  "asks": [
+    {
+      "at": "2025-09-30T14:00:00.000Z",
+      "week": 5
+    },
+    {
+      "at": "2025-10-07T14:00:00.000Z",
+      "week": 6
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-29T18:16:00.000Z",
+      "source": "Matt Maiocco, NBC Sports Bay Area (Kyle Shanahan, conference call)",
+      "words": "Shanahan said Monday that Purdy reported soreness in his right toe after Sunday's loss, and there is concern whether he will be available Thursday. \"I'm concerned with anybody who's not totally healthy at this moment.\"",
+      "url": "https://www.nbcsportsbayarea.com/nfl/san-francisco-49ers/brock-purdy-toe-injury/1877882/"
+    },
+    {
+      "at": "2025-09-29T22:07:00.000Z",
+      "source": "Cameron Salerno, CBS Sports",
+      "words": "Purdy felt soreness in his toe following Sunday's loss, and his status for Week 5 on Thursday is up in the air. Purdy missed Weeks 2 and 3 because of a turf toe injury and returned to the lineup Sunday.",
+      "url": "https://www.cbssports.com/nfl/news/brock-purdy-injury-49ers-qb-felt-toe-soreness-after-loss-to-jaguars-status-for-week-5-vs-rams-up-in-the-air/"
+    },
+    {
+      "at": "2025-10-01T20:25:00.000Z",
+      "source": "Adam La Rose, Pro Football Rumors (citing Ian Rapoport, NFL Network)",
+      "words": "Purdy has been ruled out for tomorrow's game. He did not miss any time in Sunday's loss; the injured toe was not an issue during the game.",
+      "url": "https://www.profootballrumors.com/2025/10/49ers-qb-brock-purdy-uncertain-for-week-5"
+    },
+    {
+      "at": "2025-10-02T23:34:00.000Z",
+      "source": "Ian Rapoport, NFL Network pregame (NBC Sports Bay Area)",
+      "words": "Purdy suffered a setback with the injury, and an MRI revealed an aggravation of the turf toe. \"Not major, major, but out tonight -- I'm told he's considered week-to-week. ... He could miss that game as well.\"",
+      "url": "https://www.nbcsportsbayarea.com/nfl/san-francisco-49ers/brock-purdy-toe-injury-2/1878806/"
+    },
+    {
+      "at": "2025-10-03T04:12:00.000Z",
+      "source": "Kyle Shanahan, postgame (Grant Gordon, NFL.com)",
+      "words": "Purdy is considered week to week and has no timetable for his return, Rapoport reported. \"He reaggravated it,\" Shanahan confirmed after Thursday's game. \"He's week to week. Don't know how it will heal.\"",
+      "url": "https://www.nfl.com/news/niners-qb-brock-purdy-week-to-week-with-toe-injury-could-miss-more-time"
+    },
+    {
+      "at": "2025-10-03T15:12:00.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Shanahan confirmed that Purdy is without a timeline for a return after a recent MRI revealed he aggravated the turf toe. The toe has kept him out for the third time in four games.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brock-purdy-could-miss-additional-time/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 11,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4361741/type/nfl/year/2025",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "49ers San Francisco": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Levi's Stadium": "the stadium",
+    "NBC Sports Bay Area": "a regional sports network",
+    "Bay Area": "the team's home region",
+    "Mr. Irrelevant": "Player A",
+    "Jaguars": "Team B",
+    "Jacksonville": "Team B",
+    "Jags": "Team B",
+    "Jacksonville Jaguars": "Team B",
+    "Jaguars Jacksonville": "Team B",
+    "JAX": "Team B",
+    "Liam Coen": "the opposing head coach",
+    "Coen": "the opposing head coach"
+  }
+}

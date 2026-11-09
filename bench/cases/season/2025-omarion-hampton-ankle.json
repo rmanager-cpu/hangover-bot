@@ -1,0 +1,69 @@
+{
+  "id": "2025-omarion-hampton-ankle",
+  "note": "Real. Omarion Hampton (LAC RB) hurt his left ankle in the fourth quarter of the Week 5 loss to Washington (Oct 5, 2025) and went on IR. His ESPN 2025 game log shows Weeks 1-5, then nothing until Week 14 (Dec 8, MNF vs PHI, 13 carries), so he came back: group B, backWeek 14. The Chargers' bye was Week 12. Times are the CBS page timestamps (RotoWire blurbs, plus one CBS Sports NFL story); the Oct 6 CBS story's time may be an update time, and ESPN (Kris Rhim, 20:47Z) and PFT (4:59 PM, no zone shown) ran the same Harbaugh news about then. Harbaugh gave no diagnosis; the later reports that it was a fracture (December) are after the last ask and left out. I could not open RotoWire's own archive (it redirects to current news), so its blurbs are cited from CBS.",
+  "tags": ["2025", "group-B", "RB"],
+  "group": "B",
+  "season": 2025,
+  "player": { "name": "Omarion Hampton", "position": "RB", "team": "LAC", "espnId": "4685382" },
+  "injury": "left ankle injury, Week 5 (Oct 5)",
+  "asks": [
+    { "at": "2025-10-07T14:00:00.000Z", "week": 6 },
+    { "at": "2025-11-04T15:00:00.000Z", "week": 10 }
+  ],
+  "news": [
+    {
+      "at": "2025-10-05T23:08:08.000Z",
+      "source": "RotoWire via CBS (citing Kris Rhim, ESPN)",
+      "words": "Hampton suffered an ankle injury during Sunday's contest versus the Commanders. Hampton appeared to get clipped by a Washington defender while running a route out of the Chargers backfield in the fourth quarter and then went to the locker room.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-omarion-hampton-injures-ankle-sunday/"
+    },
+    {
+      "at": "2025-10-06T21:10:36.000Z",
+      "source": "CBS Sports (Jim Harbaugh, Monday press conference; Daniel Popper, The Athletic)",
+      "words": "Coach Jim Harbaugh announced that rookie running back Omarion Hampton would be placed on injured reserve due to an ankle injury. He will now miss at least the next four games. He sported a walking boot after the game.",
+      "url": "https://www.cbssports.com/nfl/news/omarion-hampton-injury-update-chargers-rb-ankle-joins-najee-harris-on-ir-will-miss-at-least-four-games/"
+    },
+    {
+      "at": "2025-10-08T18:34:53.000Z",
+      "source": "RotoWire via CBS (citing Daniel Popper, The Athletic)",
+      "words": "The Chargers placed Hampton (ankle) on injured reserve Wednesday. Hampton is out for at least four games.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-omarion-hampton-placed-on-ir/"
+    },
+    {
+      "at": "2025-10-12T13:43:34.000Z",
+      "source": "RotoWire via CBS (citing Mike Garafolo, NFL Network)",
+      "words": "Hampton (left ankle) isn't expected to be out for the season but is on track to be sidelined for more than the four-game minimum. A target date for his return has yet to be established.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-omarion-hampton-likely-to-miss-more-than-four-games/"
+    },
+    {
+      "at": "2025-10-24T04:17:53.000Z",
+      "source": "RotoWire via CBS (citing Daniel Popper, The Athletic)",
+      "words": "Hampton (ankle) remained in a walking boot following Thursday night's win. Hampton has been on injured reserve since Week 5 and doesn't appear to be close to a return to action.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-omarion-hampton-remains-in-walking-boot/"
+    },
+    {
+      "at": "2025-11-03T21:47:45.000Z",
+      "source": "RotoWire via CBS (Jim Harbaugh, via Kris Rhim, ESPN)",
+      "words": "Harbaugh said Hampton (ankle) isn't expected to be designated for return from injured reserve until after the team's Week 12 bye. He hasn't made enough progress for the Chargers to open his 21-day evaluation window.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chargers-omarion-hampton-set-to-miss-two-more-games/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 14,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4685382/type/nfl/year/2025",
+  "aliases": {
+    "Chargers": "Team A",
+    "Los Angeles Chargers": "Team A",
+    "Los Angeles": "Team A",
+    "Bolts": "Team A",
+    "Jim Harbaugh": "the head coach",
+    "Harbaugh": "the head coach",
+    "Joe Hortiz": "the GM",
+    "Hortiz": "the GM",
+    "SoFi Stadium": "the stadium",
+    "Commanders": "Team B",
+    "Washington": "Team B",
+    "Washington Commanders": "Team B",
+    "WSH": "Team B"
+  }
+}

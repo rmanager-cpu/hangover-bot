@@ -1,0 +1,85 @@
+{
+  "id": "2024-rashee-rice-knee",
+  "note": "Real. Rashee Rice (KC) hurt his right knee in Week 4 (Sun Sep 29 at LAC) when his own quarterback ran into him; a torn ACL was feared. IR on Thu Oct 3. On Mon Oct 7 the LCL was found to need repair; surgery came Tue Oct 8 (LCL and a hamstring tendon, no ACL damage), reported that afternoon, after the second ask. His ESPN 2024 game log has no game after Week 4, so group A. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Doubts: Schefter's Oct 7 'a lot of optimism' post is cut off in X's embed after 'the belief now is it could'; I quoted only the part shown. Left out for length: Andy Reid's Sunday postgame ('not expecting good news', ProFootballTalk 23:50Z Sep 29) and his Thursday Oct 3 'wait and see' remarks.",
+  "tags": ["2024", "group-A", "WR"],
+  "group": "A",
+  "season": 2024,
+  "player": { "name": "Rashee Rice", "position": "WR", "team": "KC", "espnId": "4428331" },
+  "injury": "right knee, hurt in a collision with his own quarterback, Week 4 (Sep 29); a torn ACL was feared",
+  "asks": [
+    { "at": "2024-10-01T14:00:00.000Z", "week": 5 },
+    { "at": "2024-10-08T14:00:00.000Z", "week": 6 }
+  ],
+  "news": [
+    {
+      "at": "2024-09-29T23:58:39.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Chiefs WR Rashee Rice is feared to have suffered a torn ACL during Sunday's game vs the Chargers, per sources. There will be additional testing to confirm the initial diagnosis.",
+      "url": "https://x.com/AdamSchefter/status/1840541733265764704"
+    },
+    {
+      "at": "2024-09-30T17:57:35.000Z",
+      "source": "RotoWire via CBS (citing Nate Taylor, The Athletic)",
+      "words": "Chiefs coach Andy Reid said Monday that Rice (knee) will not be available Week 5... and that tests have not yet confirmed the severity of his injury.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chiefs-rashee-rice-tests-still-ongoing-out-for-week-5/"
+    },
+    {
+      "at": "2024-10-01T00:38:07.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "After further testing on Rashee Rice's knee today, there remains uncertainty over the extent of his injury, per sources. After consulting with team doctors and receiving second opinions, more tests are required to determine the full extent of Rice's injury...",
+      "url": "https://x.com/AdamSchefter/status/1840914055344648284"
+    },
+    {
+      "at": "2024-10-03T19:59:24.000Z",
+      "source": "RotoWire via CBS",
+      "words": "The Chiefs placed Rice (knee) on injured reserve Thursday. Rice is slated to undergo testing on his right knee next week, after which the Chiefs will have a better idea regarding the severity of the injury.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chiefs-rashee-rice-lands-on-ir/"
+    },
+    {
+      "at": "2024-10-04T12:10:48.000Z",
+      "source": "Albert Breer, The MMQB, on X",
+      "words": "Chiefs WR Rashee Rice is expected to have his knee scoped next week after the swelling goes down, per sources. There's fear of ACL damage, and also PCL damage. Docs will know more after going in.",
+      "url": "https://x.com/AlbertBreer/status/1842175537009074418"
+    },
+    {
+      "at": "2024-10-07T22:51:49.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "While #Chiefs star WR Rashee Rice's season is expected to be over, he did receive positive news today from Dr. Dan Cooper. Rice needs his LCL repaired, but there is a chance that's the only ligament to be repaired.",
+      "url": "https://x.com/RapSheet/status/1843424015656071461"
+    },
+    {
+      "at": "2024-10-07T22:51:57.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "After consulting today with doctors, there's \"a lot of optimism\" that WR Rashee Rice didn't suffer a knee injury as significant as first believed, per source. Rice will be put under anesthesia Tuesday to determine the extent of his injury.",
+      "url": "https://x.com/AdamSchefter/status/1843424050779185264"
+    },
+    {
+      "at": "2024-10-07T22:57:18.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "It's unlikely that Chiefs WR Rashee Rice will play again this season, but doctors will not know for sure until they perform surgery Tuesday morning, per source.",
+      "url": "https://x.com/AdamSchefter/status/1843425396144124306"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4428331/type/nfl/year/2024",
+  "aliases": {
+    "Chiefs": "Team A",
+    "Kansas City": "Team A",
+    "Kansas City Chiefs": "Team A",
+    "Andy Reid": "the head coach",
+    "Reid": "the head coach",
+    "Brett Veach": "the GM",
+    "Veach": "the GM",
+    "GEHA Field at Arrowhead Stadium": "the stadium",
+    "Arrowhead Stadium": "the stadium",
+    "Arrowhead": "the stadium",
+    "Chargers": "Team B",
+    "Los Angeles Chargers": "Team B",
+    "Jim Harbaugh": "the opposing coach",
+    "Patrick Mahomes": "his quarterback",
+    "Mahomes": "his quarterback",
+    "Dr. Dan Cooper": "a specialist",
+    "Dan Cooper": "a specialist"
+  }
+}

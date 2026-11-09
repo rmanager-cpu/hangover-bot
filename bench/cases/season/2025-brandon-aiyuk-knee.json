@@ -1,0 +1,89 @@
+{
+  "id": "2025-brandon-aiyuk-knee",
+  "note": "Real. Brandon Aiyuk (SF WR) tore the ACL and MCL in his right knee in Week 7 of 2024 (Oct 20, 2024, vs KC). He opened 2025 on active/PUP (Jul 18) and moved to reserve/PUP at the Aug 26 cutdown, eligible from Week 5. Through early November the team kept saying week to week and never opened his practice window; on Nov 21 The Athletic reported the 49ers had voided his 2026 guarantees, and he did not play in 2025 (both after the last ask, left out). His ESPN 2025 game log is empty (2025 is not among the log's seasons): group A, backWeek null. Note for the runner: espnBackWeek() returns undefined on an empty log. The second ask is Nov 11 rather than at his Week 5 eligibility, because the news that mattered (Lynch's 'evidence', Shanahan's practice-window talk and 'pretty confident') came in late October and early November. Times are CBS page timestamps (RotoWire blurbs, one CBS Sports story). The Shanahan Nov 5 quote is from the 49ers' press-conference transcript page, dated Nov 5 with no time, so 17:00Z is a guess (his Wednesday press conference was probably later that day; RotoWire's blurb on it is at 21:19Z).",
+  "tags": ["2025", "group-A", "WR"],
+  "group": "A",
+  "season": 2025,
+  "player": { "name": "Brandon Aiyuk", "position": "WR", "team": "SF", "espnId": "4360438" },
+  "injury": "torn ACL and MCL, right knee, Week 7 of 2024 (Oct 20, 2024); on the reserve/PUP list to open the season",
+  "asks": [
+    { "at": "2025-09-02T14:00:00.000Z", "week": 1 },
+    { "at": "2025-11-11T15:00:00.000Z", "week": 11 }
+  ],
+  "news": [
+    {
+      "at": "2025-07-18T20:43:10.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Aiyuk (knee) was placed on the active/PUP list by the 49ers on Friday. He isn't expected to be available for training camp as he recovers from a torn ACL and MCL in his right knee sustained in October.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-moved-to-activepup-list-friday/"
+    },
+    {
+      "at": "2025-07-18T21:10:16.000Z",
+      "source": "CBS Sports",
+      "words": "While no official timetable is set, midseason appears to be the earliest that Aiyuk could return to the field. The team stated on multiple occasions that Aiyuk's recovery has gone well.",
+      "url": "https://www.cbssports.com/nfl/news/49ers-place-brandon-aiyuk-ricky-pearsall-on-pup-list-wr-in-spotlight-to-start-san-francisco-training-camp/"
+    },
+    {
+      "at": "2025-08-26T20:41:39.000Z",
+      "source": "RotoWire via CBS (Kyle Shanahan, via Vic Tafur, The Athletic)",
+      "words": "The 49ers moved Aiyuk (knee) to the reserve/PUP list Tuesday, a procedural move: coach Kyle Shanahan has circled Week 6 as a possible date for his 2025 debut. He can technically return as early as Week 5.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-shifts-to-reservepup-list/"
+    },
+    {
+      "at": "2025-09-25T16:30:18.000Z",
+      "source": "RotoWire via CBS (John Lynch, via David Lombardi, SFStandard.com)",
+      "words": "49ers GM John Lynch said Thursday that Aiyuk (knee, PUP) is \"not close\" to returning. Lombardi believes a Week 6 return is not realistic, as he is still working to hit various markers in his recovery.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-not-close-to-returning-from-pup/"
+    },
+    {
+      "at": "2025-10-13T22:30:21.000Z",
+      "source": "RotoWire via CBS (Kyle Shanahan, via Nick Wagoner, ESPN, and David Lombardi)",
+      "words": "Shanahan said Monday that Aiyuk is getting \"closer and closer\" to being able to practice, but there's no specific timeline. \"I always look around Week 10, but I'm not putting an exact date on it.\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-still-no-timetable-to-practice/"
+    },
+    {
+      "at": "2025-10-23T20:15:57.000Z",
+      "source": "RotoWire via CBS (John Lynch, via David Lombardi, SFStandard.com)",
+      "words": "Lynch said Thursday that he has both hope and \"evidence\" that Aiyuk (knee) will soon be ready to make his 2025 debut. Until he is cleared to practice, a target date is hard to pinpoint.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-drawing-closer-to-2025-debut/"
+    },
+    {
+      "at": "2025-10-24T21:17:49.000Z",
+      "source": "RotoWire via CBS (Kyle Shanahan, via David Lombardi, SFStandard.com)",
+      "words": "Shanahan said Friday that the 49ers may designate Aiyuk (knee) to return from the reserve/PUP list next week, opening a 21-day practice window. The team currently is in \"week-to-week mode\" with him.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-may-have-practice-window-opened-soon/"
+    },
+    {
+      "at": "2025-11-05T17:00:00.000Z",
+      "source": "Kyle Shanahan, press conference (49ers transcript)",
+      "words": "On whether Aiyuk will play this year: \"I'm pretty confident that he is going to eventually. At least open up his practice window. We talk about it being week-to-week right now, so still waiting until he is ready.\"",
+      "url": "https://49ers.1rmg.com/transcripts/head-coach-kyle-shanahan-press-conference-11-5-25"
+    },
+    {
+      "at": "2025-11-10T22:57:43.000Z",
+      "source": "RotoWire via CBS (Kyle Shanahan, via Nick Wagoner, ESPN)",
+      "words": "Shanahan said Monday that the 49ers don't intend to open Aiyuk's (knee) practice window this week. A return is unlikely this coming Sunday and probably for at least a few more weeks after that.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-unlikely-to-practice-this-week/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4360438/type/nfl/year/2025",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Klay Kubiak": "the offensive coordinator",
+    "Levi's Stadium": "the stadium",
+    "SFStandard.com": "a local outlet",
+    "Chiefs": "Team B",
+    "Kansas City": "Team B",
+    "Kansas City Chiefs": "Team B",
+    "KC": "Team B"
+  }
+}

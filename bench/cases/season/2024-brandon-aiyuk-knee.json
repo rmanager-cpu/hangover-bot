@@ -1,0 +1,57 @@
+{
+  "id": "2024-brandon-aiyuk-knee",
+  "note": "Real. Brandon Aiyuk (SF) tore the ACL and MCL in his right knee in Week 7 (Sun Oct 20 vs KC); the MRI confirmed it on Mon Oct 21 and the head coach said he would have surgery and miss the rest of the season. His ESPN 2024 game log has no game after Week 7, so group A. Times come from each page's own metadata or from the X post id; Rapoport's wording is from X's embed service. Doubts: 49ers.com shows '3:50 PM' with no time zone; its metadata says 22:50Z, so the page shows Pacific time. ESPN's own story by Nick Wagoner shows 'Oct 21, 2024, 09:53 PM' with no zone, so it is left out; its Shanahan news reaches the case through the RotoWire blurb. That CBS blurb (published 22:46Z Oct 21) was last modified at 14:40Z Oct 22, 40 minutes after the ask; the lines quoted are Monday's news, also in Rapoport's post and on 49ers.com, but I cannot see what the edit changed.",
+  "tags": ["2024", "group-A", "WR"],
+  "group": "A",
+  "season": 2024,
+  "player": { "name": "Brandon Aiyuk", "position": "WR", "team": "SF", "espnId": "4360438" },
+  "injury": "torn ACL and MCL in his right knee, Week 7 (Oct 20)",
+  "asks": [
+    { "at": "2024-10-22T14:00:00.000Z", "week": 8 }
+  ],
+  "news": [
+    {
+      "at": "2024-10-20T23:55:42.000Z",
+      "source": "Kyle Shanahan, postgame (via ProFootballTalk)",
+      "words": "The 49ers fear that receiver Brandon Aiyuk has a torn anterior cruciate ligament, coach Kyle Shanahan said. \"That's what it looks like, but we've been wrong before, so we're praying that we are.\" Aiyuk will undergo an MRI Monday.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/kyle-shanahan-says-49ers-fear-torn-acl-for-brandon-aiyuk"
+    },
+    {
+      "at": "2024-10-21T21:04:16.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#49ers WR Brandon Aiyuk does, in fact, have a torn ACL and MCL, per sources after the MRI. There may be other damage. His season is over, with a long road back for 2025.",
+      "url": "https://x.com/RapSheet/status/1848470379716587986"
+    },
+    {
+      "at": "2024-10-21T22:46:19.000Z",
+      "source": "RotoWire via CBS (citing Nick Wagoner, ESPN)",
+      "words": "Head coach Kyle Shanahan confirmed Monday that Aiyuk sustained tears to the ACL and MCL in his right knee during Sunday's loss to the Chiefs... Aiyuk will undergo surgery and miss the remainder of the season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/49ers-brandon-aiyuk-torn-acl-mcl-confirmed/"
+    },
+    {
+      "at": "2024-10-21T22:50:00.000Z",
+      "source": "team (49ers.com)",
+      "words": "The San Francisco 49ers will be without one of their top wide receivers for the remainder of the 2024 season. Head coach Kyle Shanahan confirmed his initial injury update on Brandon Aiyuk during his Monday press conference call.",
+      "url": "https://www.49ers.com/news/kyle-shanahan-confirms-brandon-aiyuk-season-ending-acl-and-mcl-tear"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4360438/type/nfl/year/2024",
+  "aliases": {
+    "49ers": "Team A",
+    "Niners": "Team A",
+    "San Francisco": "Team A",
+    "San Francisco 49ers": "Team A",
+    "Kyle Shanahan": "the head coach",
+    "Shanahan": "the head coach",
+    "John Lynch": "the GM",
+    "Lynch": "the GM",
+    "Levi's Stadium": "the stadium",
+    "Chiefs": "Team B",
+    "Kansas City": "Team B",
+    "Kansas City Chiefs": "Team B",
+    "KC": "Team B",
+    "Andy Reid": "the opposing coach"
+  }
+}

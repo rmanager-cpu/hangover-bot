@@ -1,0 +1,88 @@
+{
+  "id": "2023-joe-burrow-wrist",
+  "note": "Real. Joe Burrow (CIN) hurt his right (throwing) wrist in the second quarter at BAL, Thursday night, Week 11 (Nov 16, 2023). Taylor called it a sprain that night; on Friday Nov 17 he said a torn ligament would likely need surgery and end his season. IR Nov 25. His 2023 ESPN game log (JSON endpoint) ends at Week 11 at BAL. Group A, backWeek null. One ask: Tue Nov 21, 10 AM EST (15:00Z). Times: X posts from their status ids (syndication created_at); NFL.com from datePublished. Doubts: none on the outcome. I left out FOX19's Burrow quote ('Surgery is likely') because I could not tell whether it was in the 2:38 PM version or the 3:53 PM update. I found no news from Nov 18 to the morning of Nov 21; Rapoport's surgery and 'full recovery' report looks later.",
+  "tags": [
+    "2023",
+    "group-A",
+    "QB"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Joe Burrow",
+    "position": "QB",
+    "team": "CIN",
+    "espnId": "3915511"
+  },
+  "injury": "torn ligament, right (throwing) wrist, Week 11 (Nov 16)",
+  "asks": [
+    {
+      "at": "2023-11-21T15:00:00.000Z",
+      "week": 12
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-11-17T02:23:15.000Z",
+      "source": "Jordan Schultz on X",
+      "words": "Joe Burrow in obvious pain. Can't grip the football.",
+      "url": "https://x.com/Schultz_Report/status/1725338782524641462"
+    },
+    {
+      "at": "2023-11-17T03:12:05.000Z",
+      "source": "team (Bengals on X)",
+      "words": "QB Joe Burrow has been declared out.",
+      "url": "https://x.com/Bengals/status/1725351071273386003"
+    },
+    {
+      "at": "2023-11-17T04:36:33.000Z",
+      "source": "Josina Anderson on X (Zac Taylor, postgame)",
+      "words": "#Bengals HC Zac Taylor thinks it's a sprained wrist for Joe Burrow, at this time...",
+      "url": "https://x.com/JosinaAnderson/status/1725372326491893932"
+    },
+    {
+      "at": "2023-11-17T05:39:07.000Z",
+      "source": "Jeremy Fowler, ESPN, on X",
+      "words": "Joe Burrow expected to get an MRI on his sprained wrist tomorrow, per source... Bengals players optimistic yet uncertain. Mike Hilton told me he doesn't sense Burrow will miss the season.",
+      "url": "https://x.com/JFowlerESPN/status/1725388074119516289"
+    },
+    {
+      "at": "2023-11-17T19:39:25.000Z",
+      "source": "Joe Danneman, FOX19, on X (Zac Taylor, press conference)",
+      "words": "Zac Taylor on Joe Burrow: Torn ligament in his wrist that'll likely need surgery and end his season.",
+      "url": "https://x.com/FOX19Joe/status/1725599542261825809"
+    },
+    {
+      "at": "2023-11-17T19:56:26.000Z",
+      "source": "NFL.com (Nick Shook)",
+      "words": "Bengals QB Joe Burrow has torn ligament in right wrist, will miss remainder of 2023 season. Joe Burrow's tumultuous 2023 season has come to a premature end.",
+      "url": "https://www.nfl.com/news/bengals-qb-joe-burrow-has-torn-wrist-ligament-to-miss-remainder-of-2023-season"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3915511/type/nfl/year/2023",
+  "aliases": {
+    "Bengals": "Team A",
+    "Cincinnati": "Team A",
+    "Cincinnati Bengals": "Team A",
+    "Bengals Cincinnati": "Team A",
+    "Zac Taylor": "the head coach",
+    "Taylor": "the head coach",
+    "Duke Tobin": "the personnel director",
+    "Paycor Stadium": "the stadium",
+    "Ravens": "Team B",
+    "Baltimore": "Team B",
+    "Baltimore Ravens": "Team B",
+    "Ravens Baltimore": "Team B",
+    "BAL": "Team B",
+    "John Harbaugh": "the opposing head coach",
+    "Harbaugh": "the opposing head coach",
+    "M&T Bank Stadium": "the stadium",
+    "Jadeveon Clowney": "an opposing player",
+    "Mike Hilton": "a teammate",
+    "Jake Browning": "the backup QB",
+    "Joe Danneman": "a local TV reporter",
+    "FOX19": "a local TV station"
+  }
+}

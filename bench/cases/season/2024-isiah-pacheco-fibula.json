@@ -1,0 +1,83 @@
+{
+  "id": "2024-isiah-pacheco-fibula",
+  "note": "Real. Isiah Pacheco (KC) fractured his right fibula in Week 2 (Sun Sep 15 vs CIN); IR and surgery on Wed Sep 18; activated Nov 28. His ESPN 2024 game log shows his first game back in Week 13 (Nov 29 vs LV), so group B, backWeek 13. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Doubts: Andy Reid's Sep 18 'this season or next season' remark is timed by the Arrowhead Pride article (19:05Z); he said it earlier that day at a time I could not pin down. That article was later updated with Rapoport's surgery news, still before the second ask. I found no further news between Sep 19 and the second ask (Sep 24). Rapoport's surgery post is trimmed (the surgeon's name and city are cut).",
+  "tags": ["2024", "group-B", "RB"],
+  "group": "B",
+  "season": 2024,
+  "player": { "name": "Isiah Pacheco", "position": "RB", "team": "KC", "espnId": "4361529" },
+  "injury": "fractured right fibula, Week 2 (Sep 15)",
+  "asks": [
+    { "at": "2024-09-17T14:00:00.000Z", "week": 3 },
+    { "at": "2024-09-24T14:00:00.000Z", "week": 4 }
+  ],
+  "news": [
+    {
+      "at": "2024-09-16T00:19:51.000Z",
+      "source": "Andy Reid, postgame (via ProFootballTalk)",
+      "words": "Reid said in his postgame press conference that Pacheco suffered an ankle injury but had no update, as he was still undergoing tests. Jeff Darlington of ESPN reported that Pacheco left the stadium on crutches and in a walking boot.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/isiah-pacheco-suffered-ankle-injury-late-in-chiefs-bengals"
+    },
+    {
+      "at": "2024-09-16T13:24:08.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#Chiefs star RB Isiah Pacheco ... fractured his fibula based on initial tests, sources say. More information coming to determine severity and associated damage, but Pacheco is set to miss real time.",
+      "url": "https://x.com/RapSheet/status/1835671010424549710"
+    },
+    {
+      "at": "2024-09-16T13:39:50.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Chiefs RB Isiah Pacheco is expected to land on injured reserve with the fibula injury he suffered Sunday vs. the Bengals, meaning he will miss a minimum of four weeks and quite possibly longer, per sources.",
+      "url": "https://x.com/AdamSchefter/status/1835674961232425093"
+    },
+    {
+      "at": "2024-09-16T19:38:54.000Z",
+      "source": "Jeremy Fowler, ESPN, on X",
+      "words": "Source: #Chiefs RB Isiah Pacheco (fibula) expected to miss approximately 6-8 weeks. He'll go on IR but plans to be back this year.",
+      "url": "https://x.com/JFowlerESPN/status/1835765321912738134"
+    },
+    {
+      "at": "2024-09-16T23:54:11.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Pacheco is slated to undergo surgery on his fractured right fibula in the middle of this week, which will require at least six weeks to recover from, Ian Rapoport of NFL Network reports.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chiefs-isiah-pacheco-undergoing-surgery-this-week/"
+    },
+    {
+      "at": "2024-09-18T19:05:00.000Z",
+      "source": "Andy Reid, press conference (via Arrowhead Pride)",
+      "words": "\"He's been put on IR. He's having surgery today. I can't give you a time when he'll return. We'll just see if it's this season or next season. We'll see how he does as he goes here.\"",
+      "url": "https://www.arrowheadpride.com/2024/9/18/24248335/chiefs-injuries-andy-reid-says-rb-isiah-pacheco-could-be-back-this-season-or-next"
+    },
+    {
+      "at": "2024-09-18T19:38:18.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#Chiefs RB Isiah Pacheco underwent successful surgery today ... No complications, no ligament issues. His timeline to return remains at least 6 weeks up to 8 weeks.",
+      "url": "https://x.com/RapSheet/status/1836489946682524041"
+    },
+    {
+      "at": "2024-09-18T19:47:09.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Pacheco's surgery involved no complications or ligament damage, which means he has a good chance to play again this season. He won't be a realistic candidate to be activated until at least November, or perhaps even December.",
+      "url": "https://www.cbssports.com/fantasy/football/news/chiefs-isiah-pacheco-no-complications-with-surgery/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 13,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4361529/type/nfl/year/2024",
+  "aliases": {
+    "Chiefs": "Team A",
+    "Kansas City": "Team A",
+    "Kansas City Chiefs": "Team A",
+    "Andy Reid": "the head coach",
+    "Reid": "the head coach",
+    "Brett Veach": "the GM",
+    "Veach": "the GM",
+    "Arrowhead Pride": "a team fan site",
+    "GEHA Field at Arrowhead Stadium": "the stadium",
+    "Arrowhead Stadium": "the stadium",
+    "Arrowhead": "the stadium",
+    "Bengals": "Team B",
+    "Cincinnati": "Team B",
+    "Cincinnati Bengals": "Team B",
+    "Zac Taylor": "the opposing coach"
+  }
+}

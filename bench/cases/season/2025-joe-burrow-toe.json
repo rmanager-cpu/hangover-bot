@@ -1,0 +1,83 @@
+{
+  "id": "2025-joe-burrow-toe",
+  "note": "Real (my pick for the ninth case: a three-month timeline that ran short). Joe Burrow (CIN QB) suffered a Grade 3 turf toe on his left foot in the second quarter of the Week 2 win over Jacksonville (Sep 14, 2025). Reports that night and Monday said surgery and at least three months, which pointed to mid-December; he went on IR Sep 16 and had surgery Sep 19. He came back on Thanksgiving: his ESPN 2025 game log shows Weeks 1-2, then Week 13 (Nov 27 at BAL, 24 of 46, 261 yards) and every week after: group B, backWeek 13. Second ask (Sep 23) is the Tuesday after the surgery. Times: CBS page timestamps (RotoWire blurbs, one CBS Sports story), FOX19's datePublished, and the AP story's modified time (20:16Z Sep 15) because its 14:39Z publish time predates Taylor's afternoon press conference that the text quotes. I did not open Rapoport's, Pelissero's or Schefter's own posts. Later timeline news (an Oct 17 'on track for mid-December' report, a Thanksgiving target in November) is after the last ask and left out.",
+  "tags": ["2025", "group-B", "QB"],
+  "group": "B",
+  "season": 2025,
+  "player": { "name": "Joe Burrow", "position": "QB", "team": "CIN", "espnId": "3915511" },
+  "injury": "Grade 3 turf toe, left foot, Week 2 (Sep 14); surgery planned",
+  "asks": [
+    { "at": "2025-09-16T14:00:00.000Z", "week": 3 },
+    { "at": "2025-09-23T14:00:00.000Z", "week": 4 }
+  ],
+  "news": [
+    {
+      "at": "2025-09-15T01:31:44.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport and Tom Pelissero, NFL Network)",
+      "words": "Burrow is feared to have suffered a Grade 3 turf toe injury, which would require surgery and a recovery period of at least three months. He exited Sunday's win in the second quarter and is still evaluating his options.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bengals-joe-burrow-could-face-three-month-absence/"
+    },
+    {
+      "at": "2025-09-15T12:45:26.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Burrow will reportedly need toe surgery, which would sideline him for a minimum of three months. Confirmation is still pending from the Bengals, but it looks like Burrow will miss extended time, into December.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bengals-joe-burrow-needs-toe-surgery-per-report/"
+    },
+    {
+      "at": "2025-09-15T18:39:47.000Z",
+      "source": "RotoWire via CBS (Zac Taylor, via Paul Dehner Jr., The Athletic, and Ben Baby, ESPN)",
+      "words": "Taylor confirmed Monday that Burrow (toe) will require surgery but declined to provide a recovery timeline. The team hasn't confirmed the severity or the possibility of him returning this season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bengals-joe-burrow-set-for-surgery/"
+    },
+    {
+      "at": "2025-09-15T20:16:57.000Z",
+      "source": "Associated Press (Zac Taylor, press conference)",
+      "words": "\"We are working through the details and timelines.\" \"I don't know what a toe rehab looks like. I know Joe's gonna give it everything he's got.\" The injury is expected to sideline Burrow a minimum of three months.",
+      "url": "https://www.wbay.com/2025/09/15/bengals-qb-joe-burrow-have-surgery-left-toe-miss-3-months-ap-source-says/"
+    },
+    {
+      "at": "2025-09-17T16:57:30.000Z",
+      "source": "FOX19 Cincinnati (Zac Taylor)",
+      "words": "Taylor said there is no update on when Burrow will undergo surgery. Burrow was put on the Injured Reserve list Tuesday and needs surgery to repair the Grade 3 turf toe injury.",
+      "url": "https://www.fox19.com/2025/09/17/zac-taylor-meets-with-media-after-joe-burrow-put-ir/"
+    },
+    {
+      "at": "2025-09-18T16:35:38.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Burrow is on track to undergo a procedure Friday to repair his Grade 3 turf toe. Once the surgery happens, he will face an estimated three-month recovery, a timetable that could allow for a late-season return.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bengals-joe-burrow-set-to-undergo-toe-surgery-soon/"
+    },
+    {
+      "at": "2025-09-19T16:41:01.000Z",
+      "source": "RotoWire via CBS (Zac Taylor, via Ben Baby, ESPN)",
+      "words": "Taylor confirmed that Burrow underwent toe surgery Friday. The procedure went well, but at this stage the Bengals don't have a timeline for his return.",
+      "url": "https://www.cbssports.com/fantasy/football/news/bengals-joe-burrow-undergoes-toe-procedure-friday/"
+    },
+    {
+      "at": "2025-09-19T16:51:00.000Z",
+      "source": "CBS Sports (citing Jonathan Jones, CBS Sports)",
+      "words": "Burrow underwent successful surgery on his turf toe Friday morning, coach Zac Taylor announced. There is no timeline for his return, but Jonathan Jones reports Burrow is expected to be sidelined for three months.",
+      "url": "https://www.cbssports.com/nfl/news/joe-burrow-injury-update-bengals-qb-undergoes-surgery-on-toe-expected-to-miss-at-least-three-months/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 13,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3915511/type/nfl/year/2025",
+  "aliases": {
+    "Bengals": "Team A",
+    "Cincinnati": "Team A",
+    "Cincinnati Bengals": "Team A",
+    "Zac Taylor": "the head coach",
+    "Taylor": "the head coach",
+    "Duke Tobin": "the personnel director",
+    "Tobin": "the personnel director",
+    "Paycor Stadium": "the stadium",
+    "FOX19": "a local TV station",
+    "Joe Cool": "Player A",
+    "Joe Brrr": "Player A",
+    "Jaguars": "Team B",
+    "Jacksonville": "Team B",
+    "Jacksonville Jaguars": "Team B",
+    "JAX": "Team B"
+  }
+}

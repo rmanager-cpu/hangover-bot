@@ -1,0 +1,70 @@
+{
+  "id": "2024-puka-nacua-knee",
+  "note": "Real. Puka Nacua (LAR) sprained the PCL in his right knee in Week 1 (Sun Sep 8 at DET), aggravating a training-camp knee injury; the coach said Monday Sep 9 he would go on IR, and the move became official Sep 11. He was designated to return Oct 22 and activated for Thursday Oct 24. His ESPN 2024 game log shows his first game back in Week 8 (Oct 24 vs MIN), so group B, backWeek 8. Times come from each page's own metadata or from the X post id; the X posts' wording is from X's embed service. Doubts: the ProFootballTalk page (21:16Z Sep 9) was edited at 13:57Z on Sep 10, three minutes before the first ask; the quoted lines are Monday's news. Rapoport's Sep 15 post also covers another player; only the Nacua part is quoted. No item from the game night itself; the first item is Schefter's Monday report.",
+  "tags": ["2024", "group-B", "WR"],
+  "group": "B",
+  "season": 2024,
+  "player": { "name": "Puka Nacua", "position": "WR", "team": "LAR", "espnId": "4426515" },
+  "injury": "PCL sprain in his right knee, aggravating a training-camp injury, Week 1 (Sep 8)",
+  "asks": [
+    { "at": "2024-09-10T14:00:00.000Z", "week": 2 },
+    { "at": "2024-09-17T14:00:00.000Z", "week": 3 }
+  ],
+  "news": [
+    {
+      "at": "2024-09-09T19:46:33.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Rams WR Puka Nacua aggravated his summer knee injury Sunday night vs. the Lions and, while he still is going through additional testing, he is expected to be considered week to week, per sources.",
+      "url": "https://x.com/AdamSchefter/status/1833230531334680863"
+    },
+    {
+      "at": "2024-09-09T21:16:56.000Z",
+      "source": "Sean McVay, press conference (via ProFootballTalk)",
+      "words": "McVay told reporters in his Monday news conference that Nacua has a PCL sprain and will be placed on injured reserve. McVay said the recurrence \"is a little more significant\" than the original injury.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/rams-to-place-puka-nacua-on-ir-with-pcl-sprain"
+    },
+    {
+      "at": "2024-09-09T21:59:31.000Z",
+      "source": "team (Rams site)",
+      "words": "McVay on Monday said Nacua's knee injury sustained against the Lions Sunday night was a PCL sprain that will land him on Injured Reserve (IR). As a result, Nacua will miss a minimum of four games.",
+      "url": "https://www.therams.com/news/puka-nacua-injury-update-week-1-lions-pcl-sprain-injured-reserve-steve-avila-joe-noteboom-kevin-dotson"
+    },
+    {
+      "at": "2024-09-11T21:41:59.000Z",
+      "source": "RotoWire via CBS (citing Adam Grosbard, Orange County Register)",
+      "words": "Rams head coach Sean McVay said Wednesday that Nacua (knee) has a \"unique\" injury that may require him to miss more than the required four games while on injured reserve. The team officially placed Nacua on IR on Wednesday.",
+      "url": "https://www.cbssports.com/fantasy/football/news/rams-puka-nacua-may-miss-more-than-four-games/"
+    },
+    {
+      "at": "2024-09-15T11:03:35.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Nacua could miss between five and seven weeks, depending on how quickly he recovers from a PCL sprain in his right knee, sources tell Adam Schefter of ESPN.",
+      "url": "https://www.cbssports.com/fantasy/football/news/rams-puka-nacua-facing-5-to-7-week-absence/"
+    },
+    {
+      "at": "2024-09-15T13:17:37.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "From @NFLGameDay: ... #Rams WR Puka Nacua (PCL) could remain on the sidelines until Week 9.",
+      "url": "https://x.com/RapSheet/status/1835306982028255382"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 8,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4426515/type/nfl/year/2024",
+  "aliases": {
+    "Rams": "Team A",
+    "Los Angeles Rams": "Team A",
+    "LA Rams": "Team A",
+    "Los Angeles": "Team A",
+    "Sean McVay": "the head coach",
+    "McVay": "the head coach",
+    "Les Snead": "the GM",
+    "Snead": "the GM",
+    "SoFi Stadium": "the stadium",
+    "Lions": "Team B",
+    "Detroit": "Team B",
+    "Detroit Lions": "Team B",
+    "Dan Campbell": "the opposing coach",
+    "Orange County Register": "a local newspaper"
+  }
+}

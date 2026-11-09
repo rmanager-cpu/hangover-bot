@@ -24,6 +24,8 @@ export const JUDGE_TIMEOUT_MS = 60_000;
 export const ADVISE_TIMEOUT_MS = 100_000;
 /** The every-tool run's guard against a hung call, not a speed rule: speed is reported, not judged. */
 export const ALL_TOOLS_TIMEOUT_MS = 300_000;
+/** The shared research's guard: one long run with every tool, a few times a week for everyone. */
+export const RESEARCH_TIMEOUT_MS = 900_000;
 /** Anthropic's web search, per search ($10 per 1,000), on top of tokens. OpenRouter's cost already includes its search fees. */
 export const ANTHROPIC_SEARCH_USD = 0.01;
 
@@ -47,12 +49,23 @@ export interface Ask {
   schema: Record<string, unknown>;
 }
 
+/** A job with every tool and a report tool to finish with: the shared research (research.ts). */
+export interface ResearchAsk {
+  system: string;
+  user: string;
+  report: { name: string; description: string; input_schema: Record<string, unknown> };
+  /** Whether a report's arguments are usable; an unusable one is put into the form by a second call. */
+  accept: (args: unknown) => boolean;
+}
+
 export interface Contender {
   entry: ModelEntry;
   judge(input: JudgeInput): Promise<Call<AiChoice>>;
   advise(input: AdviceInput, opts: AdviseOptions): Promise<Call<Advice[]>>;
   /** The parsed JSON answer, unchecked; the caller validates it. Run like the Judge: low effort, a minute. */
   ask(req: Ask): Promise<Call<unknown>>;
+  /** Every tool, then the report tool once: the report's arguments, unchecked beyond `accept`. */
+  research(req: ResearchAsk): Promise<Call<unknown>>;
 }
 
 const parsed = (text: string | null | undefined): unknown => {
@@ -60,7 +73,15 @@ const parsed = (text: string | null | undefined): unknown => {
   try {
     return JSON.parse(text);
   } catch {
-    return undefined;
+    // Asked for JSON in words, some models wrap it in a code fence or a sentence: take the object.
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start < 0 || end <= start) return undefined;
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch {
+      return undefined;
+    }
   }
 };
 
@@ -138,7 +159,7 @@ function allToolsBody(entry: ModelEntry, req: { system: string; user: string; re
   return {
     model: entry.model,
     messages: [
-      { role: "system", content: `${req.system} ${allToolsNote(xai)}` },
+      { role: "system", content: `${req.system} ${allToolsNote(xai, req.report.name)}` },
       { role: "user", content: req.user },
     ],
     tools: [
@@ -183,34 +204,39 @@ async function reform(
   report: { name: string; description: string; input_schema: Record<string, unknown> },
   t: Trace,
   f: typeof fetch,
+  o: { keep?: string; maxTokens?: number; notes?: number } = {},
 ): Promise<{ args?: unknown; usage: Usage; error?: string }> {
   const draft = [
     t.text ? `What I wrote: ${t.text}` : "",
     t.rawReport ? `My draft report, in the wrong fields: ${t.rawReport}` : "",
-    !t.text && !t.rawReport && t.reasoning ? `My notes: ${t.reasoning.slice(-6000)}` : "",
+    !t.text && !t.rawReport && t.reasoning ? `My notes: ${t.reasoning.slice(-(o.notes ?? 6000))}` : "",
     t.citations?.length ? `Pages I read: ${t.citations.map((c) => c.url).join(", ")}` : "",
   ].filter(Boolean).join("\n\n");
+  const body = (toolChoice: unknown) => ({
+    model: entry.model,
+    messages: [
+      { role: "system", content: req.system },
+      { role: "user", content: req.user },
+      { role: "assistant", content: draft || "I have no draft." },
+      { role: "user", content: `Now call ${report.name} once, with exactly its fields. ${o.keep ?? "Keep the same advice: no new moves, none dropped. Put the pages you used in sources."}` },
+    ],
+    tools: [{ type: "function", function: { name: report.name, description: report.description, parameters: report.input_schema, strict: true } }],
+    tool_choice: toolChoice,
+    max_tokens: o.maxTokens ?? 8000,
+    usage: { include: true },
+    provider: { require_parameters: true },
+    ...reasoningOf(entry, "low"),
+  });
+  const timeout = o.maxTokens ? RESEARCH_TIMEOUT_MS : ADVISE_TIMEOUT_MS;
   try {
-    const r = await chat(
-      key,
-      {
-        model: entry.model,
-        messages: [
-          { role: "system", content: req.system },
-          { role: "user", content: req.user },
-          { role: "assistant", content: draft || "I have no draft." },
-          { role: "user", content: `Now call ${report.name} once, with exactly its fields. Keep the same advice: no new moves, none dropped. Put the pages you used in sources.` },
-        ],
-        tools: [{ type: "function", function: { name: report.name, description: report.description, parameters: report.input_schema, strict: true } }],
-        tool_choice: { type: "function", function: { name: report.name } },
-        max_tokens: 8000,
-        usage: { include: true },
-        provider: { require_parameters: true },
-        ...reasoningOf(entry, "low"),
-      },
-      ADVISE_TIMEOUT_MS,
-      f,
-    );
+    let r: ChatResponse;
+    try {
+      r = await chat(key, body({ type: "function", function: { name: report.name } }), timeout, f);
+    } catch (e) {
+      // Meta's Muse accepts only "auto" (400 on Nov 8); the message already says to call it.
+      if (!(e instanceof Error) || !e.name.startsWith("http 400")) throw e;
+      r = await chat(key, body("auto"), timeout, f);
+    }
     const raw = r.choices?.[0]?.message?.tool_calls?.find((c) => c.function?.name === report.name)?.function?.arguments;
     if (!raw) return { usage: orUsage(r), error: "no report" };
     try {
@@ -257,24 +283,28 @@ function openRouter(entry: ModelEntry, key: string, f: typeof fetch): Contender 
     },
     async ask(req) {
       const t0 = performance.now();
+      const body = (enforced: boolean) => ({
+        model: entry.model,
+        messages: [
+          { role: "system", content: enforced ? req.system : `${req.system} Reply with only a JSON object matching this schema, nothing else: ${JSON.stringify(req.schema)}` },
+          { role: "user", content: req.user },
+        ],
+        ...(enforced ? { response_format: { type: "json_schema", json_schema: { name: "answer", strict: true, schema: req.schema } }, provider: { require_parameters: true } } : {}),
+        // Room for a model that reasons at length before its JSON: DeepSeek V4.1 Flash used all 2,500 (Nov 8).
+        max_tokens: 8000,
+        usage: { include: true },
+        ...reasoningOf(entry, "low"),
+      });
       try {
-        const r = await chat(
-          key,
-          {
-            model: entry.model,
-            messages: [
-              { role: "system", content: req.system },
-              { role: "user", content: req.user },
-            ],
-            response_format: { type: "json_schema", json_schema: { name: "answer", strict: true, schema: req.schema } },
-            max_tokens: 2500,
-            usage: { include: true },
-            provider: { require_parameters: true },
-            ...reasoningOf(entry, "low"),
-          },
-          JUDGE_TIMEOUT_MS,
-          f,
-        );
+        let r: ChatResponse;
+        try {
+          r = await chat(key, body(true), JUDGE_TIMEOUT_MS, f);
+        } catch (e) {
+          // No provider of this model can enforce a JSON schema (OpenRouter answers 404, or 400
+          // from the provider): ask for the JSON in words, and the parser checks it the same way.
+          if (!(e instanceof Error) || !/^http (404|400)/.test(e.name)) throw e;
+          r = await chat(key, body(false), JUDGE_TIMEOUT_MS, f);
+        }
         const text = r.choices?.[0]?.message?.content;
         const answer = parsed(text);
         return { answer, latencyMs: ms(t0), usage: orUsage(r), ...(answer !== undefined ? {} : { error: text ? "unparseable answer" : `no answer (${r.choices?.[0]?.finish_reason ?? "?"})` }) };
@@ -337,7 +367,43 @@ function openRouter(entry: ModelEntry, key: string, f: typeof fetch): Contender 
         return { answer: undefined, latencyMs: ms(t0), usage: {}, error: errorName(e) };
       }
     },
+    async research(req) {
+      const t0 = performance.now();
+      try {
+        // Medium effort for everyone: the research is the expensive, careful step (owner, Nov 7).
+        const r = await chat(key, { ...allToolsBody(entry, req), reasoning: { effort: "medium" } }, RESEARCH_TIMEOUT_MS, f);
+        const trace = openRouterTrace(r);
+        const raw = r.choices?.[0]?.message?.tool_calls?.find((t) => t.function?.name === req.report.name)?.function?.arguments;
+        const args = parsed(raw);
+        if (args !== undefined && req.accept(args)) return { answer: args, latencyMs: ms(t0), usage: orUsage(r), trace };
+        const kept = raw ? { ...trace, rawReport: raw.slice(0, 40000) } : trace;
+        const fixed = await reform(entry, key, req, req.report, kept, f, {
+          keep: "Keep the same facts, labels and summary: add nothing, leave nothing out. Put each fact's pages in its sources.",
+          maxTokens: 24000,
+          notes: 30000,
+        });
+        const usage = sumUsage(orUsage(r), fixed.usage);
+        const final = { ...kept, reformatted: true };
+        // When the second call fails too, what the first sent stands: a summary is worth keeping.
+        if (fixed.args === undefined || !req.accept(fixed.args)) return { answer: args, latencyMs: ms(t0), usage, error: `no report after reformatting (${fixed.error ?? "not a brief"})`, trace: final };
+        return { answer: fixed.args, latencyMs: ms(t0), usage, trace: final };
+      } catch (e) {
+        return { answer: undefined, latencyMs: ms(t0), usage: {}, error: errorName(e) };
+      }
+    },
   };
+}
+
+/**
+ * What's wrong with a report that failed the form, in words the model can fix: its shape only
+ * (a list sent as text, an empty list), never a judgment of the facts in it.
+ */
+export function notABrief(input: unknown): string {
+  if (!input || typeof input !== "object") return "the report was empty";
+  const problems = Object.entries(input as Record<string, unknown>).flatMap(([k, v]) =>
+    typeof v === "string" && /^\s*[[{]/.test(v) ? [`${k} came as text, not a list`] : Array.isArray(v) && !v.length ? [`${k} is empty`] : [],
+  );
+  return problems.length ? problems.join("; ") : "its fields don't match the schema";
 }
 
 // ---------------------------------------------------------------- Anthropic, the production adapter
@@ -346,22 +412,27 @@ function anthropicDirect(entry: ModelEntry, key: string, price: Price | undefine
   // The adapter takes a fetch, so a metering wrapper reads each response's usage on the way past.
   const metered = () => {
     const meter = { inputTokens: 0, outputTokens: 0, webSearches: 0, webFetches: 0, blocks: [] as AnthropicBlock[], stop: undefined as string | undefined };
+    /** One finished message: from a plain response's body, or a stream's final message. */
+    const record = (body: { usage?: unknown; content?: unknown; stop_reason?: string | null }) => {
+      const u = (body.usage ?? {}) as Record<string, unknown>;
+      const n = (k: string): number => (typeof u[k] === "number" ? (u[k] as number) : 0);
+      meter.inputTokens += n("input_tokens") + n("cache_creation_input_tokens") + n("cache_read_input_tokens");
+      meter.outputTokens += n("output_tokens");
+      const stu = u.server_tool_use as { web_search_requests?: number; web_fetch_requests?: number } | undefined;
+      meter.webSearches += stu?.web_search_requests ?? 0;
+      meter.webFetches += stu?.web_fetch_requests ?? 0;
+      // Every response's blocks, in order: the trace of searches, fetches and thinking.
+      if (Array.isArray(body.content)) meter.blocks.push(...(body.content as AnthropicBlock[]));
+      if (body.stop_reason) meter.stop = body.stop_reason;
+    };
     const wrapped = (async (url: string | URL | Request, init?: RequestInit) => {
       const res = await f(url, init);
+      // A stream is metered from its final message instead (record), not read twice here.
+      if (res.headers.get("content-type")?.includes("text/event-stream")) return res;
       try {
-        const body = (await res.clone().json()) as { usage?: Record<string, unknown>; content?: AnthropicBlock[]; stop_reason?: string };
-        const u = body.usage ?? {};
-        const n = (k: string): number => (typeof u[k] === "number" ? (u[k] as number) : 0);
-        meter.inputTokens += n("input_tokens") + n("cache_creation_input_tokens") + n("cache_read_input_tokens");
-        meter.outputTokens += n("output_tokens");
-        const stu = u.server_tool_use as { web_search_requests?: number; web_fetch_requests?: number } | undefined;
-        meter.webSearches += stu?.web_search_requests ?? 0;
-        meter.webFetches += stu?.web_fetch_requests ?? 0;
-        // Every response's blocks, in order: the trace of searches, fetches and thinking.
-        if (Array.isArray(body.content)) meter.blocks.push(...body.content);
-        if (body.stop_reason) meter.stop = body.stop_reason;
+        record((await res.clone().json()) as { usage?: unknown; content?: unknown; stop_reason?: string });
       } catch {
-        // Not JSON (a stream or an error page): no usage to read.
+        // Not JSON (an error page): no usage to read.
       }
       return res;
     }) as typeof fetch;
@@ -374,7 +445,20 @@ function anthropicDirect(entry: ModelEntry, key: string, price: Price | undefine
       ...(meter.webFetches ? { webFetches: meter.webFetches } : {}),
     });
     const trace = () => anthropicTrace(meter.blocks, meter.stop);
-    return { wrapped, usage, trace };
+    return { wrapped, usage, trace, record };
+  };
+
+  /**
+   * An Anthropic error by its class and status, plus the network's code for a dropped
+   * connection ("APIConnectionError (UND_ERR_HEADERS_TIMEOUT)"). The SDK's errors all carry
+   * the name "Error", which said nothing on Nov 8. Never the message.
+   */
+  const anthropicError = (e: unknown): string => {
+    if (!(e instanceof Anthropic.APIError)) return errorName(e);
+    let cause: unknown = (e as { cause?: unknown }).cause;
+    let code: string | undefined;
+    for (let i = 0; cause && i < 3 && !code; i++, cause = (cause as { cause?: unknown }).cause) code = (cause as { code?: string }).code;
+    return `${e.constructor.name} ${e.status ?? ""}`.trim() + (code ? ` (${code})` : "");
   };
 
   /**
@@ -417,12 +501,80 @@ function anthropicDirect(entry: ModelEntry, key: string, price: Price | undefine
       }
       return done(undefined, "no report after 10 rounds");
     } catch (e) {
-      return done(undefined, e instanceof Anthropic.APIError ? `${e.name} ${e.status ?? ""}`.trim() : errorName(e));
+      return done(undefined, anthropicError(e));
+    }
+  }
+
+  /**
+   * The research run: every tool, the thinking shown, continued through pause_turn until the
+   * report. Each round streams: Node's fetch drops a response whose headers take five minutes,
+   * and Opus's first round on Nov 8 took longer than that. The report tool is strict, so its
+   * input matches the form; a report the bench still can't use is sent back once with what's
+   * wrong, and kept as sent if the second try fails too.
+   */
+  async function researchWithAllTools(req: ResearchAsk): Promise<Call<unknown>> {
+    const m = metered();
+    const client = new Anthropic({ apiKey: key, maxRetries: 1, fetch: m.wrapped });
+    const signal = AbortSignal.timeout(RESEARCH_TIMEOUT_MS);
+    const messages: Anthropic.Messages.MessageParam[] = [{ role: "user", content: req.user }];
+    const t0 = performance.now();
+    const done = (answer: unknown, error?: string): Call<unknown> => ({ answer, latencyMs: ms(t0), usage: m.usage(), ...(error ? { error } : {}), trace: m.trace() });
+    let sentBack = false;
+    try {
+      for (let round = 0; round < 20; round++) {
+        const res = await client.messages
+          .stream(
+            {
+              model: entry.model,
+              max_tokens: 64000,
+              system: `${req.system} ${allToolsNote(false, req.report.name)}`,
+              messages,
+              tools: [
+                { type: "web_search_20260209", name: "web_search" },
+                { type: "web_fetch_20260209", name: "web_fetch", max_content_tokens: 20000 },
+                { name: req.report.name, description: req.report.description, input_schema: req.report.input_schema as Anthropic.Messages.Tool.InputSchema, strict: true },
+              ],
+              tool_choice: { type: "auto" },
+              thinking: { type: "adaptive", display: "summarized" },
+              output_config: { effort: "medium" },
+            },
+            { signal, timeout: RESEARCH_TIMEOUT_MS, maxRetries: 0 },
+          )
+          .finalMessage();
+        m.record(res);
+        const reported = res.content.find((b): b is Anthropic.Messages.ToolUseBlock => b.type === "tool_use" && b.name === req.report.name);
+        if (reported) {
+          if (req.accept(reported.input)) return done(reported.input);
+          if (sentBack) return done(reported.input, "report is not a brief");
+          sentBack = true;
+          messages.push(
+            { role: "assistant", content: res.content },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "tool_result",
+                  tool_use_id: reported.id,
+                  is_error: true,
+                  content: `Not filed: ${notABrief(reported.input)}. Call ${req.report.name} again with the same facts, each one an object with exactly the schema's fields.`,
+                },
+              ],
+            },
+          );
+          continue;
+        }
+        if (res.stop_reason !== "pause_turn") return done(undefined, res.stop_reason === "max_tokens" ? "max_tokens" : "no report");
+        messages.push({ role: "assistant", content: res.content });
+      }
+      return done(undefined, "no report after 20 rounds");
+    } catch (e) {
+      return done(undefined, anthropicError(e));
     }
   }
 
   return {
     entry,
+    research: researchWithAllTools,
     async judge(input) {
       const m = metered();
       let error: string | undefined;
@@ -462,7 +614,7 @@ function anthropicDirect(entry: ModelEntry, key: string, price: Price | undefine
         const answer = parsed(text);
         return { answer, latencyMs: ms(t0), usage: m.usage(), ...(answer !== undefined ? {} : { error: text ? "unparseable answer" : `no answer (${res.stop_reason ?? "?"})` }) };
       } catch (e) {
-        return { answer: undefined, latencyMs: ms(t0), usage: m.usage(), error: e instanceof Anthropic.APIError ? `${e.name} ${e.status ?? ""}`.trim() : errorName(e) };
+        return { answer: undefined, latencyMs: ms(t0), usage: m.usage(), error: anthropicError(e) };
       }
     },
   };
@@ -502,10 +654,23 @@ function mock(entry: ModelEntry): Contender {
         : [];
       return { answer: items, latencyMs: 1, usage: { costUsd: 0 } };
     },
+    async research(req) {
+      // A brief on the first two players listed, or one naming a player nobody sent.
+      if (entry.model === "silent") return { answer: undefined, latencyMs: 1, usage: { costUsd: 0 }, error: "mock silence" };
+      const players = ((parsed(req.user) as { players?: { id: string; name: string; team: string }[] } | undefined)?.players ?? []).slice(0, 2);
+      const fact = (p: { id: string; name: string; team: string }) => ({ playerId: entry.model === "off-list" ? "nobody" : p.id, player: p.name, team: p.team, kind: "injury", tier: "reported", sourceKind: "beat_reporter", claim: `${p.name} was limited in practice.`, sources: ["https://example.com/news"], asOf: null });
+      return { answer: { summary: ["Nothing big."], facts: players.map(fact) }, latencyMs: 1, usage: { costUsd: 0 } };
+    },
     async ask(req) {
       // The scratch bench's stand-ins: "keyword" believes any news that says out; "never" never does.
       if (entry.model === "silent") return { answer: undefined, latencyMs: 1, usage: { costUsd: 0 }, error: "mock silence" };
       const news = ((parsed(req.user) as { news?: { text?: string }[] } | undefined)?.news ?? []).map((n) => n.text ?? "").join(" ");
+      // The injury bench's stand-ins: "keyword" believes any news that says the season is over.
+      if ((req.schema as { properties?: Record<string, unknown> }).properties?.over) {
+        const done = /season-ending|out for the season|rest of the season|torn ACL|Achilles/i.test(news);
+        const over = entry.model === "never" ? 0.05 : entry.model === "keyword" ? (done ? 0.97 : 0.2) : 0.5;
+        return { answer: { over, backWeek: done ? null : 12, reason: done ? "The news says his season is over." : "Nothing says his season is over." }, latencyMs: 1, usage: { costUsd: 0 } };
+      }
       const said = /ruled out|\binactive\b|will not play|won't play/i.test(news);
       const out = entry.model === "never" ? 0.05 : entry.model === "keyword" ? (said ? 0.97 : 0.2) : 0.5;
       return { answer: { out, reason: said ? "The news says he is out." : "Nothing says he is out." }, latencyMs: 1, usage: { costUsd: 0 } };

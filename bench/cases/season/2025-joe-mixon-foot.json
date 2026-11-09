@@ -1,0 +1,71 @@
+{
+  "id": "2025-joe-mixon-foot",
+  "note": "Real. Joe Mixon (HOU RB) hurt his foot/ankle in individual offseason training (spring 2025), opened camp on the active/non-football injury list (Jul 23) and was moved to reserve/NFI at the Aug 26 cutdown, making him eligible from Week 5. He never played in 2025: Rapoport reported Nov 20 he was not expected to play, and on Dec 29 KPRC's Aaron Wilson reported he would not return this season (both after the last ask, left out). His ESPN 2025 game log is empty (2025 is not even among the log's seasons), which I read as no games: group A, backWeek null. Note for the runner: espnBackWeek() returns undefined on an empty log, so this outcome rests on the empty log plus the CBS Dec 29 blurb (https://www.cbssports.com/fantasy/football/news/texans-joe-mixon-will-not-return-this-season/). Asks: the Tuesday before Week 1, and the Tuesday after Ryans said, the Monday his practice eligibility opened, that he wasn't ready. Times: CBS page timestamps (RotoWire blurbs, one CBS Sports story), Bleacher Report's datePublished for the Rapoport report (I did not open Rapoport's post) and KPRC's datePublished for Ryans' pushback.",
+  "tags": ["2025", "group-A", "RB"],
+  "group": "A",
+  "season": 2025,
+  "player": { "name": "Joe Mixon", "position": "RB", "team": "HOU", "espnId": "3116385" },
+  "injury": "foot/ankle injury from offseason training (spring); on the reserve/non-football injury list to open the season",
+  "asks": [
+    { "at": "2025-09-02T14:00:00.000Z", "week": 1 },
+    { "at": "2025-09-30T14:00:00.000Z", "week": 5 }
+  ],
+  "news": [
+    {
+      "at": "2025-07-23T13:57:50.000Z",
+      "source": "RotoWire via CBS (citing Aaron Wilson, KPRC 2 Houston)",
+      "words": "The Texans placed Mixon (ankle) on the active/non-football injury list for the start of training camp. The issue is from his individual offseason training. Recent updates imply the Texans aren't overly concerned and plan to ease him into camp.",
+      "url": "https://www.cbssports.com/fantasy/football/news/texans-joe-mixon-placed-on-nfi-list/"
+    },
+    {
+      "at": "2025-07-26T17:45:55.000Z",
+      "source": "Bleacher Report (citing Ian Rapoport, NFL Network, and Jordan Schultz)",
+      "words": "Per Rapoport, Mixon is going to miss an \"extended period of time\" and will be reevaluated closer to the start of the regular season. Schultz added the Texans hope he can be ready for Week 1.",
+      "url": "https://bleacherreport.com/articles/25229667-texans-joe-mixon-reportedly-expected-miss-extended-time-foot-injury"
+    },
+    {
+      "at": "2025-07-29T00:36:35.000Z",
+      "source": "DeMeco Ryans, press conference (Aaron Wilson, KPRC 2 Houston)",
+      "words": "\"Nothing's changed with Joe. Joe is still working in the background. I know we get reports about Joe, nothing's changed. He's still working. Whenever it's time for Joe to be back, he'll be back.\"",
+      "url": "https://www.click2houston.com/sports/2025/07/29/nothings-changed-with-joe-how-joe-mixons-medical-outlook-remains-the-same-making-progress-rams-game-remains-goal/"
+    },
+    {
+      "at": "2025-08-25T20:06:47.000Z",
+      "source": "RotoWire via CBS",
+      "words": "Mixon (foot/ankle) officially will land on reserve/NFI on Tuesday afternoon, a move that will result in the running back missing at least the first four games of the regular season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/texans-joe-mixon-will-miss-at-least-four-games/"
+    },
+    {
+      "at": "2025-08-25T20:50:00.000Z",
+      "source": "CBS Sports (team announcement)",
+      "words": "The team announced Mixon will miss at least the first four games. He can begin to practice and play after the team's fourth regular season game, if he is medically cleared, first eligible for Week 5.",
+      "url": "https://www.cbssports.com/nfl/news/joe-mixon-injury-update-texans-rb-to-miss-at-least-four-games-after-being-placed-on-reserve-nfi-list/"
+    },
+    {
+      "at": "2025-08-27T18:27:40.000Z",
+      "source": "RotoWire via CBS (Nick Caserio, via DJ Bien-Aime, ESPN)",
+      "words": "GM Nick Caserio declined to answer in the affirmative when asked whether Mixon will suit up this season. He said the team will \"take it one day at a time\" and evaluate players \"after four weeks.\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/texans-joe-mixon-gm-noncommittal-on-return-in-2025/"
+    },
+    {
+      "at": "2025-09-29T16:34:34.000Z",
+      "source": "RotoWire via CBS (DeMeco Ryans, via Aaron Wilson, KPRC 2 Houston)",
+      "words": "Ryans said Monday that Mixon (foot) is not ready to return. He is eligible to practice this week, but that won't happen. Sources indicate it will be much longer, and there's a chance he won't play this season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/texans-joe-mixon-not-close-to-returning/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3116385/type/nfl/year/2025",
+  "aliases": {
+    "Texans": "Team A",
+    "Houston": "Team A",
+    "Houston Texans": "Team A",
+    "DeMeco Ryans": "the head coach",
+    "Ryans": "the head coach",
+    "Nick Caserio": "the GM",
+    "Caserio": "the GM",
+    "NRG Stadium": "the stadium",
+    "KPRC 2": "a local TV station"
+  }
+}

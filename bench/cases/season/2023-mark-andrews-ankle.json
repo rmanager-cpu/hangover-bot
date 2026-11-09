@@ -1,0 +1,91 @@
+{
+  "id": "2023-mark-andrews-ankle",
+  "note": "Real. Mark Andrews (BAL) hurt his left ankle (cracked fibula, ligament damage) on a hip-drop tackle on the opening drive vs CIN, Thursday night, Week 11 (Nov 16, 2023). Harbaugh postgame: it looks season-ending; Monday Nov 20: 'an outside chance' he returns; surgery Nov 21; IR Nov 25. His 2023 ESPN game log (JSON endpoint) has Weeks 2 to 11 (he missed Week 1, a quad) and then only the AFC Championship on Jan 28, 2024, a playoff game that doesn't count. Group A, backWeek null. Asks: Tue Nov 21, 10 AM EST, before the surgery news (2:29 PM ET); Tue Nov 28, after surgery and IR. Times: X posts from their status ids (syndication created_at); ESPN from datePublished. Doubts: none on the outcome. A model that remembers his playoff return may be tempted to say he came back.",
+  "tags": [
+    "2023",
+    "group-A",
+    "TE"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Mark Andrews",
+    "position": "TE",
+    "team": "BAL",
+    "espnId": "3116365"
+  },
+  "injury": "left ankle (cracked fibula, ligament damage), Week 11 (Nov 16)",
+  "asks": [
+    {
+      "at": "2023-11-21T15:00:00.000Z",
+      "week": 12
+    },
+    {
+      "at": "2023-11-28T15:00:00.000Z",
+      "week": 13
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-11-17T04:43:21.000Z",
+      "source": "John Harbaugh, postgame (team, Ravens on X)",
+      "words": "\"Unfortunately, Mark Andrews has a very serious ankle injury. It looks like a season ending injury.\"",
+      "url": "https://x.com/Ravens/status/1725374040586510539"
+    },
+    {
+      "at": "2023-11-17T20:37:19.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "Mark Andrews has suffered a cracked fibula and an ankle ligament injury, sources said after the MRI. It's still believed to be a long-term injury, as the team said. Baltimore will consult with Dr. Robert Anderson in Charlotte next week",
+      "url": "https://x.com/RapSheet/status/1725614110736318779"
+    },
+    {
+      "at": "2023-11-20T19:31:06.000Z",
+      "source": "John Harbaugh, press conference (team, Ravens on X)",
+      "words": "\"It wasn't as bad as initially feared after the game... We'll know more, we'll have to see how that goes. There is some optimism.\"",
+      "url": "https://x.com/Ravens/status/1726684612670177500"
+    },
+    {
+      "at": "2023-11-20T20:55:00.000Z",
+      "source": "John Harbaugh, press conference (ESPN, Jamison Hensley)",
+      "words": "\"There might be an outside chance he could get back at some point in time... I don't want to say that's definitive by any stretch.\" Asked about the playoffs: \"I don't even want to say right now.\"",
+      "url": "https://www.espn.com/nfl/story/_/id/38945650"
+    },
+    {
+      "at": "2023-11-21T19:29:50.000Z",
+      "source": "Mike Garafolo, NFL Network, on X",
+      "words": "#Ravens TE Mark Andrews will undergo surgery on his ankle today... Andrews is likely out for the year, though as John Harbaugh said, there's a chance he could return if Baltimore makes a deep playoff run.",
+      "url": "https://x.com/MikeGarafolo/status/1727046681802518584"
+    },
+    {
+      "at": "2023-11-25T21:01:07.000Z",
+      "source": "team (Ravens on X)",
+      "words": "We have placed TE Mark Andrews on injured reserve.",
+      "url": "https://x.com/Ravens/status/1728519206516535739"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3116365/type/nfl/year/2023",
+  "aliases": {
+    "Ravens": "Team A",
+    "Baltimore": "Team A",
+    "Baltimore Ravens": "Team A",
+    "Ravens Baltimore": "Team A",
+    "John Harbaugh": "the head coach",
+    "Harbaugh": "the head coach",
+    "Eric DeCosta": "the GM",
+    "DeCosta": "the GM",
+    "M&T Bank Stadium": "the stadium",
+    "Bengals": "Team B",
+    "Cincinnati": "Team B",
+    "Cincinnati Bengals": "Team B",
+    "Bengals Cincinnati": "Team B",
+    "CIN": "Team B",
+    "Zac Taylor": "the opposing head coach",
+    "Logan Wilson": "an opposing player",
+    "Dr. Robert Anderson": "a foot and ankle specialist",
+    "Robert Anderson": "a foot and ankle specialist",
+    "Charlotte": "another city",
+    "Jamison Hensley": "a team beat reporter"
+  }
+}

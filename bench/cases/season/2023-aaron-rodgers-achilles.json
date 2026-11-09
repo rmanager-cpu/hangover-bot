@@ -1,0 +1,107 @@
+{
+  "id": "2023-aaron-rodgers-achilles",
+  "note": "Real. Aaron Rodgers (NYJ) tore his left Achilles on the fourth snap of Week 1, Monday night vs BUF (Sep 11, 2023). The Jets opened his 21-day practice window Nov 29, but he played no more games in 2023: his 2023 ESPN game log (JSON endpoint) has only Week 1 vs BUF. Group A, backWeek null. First ask Tue Sep 12, 10 AM EDT: an hour before the MRI confirmation (Schefter 11:00 AM ET, Jonathan Jones 11:01 AM ET), so it sees only Monday night's fear. Second ask Tue Dec 5, 10 AM EST: after the window opened, with the Jets 4-8. Times: X posts from their status ids (syndication created_at); ESPN and CBS from datePublished. Doubts: the RotoWire blurb (11:48 PM ET Sep 11) shows a dateModified of 17:24Z Sep 12, after the first ask; its text still calls the MRI pending, so I kept it. I found no Saleh or Rodgers news from Dec 1 to the morning of Dec 5; Rodgers' Tuesday McAfee spot that day came after 10 AM and is left out. In the hidden run, 'fortnights' and his weekly show are memorable details; the show's name is aliased.",
+  "tags": [
+    "2023",
+    "group-A",
+    "QB"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Aaron Rodgers",
+    "position": "QB",
+    "team": "NYJ",
+    "espnId": "8439"
+  },
+  "injury": "left Achilles (tear feared, MRI pending), Week 1 (Sep 11)",
+  "asks": [
+    {
+      "at": "2023-09-12T14:00:00.000Z",
+      "week": 2
+    },
+    {
+      "at": "2023-12-05T15:00:00.000Z",
+      "week": 14
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-09-12T01:03:37.000Z",
+      "source": "team (Jets on X)",
+      "words": "Rodgers has been downgraded to out. His x-rays were negative.",
+      "url": "https://x.com/nyjets/status/1701401140422758762"
+    },
+    {
+      "at": "2023-09-12T03:28:51.000Z",
+      "source": "Rich Cimini, ESPN, on X (Robert Saleh, postgame)",
+      "words": "Breaking: Robert Saleh says they fear a torn Achilles for Rodgers. \"It's not good.\" MRI tomorrow. They expect it to confirm the tear. #Jets",
+      "url": "https://x.com/RichCimini/status/1701437689730396621"
+    },
+    {
+      "at": "2023-09-12T03:48:11.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "The Jets believe that Rodgers suffered an Achilles injury during Monday's 22-16 overtime win against the Bills... X-rays came back negative, but [he] was seen wearing a walking boot on his left foot... Tuesday's MRI likely will confirm the worst.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jets-aaron-rodgers-likely-has-achilles-injury/"
+    },
+    {
+      "at": "2023-09-12T15:00:22.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "An MRI confirmed today that Aaron Rodgers officially tore his Achilles on the fourth play of his Jets' career. Rodgers' season now, officially, is over.",
+      "url": "https://x.com/AdamSchefter/status/1701611717607002347"
+    },
+    {
+      "at": "2023-11-07T21:43:00.000Z",
+      "source": "Rich Cimini, ESPN (Rodgers on The Pat McAfee Show)",
+      "words": "Rodgers revealed a vague timeline for when he hopes to return, hinting Tuesday that he could be back on the field in six weeks. \"It'll be a few fortnights,\" Rodgers said.",
+      "url": "https://www.espn.com/nfl/story/_/id/38843177/jets-aaron-rodgers-hints-return-line-fortnights"
+    },
+    {
+      "at": "2023-11-19T15:28:34.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#Jets QB Aaron Rodgers eyes a December return, with Week 16 being the most likely spot... if the #Jets are alive and he can protect himself",
+      "url": "https://x.com/RapSheet/status/1726261188311355516"
+    },
+    {
+      "at": "2023-11-28T21:07:00.000Z",
+      "source": "Aaron Rodgers on The Pat McAfee Show (CBS Sports)",
+      "words": "\"First, am I healthy? Then, are we alive? Are we in it?\"... \"health-wise I'm improving steadily, but I'm not at an ability to play at this point.\" The Jets have lost four straight, falling to 4-7.",
+      "url": "https://www.cbssports.com/nfl/news/jets-aaron-rodgers-lays-out-checkpoints-for-possible-return-to-field-in-2023/"
+    },
+    {
+      "at": "2023-11-29T17:50:30.000Z",
+      "source": "RotoWire via CBS (citing Rich Cimini, ESPN)",
+      "words": "Rodgers (Achilles) has been designated for return from injured reserve... cleared for functional football activity, [but] not yet ready to take contact... he's uncertain to be activated from IR once the evaluation window closes in three weeks.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jets-aaron-rodgers-returning-to-practice-wednesday/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/8439/type/nfl/year/2023",
+  "aliases": {
+    "Jets": "Team A",
+    "New York": "Team A",
+    "New York Jets": "Team A",
+    "Jets New York": "Team A",
+    "Robert Saleh": "the head coach",
+    "Saleh": "the head coach",
+    "Joe Douglas": "the GM",
+    "MetLife Stadium": "the stadium",
+    "Bills": "Team B",
+    "Buffalo": "Team B",
+    "Buffalo Bills": "Team B",
+    "Bills Buffalo": "Team B",
+    "BUF": "Team B",
+    "Sean McDermott": "the opposing head coach",
+    "McDermott": "the opposing head coach",
+    "Commanders": "Team C",
+    "Washington": "Team C",
+    "Zach Wilson": "the backup QB",
+    "Tim Boyle": "the backup QB",
+    "The Pat McAfee Show": "a weekly sports show",
+    "Pat McAfee Show": "a weekly sports show",
+    "Pat McAfee": "a sports show host",
+    "McAfee": "a sports show host",
+    "Rich Cimini": "a team beat reporter"
+  }
+}

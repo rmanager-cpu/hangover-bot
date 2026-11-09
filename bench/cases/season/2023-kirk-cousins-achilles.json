@@ -1,0 +1,86 @@
+{
+  "id": "2023-kirk-cousins-achilles",
+  "note": "Real. Kirk Cousins (MIN) tore his right Achilles (non-contact) in the fourth quarter at GB, Week 8 (Oct 29, 2023); the team's MRI confirmed the tear Oct 30. His 2023 ESPN game log (JSON endpoint) ends at Week 8 at GB. Group A, backWeek null. One ask: Tue Oct 31, 10 AM EDT. Times: X posts from their status ids (syndication created_at); NFL.com from datePublished. Doubts: none on the outcome. The team's own post did not say 'season-ending'; NFL.com did, citing Rapoport and Pelissero, nine seconds after the team's post.",
+  "tags": [
+    "2023",
+    "group-A",
+    "QB"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Kirk Cousins",
+    "position": "QB",
+    "team": "MIN",
+    "espnId": "14880"
+  },
+  "injury": "torn right Achilles, Week 8 (Oct 29)",
+  "asks": [
+    {
+      "at": "2023-10-31T14:00:00.000Z",
+      "week": 9
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-10-29T19:44:43.000Z",
+      "source": "team (Vikings on X)",
+      "words": "QB Kirk Cousins (ankle) is out for the remainder of #MINvsGB.",
+      "url": "https://x.com/Vikings/status/1718715506776068356"
+    },
+    {
+      "at": "2023-10-29T20:39:28.000Z",
+      "source": "Adam Schefter, ESPN, on X (Kevin O'Connell, postgame)",
+      "words": "Vikings' HC Kevin O'Connell said the team fears QB Kirk Cousins suffered an Achilles injury today. He will undergo further testing to confirm.",
+      "url": "https://x.com/AdamSchefter/status/1718729285203034295"
+    },
+    {
+      "at": "2023-10-29T20:39:46.000Z",
+      "source": "Tom Pelissero, NFL Network, on X",
+      "words": "#Vikings QB Kirk Cousins suffered an Achilles injury based on the initial examination, per coach Kevin O'Connell. Cousins will undergo an MRI, but the diagnosis on Achilles is rarely wrong. It appears his season is over.",
+      "url": "https://x.com/TomPelissero/status/1718729359497052323"
+    },
+    {
+      "at": "2023-10-29T20:40:50.000Z",
+      "source": "Adam Schefter, ESPN, on X",
+      "words": "Kirk Cousins tore his Achilles today, per source. An MRI will be taken to confirm.",
+      "url": "https://x.com/AdamSchefter/status/1718729627013726643"
+    },
+    {
+      "at": "2023-10-30T17:42:04.000Z",
+      "source": "team (Vikings on X)",
+      "words": "Kirk Cousins underwent an MRI this morning at Twin Cities Orthopedics that confirmed an Achilles tendon tear. The timeline and details of his upcoming surgery will be determined this week.",
+      "url": "https://x.com/Vikings/status/1719047026363543682"
+    },
+    {
+      "at": "2023-10-30T17:42:13.000Z",
+      "source": "NFL.com (citing Ian Rapoport and Tom Pelissero)",
+      "words": "Cousins and the Minnesota Vikings received a major blow when an MRI confirmed a torn Achilles from Sunday's win over the Packers, ending his season, according to NFL Network's Ian Rapoport and Tom Pelissero.",
+      "url": "https://www.nfl.com/news/vikings-qb-kirk-cousins-sustained-torn-achilles-will-miss-remainder-of-season"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/14880/type/nfl/year/2023",
+  "aliases": {
+    "Vikings": "Team A",
+    "Minnesota": "Team A",
+    "Minnesota Vikings": "Team A",
+    "Vikings Minnesota": "Team A",
+    "Kevin O'Connell": "the head coach",
+    "O'Connell": "the head coach",
+    "Kwesi Adofo-Mensah": "the GM",
+    "U.S. Bank Stadium": "the stadium",
+    "Twin Cities Orthopedics": "a local clinic",
+    "Packers": "Team B",
+    "Green Bay": "Team B",
+    "Green Bay Packers": "Team B",
+    "Packers Green Bay": "Team B",
+    "GB": "Team B",
+    "MINvsGB": "Team A vs Team B",
+    "Matt LaFleur": "the opposing head coach",
+    "LaFleur": "the opposing head coach",
+    "Lambeau Field": "the stadium",
+    "Jaren Hall": "the backup QB"
+  }
+}

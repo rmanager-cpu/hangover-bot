@@ -1,0 +1,93 @@
+{
+  "id": "2025-jayden-reed-collarbone",
+  "note": "Real. Jayden Reed (GB) broke his collarbone landing on his right shoulder in the first quarter against Washington, Thursday night of Week 2 (Sep 11, 2025). On Sep 16 he had surgery on the collarbone and on a Jones fracture in his left foot he had played through since camp. IR official Sep 20, with a 6-8 week estimate, but on Nov 19 LaFleur said he was not yet cleared to open his practice window. It opened Nov 21. His 2025 ESPN game log (JSON endpoint) has Weeks 1 and 2 (0 targets in Week 2), then nothing until Week 14 vs CHI (Dec 7; RotoWire's Dec 7 blurb confirms him active). So group B, backWeek 14. Second ask: the Tuesday after the practice window opened. Times come from each page's datePublished metadata. Doubts: the Sep 12 RotoWire blurb was modified about an hour later, and the Sep 16 surgery blurb the next day. The NFL Media report on surgery and a November return is cited from CBS, not the original. LaFleur's 'You'll find out Thursday' (4for4, Nov 25 23:54Z) came after the second ask and is left out.",
+  "tags": [
+    "2025",
+    "group-B",
+    "WR"
+  ],
+  "group": "B",
+  "season": 2025,
+  "player": {
+    "name": "Jayden Reed",
+    "position": "WR",
+    "team": "GB",
+    "espnId": "4362249"
+  },
+  "injury": "broken collarbone (right shoulder), Week 2 (Thursday night, Sep 11)",
+  "asks": [
+    {
+      "at": "2025-09-16T14:00:00.000Z",
+      "week": 3
+    },
+    {
+      "at": "2025-11-25T15:00:00.000Z",
+      "week": 13
+    }
+  ],
+  "news": [
+    {
+      "at": "2025-09-12T04:16:00.000Z",
+      "source": "RotoWire via CBS (citing Zach Jacobson, 247Sports)",
+      "words": "Reed suffered a broken collarbone in the first quarter. Coach Matt LaFleur said Reed will miss \"a lot\" of time and will land on injured reserve. He is expected to return at some point during the regular season.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-jayden-reed-diagnosed-with-broken-collarbone/"
+    },
+    {
+      "at": "2025-09-12T08:25:00.000Z",
+      "source": "Matt LaFleur, postgame (Michael David Smith, Pro Football Talk)",
+      "words": "\"He's going to miss a lot of time. Unfortunately, he broke his collarbone, so he'll be down for quite some time. ... Certainly I would expect him back at some point this season.\"",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/jayden-reed-has-broken-collarbone-will-miss-significant-time"
+    },
+    {
+      "at": "2025-09-12T17:40:00.000Z",
+      "source": "Bryan DeArdo and Carter Bahns, CBS Sports (citing NFL Media)",
+      "words": "Reed suffered a fractured collarbone that will put him on injured reserve. According to NFL Media, he will undergo surgery early next week, likely Tuesday, and the team hopes he will return to action in November.",
+      "url": "https://www.cbssports.com/nfl/news/jayden-reed-injury-packers-wr-heading-to-ir-with-fractured-collarbone-reportedly-aiming-for-november-return/"
+    },
+    {
+      "at": "2025-09-16T22:01:00.000Z",
+      "source": "RotoWire via CBS (Reed on social media)",
+      "words": "Reed announced Tuesday that he underwent successful surgeries to repair a fractured collarbone and a Jones fracture in his left foot. The surgeries aren't expected to alter his return timeline, estimated at 6-to-8 weeks.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-jayden-reed-gets-foot-clavicle-surgeries/"
+    },
+    {
+      "at": "2025-09-20T18:17:00.000Z",
+      "source": "RotoWire via CBS",
+      "words": "The Packers placed Reed (collarbone/foot) on injured reserve Saturday. He has undergone surgeries for both and is facing a 6-to-8 week recovery timetable.",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-jayden-reed-move-to-ir-official/"
+    },
+    {
+      "at": "2025-11-19T17:27:00.000Z",
+      "source": "RotoWire via CBS (citing Rob Demovsky, ESPN)",
+      "words": "LaFleur said Wednesday that Reed has not yet been cleared to have his practice window opened. LaFleur declined to offer a specific timetable but noted the wideout is \"excited to get back out there.\"",
+      "url": "https://www.cbssports.com/fantasy/football/news/packers-jayden-reed-not-ready-to-practice-yet/"
+    },
+    {
+      "at": "2025-11-21T18:01:00.000Z",
+      "source": "Myles Simmons, Pro Football Talk",
+      "words": "Via multiple reporters, Reed is participating in Friday's session, signifying that Green Bay has opened the 21-day practice window for him to return from injured reserve.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/packers-open-21-day-practice-window-for-jayden-reed"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 14,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4362249/type/nfl/year/2025",
+  "aliases": {
+    "Packers": "Team A",
+    "Green Bay": "Team A",
+    "Green Bay Packers": "Team A",
+    "Packers Green Bay": "Team A",
+    "Pack": "Team A",
+    "Matt LaFleur": "the head coach",
+    "LaFleur": "the head coach",
+    "Brian Gutekunst": "the GM",
+    "Gutekunst": "the GM",
+    "Lambeau Field": "the stadium",
+    "Commanders": "Team B",
+    "Washington": "Team B",
+    "Washington Commanders": "Team B",
+    "Commanders Washington": "Team B",
+    "WSH": "Team B",
+    "Dan Quinn": "the opposing head coach"
+  }
+}

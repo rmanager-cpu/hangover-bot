@@ -1,0 +1,84 @@
+{
+  "id": "2025-bucky-irving-shoulder",
+  "note": "Real. Bucky Irving (TB RB) hurt his left foot in the Week 4 loss to Philadelphia (Sep 28, 2025) and played through it; Monday he had an MRI, Wednesday he was in a boot on crutches, and on Oct 5 Schefter reported a shoulder subluxation too. He was never put on IR, missed Weeks 5-12 (bye Week 9; seven games) and came back in Week 13 (Nov 30 vs ARI, 17 carries) per his ESPN 2025 game log: group B, backWeek 13. Your guess of IR was wrong; I found no IR move. The first ask (Sep 30) sees only Monday's news that he was getting an MRI, so it is a thin, early read; the second ask (Nov 11) comes after six missed games with Bowles saying the shoulder is what keeps him out and it's too soon to know about Week 11. Times: Heavy's datePublished (21:42Z Sep 29) for the Bowles MRI news (via Scott Reynolds of Pewter Report and Rick Stroud), ESPN's datePublished (16:17Z Oct 5) for Schefter's report, and CBS page timestamps for the RotoWire blurbs. I did not open Schefter's or Garafolo's own posts.",
+  "tags": ["2025", "group-B", "RB"],
+  "group": "B",
+  "season": 2025,
+  "player": { "name": "Bucky Irving", "position": "RB", "team": "TB", "espnId": "4596448" },
+  "injury": "left foot/ankle injury, Week 4 (Sep 28); MRI on Monday",
+  "asks": [
+    { "at": "2025-09-30T14:00:00.000Z", "week": 5 },
+    { "at": "2025-11-11T15:00:00.000Z", "week": 11 }
+  ],
+  "news": [
+    {
+      "at": "2025-09-29T21:42:58.000Z",
+      "source": "Heavy (Todd Bowles, via Scott Reynolds, Pewter Report, and Rick Stroud, Tampa Bay Times)",
+      "words": "Bowles says \"quite a few\" players are getting MRIs. Asked if Irving is one of the players getting an MRI, he confirmed that he's one of them. Irving's Week 5 status is unclear.",
+      "url": "https://heavy.com/sports/nfl/tampa-bay-buccaneers/news-bucky-irving-injury-update-week-5/"
+    },
+    {
+      "at": "2025-10-01T00:46:23.000Z",
+      "source": "RotoWire via CBS (citing Mike Garafolo, NFL Network)",
+      "words": "The Buccaneers are still gathering medical opinions on an apparent ankle and/or foot injury to Irving. He underwent an MRI on Monday, is still sore, and his status is up in the air for Sunday.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-status-up-in-air-for-week-5/"
+    },
+    {
+      "at": "2025-10-01T14:54:18.000Z",
+      "source": "RotoWire via CBS (citing Greg Auman, FOX Sports)",
+      "words": "Irving (ankle) was spotted wearing a boot on his left foot and using crutches at Wednesday's walkthrough practice.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-wearing-boot-at-walkthrough/"
+    },
+    {
+      "at": "2025-10-01T16:01:46.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Irving is dealing with a foot sprain that is not considered a long-term injury. He is viewed as week-to-week.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-dealing-with-sprained-foot/"
+    },
+    {
+      "at": "2025-10-05T16:17:56.000Z",
+      "source": "Jenna Laine, ESPN (citing Adam Schefter)",
+      "words": "Irving not only has a foot sprain, but he is also dealing with a shoulder subluxation that is expected to sideline him for at least two weeks, sources told ESPN's Adam Schefter.",
+      "url": "https://www.espn.com/nfl/story/_/id/46498398/sources-bucs-bucky-irving-expected-miss-least-2-weeks"
+    },
+    {
+      "at": "2025-10-22T16:52:10.000Z",
+      "source": "RotoWire via CBS (Todd Bowles, via Greg Auman, FOX Sports)",
+      "words": "Bowles said Wednesday that Irving (foot) will not suit up for Sunday's game. He won't practice Wednesday. His next opportunity will come in Week 10, after the bye.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-wont-return-week-8/"
+    },
+    {
+      "at": "2025-11-05T15:55:02.000Z",
+      "source": "RotoWire via CBS (citing Rick Stroud, Tampa Bay Times)",
+      "words": "Irving (foot/shoulder) is not expected to participate in Wednesday's practice. He evidently remains in the rehab phase of his recovery, despite the fact that the Buccaneers are coming off a bye.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-not-in-line-to-practice/"
+    },
+    {
+      "at": "2025-11-10T17:44:57.000Z",
+      "source": "RotoWire via CBS (Todd Bowles, via Scott Smith, Buccaneers.com)",
+      "words": "Bowles said Monday that Irving's shoulder injury is what's keeping him sidelined, and he has to be able to take a hit before being cleared. Bowles added that it's too soon to know if Irving can play Week 11.",
+      "url": "https://www.cbssports.com/fantasy/football/news/buccaneers-bucky-irving-status-remains-uncertain/"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 13,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4596448/type/nfl/year/2025",
+  "aliases": {
+    "Buccaneers": "Team A",
+    "Bucs": "Team A",
+    "Tampa Bay": "Team A",
+    "Tampa Bay Buccaneers": "Team A",
+    "Buccaneers.com": "the team site",
+    "Pewter Report": "a team news site",
+    "Todd Bowles": "the head coach",
+    "Bowles": "the head coach",
+    "Jason Licht": "the GM",
+    "Licht": "the GM",
+    "Raymond James Stadium": "the stadium",
+    "Mar'Keise": "Player A",
+    "Eagles": "Team B",
+    "Philadelphia": "Team B",
+    "Philadelphia Eagles": "Team B",
+    "PHI": "Team B"
+  }
+}

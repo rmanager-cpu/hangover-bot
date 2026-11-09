@@ -1,0 +1,88 @@
+{
+  "id": "2023-nick-chubb-knee",
+  "note": "Real. Nick Chubb (CLE) was carted off with a left knee injury in the second quarter at PIT, Monday night, Week 2 (Sep 18, 2023); Stefanski said after the game he expected him to miss the season; the Browns announced surgery Sep 19. His 2023 ESPN game log (JSON endpoint) has only Weeks 1 and 2. Group A, backWeek null. One ask: Tue Sep 19, 10 AM EDT. The Browns' Tuesday surgery announcement came after it (FantasyPros 12:45 PM EDT) and is left out. Times: X posts from their status ids (syndication created_at); FantasyPros from the time it shows (10:17 PM EDT = 02:17Z). Doubts: I don't know Leah Doherty's outlet (her handle says TV). Rapoport's tweet has his own typo ('suffered a what is believed'). Schefter's Sep 24 report that the ACL was only stretched is after the ask.",
+  "tags": [
+    "2023",
+    "group-A",
+    "RB"
+  ],
+  "group": "A",
+  "season": 2023,
+  "player": {
+    "name": "Nick Chubb",
+    "position": "RB",
+    "team": "CLE",
+    "espnId": "3128720"
+  },
+  "injury": "left knee, carted off, Week 2 (Sep 18)",
+  "asks": [
+    {
+      "at": "2023-09-19T14:00:00.000Z",
+      "week": 3
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-09-19T01:09:58.000Z",
+      "source": "Leah Doherty on X",
+      "words": "Devastating loss for the #Browns as Chubb is carted off here in Pittsburgh",
+      "url": "https://x.com/LeahDohertyTV/status/1703939457018208651"
+    },
+    {
+      "at": "2023-09-19T02:03:51.000Z",
+      "source": "Jordan Schultz on X",
+      "words": "Sources: The #Browns fear Nick Chubb's season is over from a possible knee dislocation, potentially with multiple ligament damage. He's currently undergoing testing, but there's serious concern.",
+      "url": "https://x.com/Schultz_Report/status/1703953016833867929"
+    },
+    {
+      "at": "2023-09-19T02:17:00.000Z",
+      "source": "FantasyPros (citing Jordan Schultz)",
+      "words": "There's fear that he dislocated his knee and suffered ligament damage that would end his season, but we don't know anything for sure yet. We should get more information on this in the coming days",
+      "url": "https://www.fantasypros.com/nfl/news/415093/nick-chubb-knee-undergoing-further-tests.php"
+    },
+    {
+      "at": "2023-09-19T03:51:56.000Z",
+      "source": "Ian Rapoport, NFL Network, on X",
+      "words": "#Browns RB Nick Chubb suffered a what is believed to be a significant and season-ending knee injury against the #Steelers, sources say, including multiple torn ligaments. He'll have tests done.",
+      "url": "https://x.com/RapSheet/status/1703980214554968415"
+    },
+    {
+      "at": "2023-09-19T04:03:29.000Z",
+      "source": "Adam Schefter, ESPN, on X (Kevin Stefanski, postgame)",
+      "words": "Browns' HC Kevin Stefanski told reporters that he expects RB Nick Chubb to be out for the season with a significant knee injury.",
+      "url": "https://x.com/AdamSchefter/status/1703983121429917778"
+    },
+    {
+      "at": "2023-09-19T05:03:17.000Z",
+      "source": "Mary Kay Cabot, cleveland.com, on X",
+      "words": "League source confirms it appears to be multiple torn knee ligaments for #Browns RB Nick Chubb, but tests will confirm. He's out for the season",
+      "url": "https://x.com/MaryKayCabot/status/1703998172643664333"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/3128720/type/nfl/year/2023",
+  "aliases": {
+    "Browns": "Team A",
+    "Cleveland": "Team A",
+    "Cleveland Browns": "Team A",
+    "Browns Cleveland": "Team A",
+    "cleveland.com": "a local outlet",
+    "Kevin Stefanski": "the head coach",
+    "Stefanski": "the head coach",
+    "Andrew Berry": "the GM",
+    "Cleveland Browns Stadium": "the stadium",
+    "Steelers": "Team B",
+    "Pittsburgh": "Team B",
+    "Pittsburgh Steelers": "Team B",
+    "Steelers Pittsburgh": "Team B",
+    "PIT": "Team B",
+    "Mike Tomlin": "the opposing head coach",
+    "Tomlin": "the opposing head coach",
+    "Acrisure Stadium": "the stadium",
+    "Minkah Fitzpatrick": "an opposing player",
+    "Mary Kay Cabot": "a team beat reporter",
+    "Leah Doherty": "a local TV reporter",
+    "Jerome Ford": "the backup RB"
+  }
+}

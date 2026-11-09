@@ -1,0 +1,99 @@
+{
+  "id": "2023-justin-jefferson-hamstring",
+  "note": "Real. Justin Jefferson (MIN) strained his right hamstring in the fourth quarter vs KC, Week 5 (Oct 8, 2023). IR Oct 11; practice window opened Nov 8; not activated for Weeks 10 to 12; bye in Week 13. His 2023 ESPN game log (JSON endpoint) skips Weeks 6 to 13 and resumes Week 14 at LV (Dec 10), so group B, backWeek 14. First ask Tue Oct 10, 10 AM EDT: sees Pelissero's IR report (7:11 AM ET). Second ask Tue Nov 14, 10 AM EST: after the window opened and he sat Week 10. Times: X posts from their status ids (syndication created_at); ESPN, NFL.com and PFT from datePublished. Doubts: the Nov 8 window item is PFT's write-up (1:29 PM ET) of Rapoport's report, not his own post; Pelissero's 'unlikely to play this week' was from Tuesday Nov 7, time not found. Reports after Nov 14 that he would wait until after the bye are left out.",
+  "tags": [
+    "2023",
+    "group-B",
+    "WR"
+  ],
+  "group": "B",
+  "season": 2023,
+  "player": {
+    "name": "Justin Jefferson",
+    "position": "WR",
+    "team": "MIN",
+    "espnId": "4262921"
+  },
+  "injury": "right hamstring, Week 5 (Oct 8)",
+  "asks": [
+    {
+      "at": "2023-10-10T14:00:00.000Z",
+      "week": 6
+    },
+    {
+      "at": "2023-11-14T15:00:00.000Z",
+      "week": 11
+    }
+  ],
+  "news": [
+    {
+      "at": "2023-10-09T01:29:00.000Z",
+      "source": "Kevin O'Connell, postgame (ESPN, Kevin Seifert)",
+      "words": "O'Connell said that it's \"still very early\" to project a timetable for Jefferson's recovery -- or if he'd miss any time at all... \"Hopefully we have him right back this week.\"",
+      "url": "https://www.espn.com/nfl/story/_/id/38609821/vikings-unsure-justin-jefferson-status-injury"
+    },
+    {
+      "at": "2023-10-09T18:14:55.000Z",
+      "source": "Kevin O'Connell, Monday (NFL.com)",
+      "words": "Jefferson will seek multiple medical opinions on his injured hamstring... \"Justin's still going through the evaluation process on that hamstring strain... I'll keep you guys posted on what that timeline may look like.\"",
+      "url": "https://www.nfl.com/news/vikings-wr-justin-jefferson-to-solicit-multiple-opinions-on-injured-hamstring"
+    },
+    {
+      "at": "2023-10-10T11:11:17.000Z",
+      "source": "Tom Pelissero, NFL Network, on X",
+      "words": "The #Vikings plan to place Justin Jefferson on injured reserve because of the hamstring injury he suffered in Sunday's loss... The exact timeline is TBD based on how he responds to treatment. But Jefferson is out at least four games.",
+      "url": "https://x.com/TomPelissero/status/1711700926828839390"
+    },
+    {
+      "at": "2023-10-11T19:10:45.000Z",
+      "source": "Kevin O'Connell, press conference (PFT)",
+      "words": "O'Connell... doesn't view Jefferson's hamstring injury as season-ending. \"I don't want to speculate on exactly when [his return will] be.\" O'Connell added the team is hopeful to open Jefferson's practice window after the required four games.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/kevin-oconnell-justin-jeffersons-hamstring-injury-is-not-expected-to-end-his-season"
+    },
+    {
+      "at": "2023-11-08T18:29:31.000Z",
+      "source": "PFT (citing Ian Rapoport and Tom Pelissero, NFL Network)",
+      "words": "The Vikings are set to designate Jefferson to return from injured reserve, opening his 21-day practice window... Pelissero separately reported on Tuesday that the receiver is unlikely to play this week against the Saints.",
+      "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/vikings-to-open-justin-jeffersons-21-day-practice-window"
+    },
+    {
+      "at": "2023-11-11T20:45:07.000Z",
+      "source": "Tom Pelissero, NFL Network, on X",
+      "words": "The #Vikings won't activate WR Justin Jefferson from injured reserve for Sunday's game vs. the #Saints. Jefferson (hamstring) returned to practice this week and was listed as questionable. But the plan was always to ramp him up gradually",
+      "url": "https://x.com/TomPelissero/status/1723441746443460661"
+    },
+    {
+      "at": "2023-11-13T18:37:05.000Z",
+      "source": "Alec Lewis, The Athletic, on X (Kevin O'Connell, Monday)",
+      "words": "Vikings HC Kevin O'Connell said WR Justin Jefferson will continue to ramp up. Complimented the work JJ put in last week... KOC said the only person who wants JJ back as much as JJ might be him.",
+      "url": "https://x.com/alec_lewis/status/1724134303250997484"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": 14,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4262921/type/nfl/year/2023",
+  "aliases": {
+    "Vikings": "Team A",
+    "Minnesota": "Team A",
+    "Minnesota Vikings": "Team A",
+    "Vikings Minnesota": "Team A",
+    "Kevin O'Connell": "the head coach",
+    "O'Connell": "the head coach",
+    "KOC": "the head coach",
+    "Kwesi Adofo-Mensah": "the GM",
+    "Adofo-Mensah": "the GM",
+    "U.S. Bank Stadium": "the stadium",
+    "US Bank Stadium": "the stadium",
+    "JJ": "Player A",
+    "Chiefs": "Team B",
+    "Kansas City": "Team B",
+    "Kansas City Chiefs": "Team B",
+    "Chiefs Kansas City": "Team B",
+    "KC": "Team B",
+    "Andy Reid": "the opposing head coach",
+    "Saints": "Team C",
+    "New Orleans": "Team C",
+    "Kevin Seifert": "a team beat reporter",
+    "Alec Lewis": "a team beat reporter"
+  }
+}

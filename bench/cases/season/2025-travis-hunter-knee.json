@@ -1,0 +1,73 @@
+{
+  "id": "2025-travis-hunter-knee",
+  "note": "Real. Travis Hunter (JAX WR/CB) hurt his right knee, non-contact, in practice on Thursday Oct 30, 2025 (after the Week 8 bye, before Week 9); Liam Coen announced IR the next morning. On Nov 11 the team announced surgery on an isolated LCL injury and said he would miss the rest of the 2025 season. His ESPN 2025 game log ends at Week 7 (Oct 19, London, vs LAR): group A, backWeek null. The first ask is Nov 4 (EST, 15:00Z). The second ask (Nov 18) comes after the team's season-ending announcement, so it should be near certain: it checks that a model reads a team's word. Times: Jaguars.com shows 12:20 PM ET (16:20Z) for the Oehser story; the AP story's 21:49Z is its update time on news4jax (Bay News 9 shows 5:49 PM ET for the same AP text); Mike Silver's report is dated only Nov 1 by Bleacher Report, so its 17:00Z is a guess. I did not open Schefter's, Silver's or Rapoport's own posts. ESPN's IR story (14:52Z) already carries the later ACL report, so it is left out.",
+  "tags": ["2025", "group-A", "WR"],
+  "group": "A",
+  "season": 2025,
+  "player": { "name": "Travis Hunter", "position": "WR", "team": "JAX", "espnId": "4685415" },
+  "injury": "right knee injury, non-contact, in practice Oct 30 (before Week 9); placed on IR Oct 31",
+  "asks": [
+    { "at": "2025-11-04T15:00:00.000Z", "week": 10 },
+    { "at": "2025-11-18T15:00:00.000Z", "week": 12 }
+  ],
+  "news": [
+    {
+      "at": "2025-10-31T14:50:58.000Z",
+      "source": "RotoWire via CBS (citing Demetrius Harvey, Florida Times-Union)",
+      "words": "Coach Liam Coen announced Friday that Hunter (knee) will be placed on injured reserve. Hunter suffered a non-contact knee injury during Thursday's practice and will miss at least the next four games. The full extent isn't yet known publicly.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-travis-hunter-heading-to-injured-reserve/"
+    },
+    {
+      "at": "2025-10-31T16:20:59.000Z",
+      "source": "Liam Coen, press conference (Jaguars.com, John Oehser)",
+      "words": "\"Obviously huge blow.\" \"We're currently assessing the injury, just to determine the best course of action moving forward for Travis and for the team.\" \"We're still waiting on further information to determine how long it could be.\"",
+      "url": "https://www.jaguars.com/news/k000469-hc-liam-coen-announces-jaguars-wr-db-travis-hunter-will-be-placed-on-injured-reserve"
+    },
+    {
+      "at": "2025-10-31T20:44:20.000Z",
+      "source": "RotoWire via CBS (citing Adam Schefter, ESPN)",
+      "words": "Initial testing on Hunter's knee revealed that the wideout's ACL is intact. He will need additional testing to determine the extent of the injury and how long he'll be sidelined, with no answers expected before next week.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-travis-hunter-acl-reportedly-intact/"
+    },
+    {
+      "at": "2025-10-31T21:49:30.000Z",
+      "source": "Associated Press (Liam Coen)",
+      "words": "Coen said the team is \"still assessing\" whether Hunter will be able to play again this season. \"That, I don't know,\" Coen said, adding that it's \"a minor setback for a major comeback.\"",
+      "url": "https://www.news4jax.com/sports/2025/10/30/jaguars-placing-two-way-star-travis-hunter-on-injured-reserve-with-a-knee-injury/"
+    },
+    {
+      "at": "2025-11-01T17:00:00.000Z",
+      "source": "Bleacher Report (citing Mike Silver, The Athletic)",
+      "words": "The Jaguars are \"confident\" Hunter did not sustain long-term damage to his knee. They are evaluating the best course of treatment over the next two weeks and have no intention of rushing him back.",
+      "url": "https://bleacherreport.com/articles/25274564-travis-hunters-acl-reportedly-intact-jags-confident-wr-avoided-long-term-injury"
+    },
+    {
+      "at": "2025-11-11T20:11:35.000Z",
+      "source": "RotoWire via CBS (citing Ian Rapoport, NFL Network)",
+      "words": "Hunter underwent season-ending surgery Tuesday to repair an isolated LCL injury to his right knee. He is expected to be ready to resume football activities in six months.",
+      "url": "https://www.cbssports.com/fantasy/football/news/jaguars-travis-hunter-surgery-brings-end-to-rookie-season/"
+    },
+    {
+      "at": "2025-11-11T20:15:26.000Z",
+      "source": "team (Jaguars release)",
+      "words": "Hunter underwent successful surgery to repair an isolated lateral collateral ligament (LCL) injury in his right knee. Beyond the LCL, there was no additional damage. He will miss the remainder of the 2025 season.",
+      "url": "https://www.jaguars.com/news/k000227-travis-hunter-undergoes-successful-knee-surgery"
+    }
+  ],
+  "lastWeek": 17,
+  "backWeek": null,
+  "outcomeSource": "https://www.espn.com/nfl/player/gamelog/_/id/4685415/type/nfl/year/2025",
+  "aliases": {
+    "Jaguars": "Team A",
+    "Jags": "Team A",
+    "Jacksonville": "Team A",
+    "Jacksonville Jaguars": "Team A",
+    "Jaguars.com": "the team site",
+    "Liam Coen": "the head coach",
+    "Coen": "the head coach",
+    "James Gladstone": "the GM",
+    "Gladstone": "the GM",
+    "EverBank Stadium": "the stadium",
+    "Florida Times-Union": "the local paper"
+  }
+}

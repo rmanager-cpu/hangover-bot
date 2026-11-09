@@ -234,4 +234,118 @@ export interface ScratchRecord extends RecordBase {
   reason?: string;
 }
 
-export type RunRecord = JudgeRecord | AdviceRecord | ReplayRecord | ScratchRecord;
+/** One player the shared research covers: on some RosterBots team, or a free agent one could add. */
+export interface ResearchTarget {
+  id: string;
+  name: string;
+  position: string;
+  proTeam: string;
+  /** ESPN's status when the case was built. */
+  status: Status;
+  percentRostered?: number;
+  byeWeek?: number;
+  /** ESPN's projection for the week researched, when it sent one. */
+  projection?: number;
+  /** On a RosterBots roster, a free agent, or both (in different leagues). */
+  on: "roster" | "free agent" | "both";
+}
+
+/**
+ * A research case: one week's question and everyone it covers (owner, Nov 7: one agent does the
+ * research leading up to waiver day, and that's the data each RosterBot goes off). Built from
+ * the live advice cases with ESPN's statuses refreshed (run.ts research-case).
+ */
+export interface ResearchCase {
+  id: string;
+  note?: string;
+  example?: boolean;
+  season: number;
+  week: number;
+  /** The owner's words, as asked. */
+  question: string;
+  /** When ESPN's statuses were read. */
+  builtAt: string;
+  targets: ResearchTarget[];
+}
+
+export type FactKind = "injury" | "return" | "role" | "trade" | "release" | "suspension" | "bye" | "pickup" | "other";
+/** Confirmed: the team or league, a national news organization, or two or more sites; reported, one other source; speculation, a take (owner, Nov 8). */
+export type FactTier = "confirmed" | "reported" | "speculation";
+export type SourceKind = "team" | "national_insider" | "beat_reporter" | "outlet" | "fantasy_site" | "other";
+
+export interface Fact {
+  /** An id from the case, or null for a player not listed or a whole team. */
+  playerId: string | null;
+  player: string;
+  team: string;
+  kind: FactKind;
+  tier: FactTier;
+  sourceKind: SourceKind;
+  claim: string;
+  sources: string[];
+  asOf?: string;
+}
+
+export interface Brief {
+  summary: string[];
+  facts: Fact[];
+  /** Facts the model sent that weren't facts (a missing field, an unknown kind): left out. */
+  malformed: number;
+}
+
+export interface ResearchRecord extends RecordBase {
+  job: "research";
+  brief?: Brief;
+  trace?: Trace;
+}
+
+/** A moment the injury bench asks: when, and the NFL week whose games come next. */
+export interface SeasonAsk {
+  at: string;
+  week: number;
+}
+
+/**
+ * An injury case: is his fantasy season over? One real injury, the news as it was published,
+ * and whether he played again by the last week of the fantasy regular season (owner, Nov 8:
+ * go by the AI's confidence, not by which site said it). Real cases only, every fact sourced.
+ */
+export interface SeasonCase {
+  id: string;
+  note?: string;
+  example?: boolean;
+  tags?: string[];
+  /** A: he did not play again by lastWeek. B: he did. */
+  group: "A" | "B";
+  season: number;
+  player: { name: string; position: string; team: string; espnId?: string };
+  /** What he hurt and when, as known at the first ask: "torn ACL, Week 7 (Oct 20)". */
+  injury: string;
+  /** Usually the Tuesday after the injury, 10 AM ET (waiver day), and at most one later Tuesday. */
+  asks: SeasonAsk[];
+  /** Everything published by the last ask, oldest first. Each ask sees only what came before it. */
+  news: ScratchNews[];
+  /** The fantasy regular season's last week: 17. */
+  lastWeek: number;
+  /** The first regular-season week he played again, or null if not by lastWeek. */
+  backWeek: number | null;
+  /** His game log for that season. */
+  outcomeSource: string;
+  /** Words to hide in the hidden-names run (nicknames, cities, coaches, stadiums), real → stand-in. */
+  aliases?: Record<string, string>;
+}
+
+export interface SeasonRecord extends RecordBase {
+  job: "season";
+  /** The names were hidden: the model could not know how the season went. */
+  hidden: boolean;
+  /** The moment asked, ISO. */
+  asked: string;
+  /** The model's probability that his fantasy season is over, 0 to 1. */
+  over?: number;
+  /** Its guess at the week he plays again, null for not this season. */
+  backWeek?: number | null;
+  reason?: string;
+}
+
+export type RunRecord = JudgeRecord | AdviceRecord | ReplayRecord | ScratchRecord | ResearchRecord | SeasonRecord;
