@@ -67,6 +67,7 @@ reading; the owner may overrule any of them.
 | Questionable starters | No action until 100 minutes before his kickoff, then a judgment call. | The news changes until inactives. |
 | `refreshConnection()` | Not in the connector. ESPN sessions cannot be refreshed by us. A rejected cookie marks the connection as needing reconnect and tells the user. | `MEGACAST-AUDIT.md` |
 | `connect()` | Not in the connector. ESPN sign-in happens in the extension, which hands the session to the backend. | A server cannot sign a consumer in to ESPN. |
+| A signed-out visitor's SWID (Nov 9) | ESPN gives every visitor a SWID and writes the account's separately; the Nov 9 build handed over the visitor's three times (fan API: "fan not found"; no leagues listed; the typed league "not your team"). The app now sends every SWID it can see (native store per host, plus every copy in `document.cookie`), `espn-connect` keeps the first that ESPN's fan API knows as an account, and answers `409 espn_not_signed_in` (nothing stored) when none is; the app keeps ESPN's page up and waits for a new SWID. `leagues` treats a stored visitor SWID as a sign-in to redo. | The fan API is the one read that tells a visitor from an account: league reads of a public league take either. Its shape was first seen live Nov 9 and matches the parser; the team name is `entryMetadata.teamName`. |
 
 ## Open, with the cautious default the code uses meanwhile
 

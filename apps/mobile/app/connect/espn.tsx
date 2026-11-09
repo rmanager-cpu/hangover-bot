@@ -22,36 +22,47 @@ const LOGIN_URL = "https://www.espn.com/login";
 const FALLBACK_URL = "https://fantasy.espn.com/football/";
 const POLL_MS = 2000;
 
-// Runs inside ESPN's page. If page JavaScript can see both cookies (espn_s2 may be
-// HttpOnly, and then only the native store has it), it posts just those two, once, and
-// only after two looks have seen the same pair: ESPN sets a SWID for signed-out visitors
-// and writes the account's SWID and espn_s2 as separate steps, so a single look can land
-// between them and hand over the visitor's SWID.
+// Runs inside ESPN's page. It reports every SWID document.cookie holds whenever they change:
+// ESPN sets a SWID for signed-out visitors and writes the account's as a separate step,
+// possibly on another domain under the same name, and the native cookie store shows only
+// one per host (Nov 9: it showed the visitor's). If page JavaScript can see espn_s2 too
+// (it may be HttpOnly, and then only the native store has it), it posts the session once
+// two looks have seen the same cookies, and again whenever they change.
 const FALLBACK_JS = `(function () {
   if (window.__rosterbots) return;
-  function pick(name) {
-    var parts = (document.cookie || "").split(";");
+  function all(name) {
+    var out = [], parts = (document.cookie || "").split(";");
     for (var i = 0; i < parts.length; i++) {
       var at = parts[i].indexOf("=");
-      if (at > 0 && parts[i].slice(0, at).trim() === name) return parts[i].slice(at + 1).trim();
+      if (at > 0 && parts[i].slice(0, at).trim() === name) {
+        var v = parts[i].slice(at + 1).trim();
+        if (v && out.indexOf(v) < 0) out.push(v);
+      }
     }
-    return "";
+    return out;
   }
-  var last = "";
+  var last = "", sent = "", posted = "";
   function look() {
-    var swid = pick("SWID"), espnS2 = pick("espn_s2");
-    if (!swid || !espnS2) { last = ""; return; }
-    var pair = swid + "|" + espnS2;
+    var swids = all("SWID"), espnS2 = all("espn_s2")[0] || "";
+    var key = swids.join(",");
+    if (key && key !== sent) {
+      sent = key;
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: "espn-swids", swids: swids }));
+    }
+    if (!swids.length || !espnS2) { last = ""; return; }
+    var pair = key + "|" + espnS2;
     if (pair !== last) { last = pair; return; }
-    clearInterval(window.__rosterbots);
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: "espn-session", swid: swid, espnS2: espnS2 }));
+    if (pair === posted) return;
+    posted = pair;
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: "espn-session", swid: swids[0], espnS2: espnS2, swids: swids }));
   }
   window.__rosterbots = setInterval(look, ${POLL_MS});
   look();
 })();
 true;`;
 
-const samePair = (a: EspnSession | null, b: EspnSession): boolean => a !== null && a.swid === b.swid && a.espnS2 === b.espnS2;
+const samePair = (a: EspnSession | null, b: EspnSession): boolean =>
+  a !== null && a.espnS2 === b.espnS2 && a.swids.join(",") === b.swids.join(",");
 
 const fromEspn = (url: string): boolean => {
   try {
@@ -83,6 +94,11 @@ export default function EspnSignIn() {
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const busy = useRef(false);
+  // Every SWID the page script has seen, added to the native store's at handover.
+  const pageSwids = useRef<string[]>([]);
+  // SWIDs espn-connect called a signed-out visitor's: not handed over again on their own.
+  const visitors = useRef<Set<string>>(new Set());
+  const [waitingForEspn, setWaitingForEspn] = useState(false);
 
   // Start signed out, so an expired session left on the phone is never handed over as new.
   useEffect(() => {
@@ -110,6 +126,8 @@ export default function EspnSignIn() {
 
   const startOver = useCallback(async (message: string) => {
     await forgetEspnSession();
+    pageSwids.current = [];
+    setWaitingForEspn(false);
     setUri(LOGIN_URL);
     setWebKey((k) => k + 1);
     setPhase({ kind: "failed", message, fresh: true });
@@ -118,10 +136,14 @@ export default function EspnSignIn() {
   const handOver = useCallback(
     async (session: EspnSession) => {
       if (busy.current || phaseRef.current.kind !== "signing-in") return;
+      const swids = [...session.swids];
+      for (const s of pageSwids.current) if (!swids.includes(s)) swids.push(s);
+      // Nothing new since ESPN last said "not signed in yet": keep waiting.
+      if (swids.every((s) => visitors.current.has(s))) return;
       busy.current = true;
       setPhase({ kind: "checking" });
       try {
-        const result = await api.espnConnect(session.swid, session.espnS2);
+        const result = await api.espnConnect(swids[0]!, session.espnS2, swids);
         // Handed over: the phone keeps no ESPN session of its own.
         await forgetEspnSession();
         if (reauth) {
@@ -134,6 +156,14 @@ export default function EspnSignIn() {
           router.replace("/connect/leagues");
         }
       } catch (e) {
+        if (e instanceof ApiError && e.code === "espn_not_signed_in") {
+          // The phone holds a signed-out visitor's SWID and not yet the account's: ESPN is still
+          // finishing the sign-in (or the user hasn't). Keep its page up and keep looking.
+          for (const s of swids) visitors.current.add(s);
+          setWaitingForEspn(true);
+          setPhase({ kind: "signing-in" });
+          return;
+        }
         if (e instanceof ApiError && (e.code === "espn_rejected" || e.code === "bad_request")) {
           await startOver("ESPN didn't accept that sign-in. Please sign in again.");
         } else if (e instanceof ApiError && e.code === "wrong_team") {
@@ -187,9 +217,14 @@ export default function EspnSignIn() {
     } catch {
       return;
     }
-    const m = msg as { type?: unknown; swid?: unknown; espnS2?: unknown } | null;
+    const m = msg as { type?: unknown; swid?: unknown; espnS2?: unknown; swids?: unknown } | null;
+    const swids = Array.isArray(m?.swids) ? m.swids.filter((x): x is string => typeof x === "string" && x.length > 0).slice(0, 5) : [];
+    if (m?.type === "espn-swids") {
+      for (const s of swids) if (!pageSwids.current.includes(s)) pageSwids.current.push(s);
+      return;
+    }
     if (m?.type === "espn-session" && typeof m.swid === "string" && typeof m.espnS2 === "string" && m.swid && m.espnS2) {
-      handOver({ swid: m.swid, espnS2: m.espnS2 });
+      handOver({ swid: m.swid, espnS2: m.espnS2, swids: swids.length ? swids : [m.swid] });
     }
   };
 
@@ -215,7 +250,9 @@ export default function EspnSignIn() {
   return (
     <SafeAreaView style={s.screen} edges={["bottom", "left", "right"]}>
       <View style={s.intro}>
-        <Body>Sign in with your ESPN email and password.</Body>
+        <Body>
+          {waitingForEspn ? "Waiting for ESPN to finish signing you in. If ESPN's page still shows Log In, sign in there." : "Sign in with your ESPN email and password."}
+        </Body>
         <Muted>RosterBots keeps the sign-in ESPN gives this screen, encrypted on its server. It never sees your password.</Muted>
         {uri === LOGIN_URL ? (
           <Pressable accessibilityRole="button" onPress={() => setUri(FALLBACK_URL)} hitSlop={8}>

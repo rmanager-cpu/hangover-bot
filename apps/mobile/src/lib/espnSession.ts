@@ -11,6 +11,13 @@ import { Platform } from "react-native";
 export interface EspnSession {
   swid: string;
   espnS2: string;
+  /**
+   * Every SWID seen, swid among them. ESPN gives a signed-out visitor a SWID and writes the
+   * account's own separately, so the phone can hold both, under one name on different
+   * domains, and which one a single lookup returns is chance (Nov 9: the visitor's, three
+   * times). espn-connect asks ESPN which one is the account.
+   */
+  swids: string[];
 }
 
 type CookieManager = typeof import("@react-native-cookies/cookies").default;
@@ -32,22 +39,27 @@ function cookieManager(): CookieManager | null {
 
 export const nativeCookiesAvailable = (): boolean => cookieManager() !== null;
 
-// espn_s2 and SWID are set on .espn.com; asking both hosts covers a cookie scoped narrower.
-const HOSTS = ["https://www.espn.com/", "https://fantasy.espn.com/"];
+// espn_s2 and SWID are set on .espn.com; asking each host covers a cookie scoped narrower.
+const HOSTS = ["https://www.espn.com/", "https://fantasy.espn.com/", "https://espn.com/"];
 const webKit = Platform.OS === "ios";
 
 /** The session if ESPN has set one, null if not yet. Throws if the store can't be read. */
 export async function readEspnSession(): Promise<EspnSession | null> {
   const cm = cookieManager();
   if (!cm) return null;
-  let swid = "";
+  const swids: string[] = [];
+  const add = (v: string | undefined) => {
+    if (v && !swids.includes(v)) swids.push(v);
+  };
   let espnS2 = "";
   for (const host of HOSTS) {
     const jar = await cm.get(host, webKit);
-    swid ||= jar.SWID?.value ?? "";
+    add(jar.SWID?.value);
     espnS2 ||= jar.espn_s2?.value ?? "";
   }
-  return swid && espnS2 ? { swid, espnS2 } : null;
+  // The cookie library keys each host's jar by name, so two SWIDs on one host show as one.
+  // The page script sees them all in document.cookie and the sign-in screen adds those.
+  return swids.length && espnS2 ? { swid: swids[0]!, espnS2, swids } : null;
 }
 
 /**

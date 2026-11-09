@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { AuthError, espnConnector, freeAgentFilter, NoTeamError, ProviderError, statusOf, toAddDrop, toFreeAgents, toLeagues, toRoster, toTransaction } from "../src/index.ts";
+import { AuthError, espnConnector, freeAgentFilter, NoTeamError, NotSignedInError, ProviderError, statusOf, toAddDrop, toFreeAgents, toLeagues, toRoster, toTransaction } from "../src/index.ts";
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"));
 const league = fixture("league");
@@ -190,10 +190,24 @@ test("the free-agent filter asks for free agents and waivers who can play the sl
   assert.equal("filterSlotIds" in freeAgentFilter(2026, 5, undefined, 40).players, false);
 });
 
+// The fixture has the shape of ESPN's real fan profile, first read Nov 9 2026: the team name
+// is entryMetadata.teamName, and favourite-player preferences carry no entry.
 test("the fan profile yields this season's football leagues only", () => {
   assert.deepEqual(toLeagues(fixture("fan"), 2026), [
     { leagueId: "36784699", leagueName: "Live free or die hard RR4L", season: 2026, teamId: "2", teamName: "Trust The Process" },
+    { leagueId: "333", leagueName: "Location and nickname", season: 2026, teamId: "3", teamName: "Older Shape" },
   ]);
+});
+
+test("a signed-out visitor's SWID is told apart from an account: fan not found, or anon", async () => {
+  const notFound = fakeFetch(() => json({ message: "fan not found" }, 404));
+  await assert.rejects(espnConnector({ season: 2026, credentials: creds, fetch: notFound.f }).getLeagues(), NotSignedInError);
+  const anon = fakeFetch(() => json({ id: SWID, anon: true, preferences: [] }));
+  await assert.rejects(espnConnector({ season: 2026, credentials: creds, fetch: anon.f }).getLeagues(), NotSignedInError);
+  const down = fakeFetch(() => json({}, 503));
+  await assert.rejects(espnConnector({ season: 2026, credentials: creds, fetch: down.f }).getLeagues(), (e) => e instanceof ProviderError);
+  const account = fakeFetch(() => json(fixture("fan")));
+  assert.equal((await espnConnector({ season: 2026, credentials: creds, fetch: account.f }).getLeagues()).length, 2);
 });
 
 // ---- the connector itself, over a fake fetch

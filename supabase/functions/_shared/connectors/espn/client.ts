@@ -1,4 +1,4 @@
-// Copied from packages/connectors/src/espn\client.ts by scripts/build-functions.ts. Edit the original.
+// Copied from packages/connectors/src/espn/client.ts by scripts/build-functions.ts. Edit the original.
 // The ESPN connector. Reads are the v3 league API Megacast used all season; the write is
 // the ROSTER transaction the ESPN site sends when you move a player, and is UNPROVEN (see
 // docs/MEGACAST-AUDIT.md). The free-agent read and the FREEAGENT add/drop transaction are
@@ -8,7 +8,7 @@
 // Never log a request or its headers: they carry the member's cookies.
 
 import type { FreeAgent, Game, Move, Player, Roster, RosterEntry, Slot } from "@rosterbots/core";
-import { AuthError, NoTeamError, ProviderError, type AddDrop, type ConnectorCapabilities, type FantasyConnector, type LeagueSummary } from "../types.ts";
+import { AuthError, NoTeamError, NotSignedInError, ProviderError, type AddDrop, type ConnectorCapabilities, type FantasyConnector, type LeagueSummary } from "../types.ts";
 import { ID_BY_SLOT, positionOf, proTeamOf, slotOf, statusOf } from "./maps.ts";
 
 export interface EspnCredentials {
@@ -261,6 +261,7 @@ const CAPS: ConnectorCapabilities = {
 // and community clients read it; not yet seen from this code. UNVERIFIED.
 const FAN = "https://fan.api.espn.com/apis/v2/fans/";
 interface EspnFan {
+  anon?: boolean;
   preferences?: {
     metaData?: {
       entry?: {
@@ -270,6 +271,7 @@ interface EspnFan {
         entryId?: number;
         entryLocation?: string;
         entryNickname?: string;
+        entryMetadata?: { teamName?: string };
         groups?: { groupId?: number; groupName?: string }[];
       };
     };
@@ -284,7 +286,8 @@ export function toLeagues(fan: EspnFan, season: number): LeagueSummary[] {
     if (!e || (e.abbrev !== "FFL" && e.gameId !== 1) || e.seasonId !== season) continue;
     const g = e.groups?.[0];
     if (!g?.groupId) continue;
-    const teamName = `${e.entryLocation ?? ""} ${e.entryNickname ?? ""}`.trim();
+    // ESPN's real profile (first read Nov 9) names the team in entryMetadata.teamName.
+    const teamName = (e.entryMetadata?.teamName ?? `${e.entryLocation ?? ""} ${e.entryNickname ?? ""}`).trim();
     out.push({
       leagueId: String(g.groupId),
       leagueName: g.groupName ?? "",
@@ -354,7 +357,17 @@ export function espnConnector(opts: EspnOptions): FantasyConnector {
     capabilities: () => CAPS,
 
     async getLeagues() {
-      return toLeagues(await get<EspnFan>(FAN + encodeURIComponent(swid), "fan profile"), opts.season);
+      // A signed-out visitor's SWID is "fan not found" (404) here: the one read that tells a
+      // visitor from an account, since league reads of a public league take either.
+      let fan: EspnFan;
+      try {
+        fan = await get<EspnFan>(FAN + encodeURIComponent(swid), "fan profile");
+      } catch (e) {
+        if (e instanceof ProviderError && e.httpStatus === 404) throw new NotSignedInError();
+        throw e;
+      }
+      if (fan.anon === true) throw new NotSignedInError();
+      return toLeagues(fan, opts.season);
     },
 
     async getMyTeam(leagueId) {

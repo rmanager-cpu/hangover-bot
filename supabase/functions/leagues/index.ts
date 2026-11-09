@@ -5,7 +5,7 @@
 // The fan-profile read is the same unproven one espn-connect makes; when it fails, the
 // list is empty and the app offers league-id entry as before.
 
-import { AuthError, type LeagueSummary } from "@rosterbots/connectors";
+import { AuthError, NotSignedInError, type LeagueSummary } from "@rosterbots/connectors";
 import { requireUser } from "../_lib/auth.ts";
 import { makeDeps } from "../_lib/deps.ts";
 import { espnRejected, HttpError, json, readBody, season, serve } from "../_lib/http.ts";
@@ -29,6 +29,8 @@ serve("leagues", async (req) => {
     // A refusal here is the sign-in's: the app sends the user back to ESPN. Anything else
     // leaves the list empty, and the league id can be typed.
     if (e instanceof AuthError) throw e;
+    // A stored visitor's SWID (an app before Nov 9 could store one) is no sign-in at all.
+    if (e instanceof NotSignedInError) throw espnRejected();
   }
   console.log(`leagues: ${leagues.length} league(s) listed`);
   return json({ credentialId, leagues, leagueLookupFailed: leagues.length === 0 });

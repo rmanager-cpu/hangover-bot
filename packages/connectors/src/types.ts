@@ -58,7 +58,7 @@ export interface AddDrop {
 export interface FantasyConnector {
   readonly provider: ProviderId;
   capabilities(): ConnectorCapabilities;
-  /** The fantasy football leagues this member belongs to this season. */
+  /** The fantasy football leagues this member belongs to this season. NotSignedInError when the credentials are a signed-out visitor's. */
   getLeagues(): Promise<LeagueSummary[]>;
   /** The member's own team in a league, found by membership, never by counting. */
   getMyTeam(leagueId: string): Promise<{ teamId: string; teamName: string; leagueName: string }>;
@@ -103,6 +103,18 @@ export class ProviderError extends Error {
 export class NoTeamError extends ProviderError {
   constructor(leagueId?: string) {
     super("these credentials manage no team in " + (leagueId ? "league " + leagueId : "this league"), 200);
+  }
+}
+
+/**
+ * The SWID is not an ESPN account: ESPN's fan API has no fan by that id, or calls it
+ * anonymous. ESPN gives every signed-out visitor a SWID, so a sign-in handed over before
+ * ESPN wrote the account's own is this (seen Nov 9: such a SWID read public leagues,
+ * listed none and owned no team).
+ */
+export class NotSignedInError extends Error {
+  constructor() {
+    super("the SWID is a signed-out visitor's, not an ESPN account's");
   }
 }
 

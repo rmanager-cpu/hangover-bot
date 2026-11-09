@@ -1,13 +1,15 @@
 // espn-connect: the app's in-app ESPN sign-in hands over SWID and espn_s2.
-//   { swid, espnS2, season? } -> { credentialId, leagues: LeagueSummary[], leagueLookupFailed }
+//   { swid, espnS2, swids?, season? } -> { credentialId, leagues: LeagueSummary[], leagueLookupFailed }
 //   401 { error: "espn_rejected" } when ESPN's league API refuses them.
+//   409 { error: "espn_not_signed_in" } when every SWID offered is a signed-out visitor's:
+//   ESPN has not finished the sign-in, and nothing is stored. The app keeps waiting.
 //   409 { error: "wrong_team" } when they are a different ESPN account from the one that
 //   owns the team the user already watches (nothing is stored).
 // A user who already watches a league has the new cookies tried against it first, so a
 // bad sign-in never replaces a good one. A first sign-in is stored as it is: picking a
 // league (connection-setup) is its proof. Never log the cookies.
 
-import { AuthError, ProviderError, type LeagueSummary } from "@rosterbots/connectors";
+import { AuthError, NotSignedInError, ProviderError, type LeagueSummary } from "@rosterbots/connectors";
 import { requireUser } from "../_lib/auth.ts";
 import { makeDeps } from "../_lib/deps.ts";
 import { HttpError, json, readBody, season, serve, str } from "../_lib/http.ts";
@@ -51,20 +53,47 @@ serve("espn-connect", async (req) => {
   const db = adminClient();
   const user = await requireUser(req, db);
   const body = await readBody(req);
-  const credentials = { swid: cleanSwid(str(body, "swid")), espnS2: cleanS2(str(body, "espnS2")) };
+  const espnS2 = cleanS2(str(body, "espnS2"));
   const store = createStore(db);
   const deps = makeDeps(store);
 
-  // The league list comes from ESPN's fan profile, a read this code has never seen answer.
-  // Nothing it does says anything about the sign-in, a 401 from it included: a refusal
-  // there would otherwise loop the user through sign-in for ever, with league-id entry
-  // never reached. An empty list is likelier a shape we do not read than a member in no
-  // leagues, so the app offers league-id entry either way.
+  // ESPN gives every signed-out visitor a SWID and writes the account's own as a separate
+  // step, so the phone may hold both and hand over the visitor's (Nov 9: three sign-ins,
+  // each a visitor's SWID with a real espn_s2; no leagues listed, the typed league "not
+  // your team"). The app sends every SWID it can see; the fan profile tells a visitor's
+  // ("fan not found") from the account's, and the first account wins.
+  const offered = [str(body, "swid"), ...(Array.isArray(body.swids) ? body.swids.filter((x): x is string => typeof x === "string") : [])];
+  const candidates: string[] = [];
+  for (const raw of offered.slice(0, 6)) {
+    try {
+      const s = cleanSwid(raw);
+      if (!candidates.includes(s)) candidates.push(s);
+    } catch {
+      // Not a SWID; the others may be.
+    }
+  }
+  if (candidates.length === 0) throw notASignIn();
+
+  // The fan profile's league list was unproven until Nov 9; any failure of it other than
+  // "a visitor" says nothing about the sign-in, so that SWID is used with no list and the
+  // app offers league-id entry (a 401 here would loop the user through sign-in for ever).
+  let credentials: { swid: string; espnS2: string } | null = null;
   let leagues: LeagueSummary[] = [];
-  try {
-    leagues = await deps.connector(credentials, season(body)).getLeagues();
-  } catch {
-    // Unproven read: the league id can be typed.
+  for (const swid of candidates) {
+    try {
+      leagues = await deps.connector({ swid, espnS2 }, season(body)).getLeagues();
+      credentials = { swid, espnS2 };
+      break;
+    } catch (e) {
+      if (e instanceof NotSignedInError) continue;
+      credentials = { swid, espnS2 };
+      leagues = [];
+      break;
+    }
+  }
+  if (!credentials) {
+    console.log(`espn-connect: not signed in yet (${candidates.length} visitor SWID(s))`);
+    throw new HttpError(409, "espn_not_signed_in", "ESPN hasn't finished signing you in. Finish signing in on ESPN's page, then wait a moment.");
   }
   const leagueLookupFailed = leagues.length === 0;
 

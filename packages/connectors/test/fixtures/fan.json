@@ -1,8 +1,14 @@
 {
+  "id": "{MEGA-CAST-SWID}",
+  "anon": false,
   "preferences": [
-    { "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2026, "entryId": 2, "entryLocation": "Trust The", "entryNickname": "Process",
-      "groups": [ { "groupId": 36784699, "groupName": "Live free or die hard RR4L" } ] } } },
-    { "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2025, "entryId": 4, "groups": [ { "groupId": 111, "groupName": "Last year" } ] } } },
-    { "metaData": { "entry": { "abbrev": "FBA", "gameId": 3, "seasonId": 2026, "entryId": 1, "groups": [ { "groupId": 222, "groupName": "Basketball" } ] } } }
+    { "type": { "id": 9, "code": "fantasy" }, "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2026, "entryId": 2,
+      "entryMetadata": { "teamName": "Trust The Process ", "teamAbbrev": "TTP" },
+      "groups": [ { "groupId": 36784699, "groupName": "Live free or die hard RR4L", "groupSize": 12 } ] } } },
+    { "type": { "id": 9, "code": "fantasy" }, "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2026, "entryId": 3, "entryLocation": "Older", "entryNickname": "Shape",
+      "groups": [ { "groupId": 333, "groupName": "Location and nickname" } ] } } },
+    { "type": { "id": 9, "code": "fantasy" }, "metaData": { "entry": { "abbrev": "FFL", "gameId": 1, "seasonId": 2025, "entryId": 4, "groups": [ { "groupId": 111, "groupName": "Last year" } ] } } },
+    { "type": { "id": 9, "code": "fantasy" }, "metaData": { "entry": { "abbrev": "FBA", "gameId": 3, "seasonId": 2026, "entryId": 1, "groups": [ { "groupId": 222, "groupName": "Basketball" } ] } } },
+    { "type": { "id": 3, "code": "players" }, "metaData": null }
   ]
 }

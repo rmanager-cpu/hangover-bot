@@ -49,7 +49,8 @@ export interface EspnConnectResult {
 
 export const api = {
   /** The one place the ESPN session leaves the phone. */
-  espnConnect: (swid: string, espnS2: string) => call<EspnConnectResult>("espn-connect", { swid, espnS2 }),
+  /** 409 espn_not_signed_in when every SWID is a signed-out visitor's: ESPN isn't done yet. */
+  espnConnect: (swid: string, espnS2: string, swids: string[]) => call<EspnConnectResult>("espn-connect", { swid, espnS2, swids }),
   /** The leagues the stored ESPN sign-in belongs to, for watching another one. 404 not_found without a sign-in. */
   leagues: () => call<EspnConnectResult>("leagues", {}),
   connectionSetup: (credentialId: string, leagueId: string) =>
