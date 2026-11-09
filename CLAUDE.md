@@ -63,7 +63,10 @@ the local build; cron's first calls to the new `check` returned 200. Android bui
 (commit `c426c04`: `eas.json` without the empty Google client id, which EAS refuses) carries
 the Nov 7 app. An iPhone build was tried the same day and failed at credentials: the Expo
 project has no Apple signing credentials, which need an Apple Developer Program membership
-and an interactive `eas credentials` (or expo.dev → Credentials) first. **Unverified against
+and an interactive `eas credentials` (or expo.dev → Credentials) first. **Nov 9, evening:** `espn-connect` v8 and `leagues` v3 deployed and read back byte for byte
+(the visitor-SWID fix, commit `e14d8fc`); an Android preview build of that branch was queued
+(`d6d6aded`). ESPN's fan profile, read live for the first time, lists the account's leagues.
+**Unverified against
 ESPN:** the free-agent read and the FREEAGENT add/drop (hand-built fixtures), where ESPN
 places an add, and the lineup write itself (still `unverified` in the connector; the Saturday
 test swap is the proof). Push needs Firebase (`google-services.json` as an EAS file variable,
