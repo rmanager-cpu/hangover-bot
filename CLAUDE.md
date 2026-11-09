@@ -7,7 +7,7 @@ before changing behaviour. `docs/ARCHITECTURE.md` is how it fits together.
 The stack is fixed: read `docs/STACK.md` before adding anything. Do not bring in a
 framework, database, AI provider or push service that is not listed there.
 
-## Where it is (Oct 25 2026): the AI layer is built; the next build carries it
+## Where it is (Nov 9 2026): everything is live, and the Nov 9 build carries it
 
 Target: the Google Play closed test (friends, a fake league), AI Native included, since a
 runaway AI is the risk that matters (owner). The contracts: `docs/BETA.md` for the beta,
@@ -56,15 +56,18 @@ scripts, mobile), `npm run functions:check`, `npx -y deno@2 check index.ts` in
 `supabase/functions/{check,decide,leagues,connection-setup}`, and in `apps/mobile`
 `EXPO_OFFLINE=1 npx expo export --platform android`.
 
-**Deployed (Oct 25, 8:50 PM ET):** the AI Native migration, `ANTHROPIC_API_KEY`, and the AI
-layer's `check`, `decide` and `leagues`, each verified byte for byte against the local build;
-the first live check of both leagues came back `ok` with the key present. `espn-connect`,
-`connection-setup`, `read`, `swap` and `delete-account` are the earlier Oct 25 versions,
-compatible, to refresh when convenient. Android build `81e28a42` (commit `0dc994e`) carries
-the AI layer's screens. The in-app ESPN sign-in and the league list worked on the owner's phone. **Unverified against ESPN:** the
-free-agent read and the FREEAGENT add/drop (hand-built fixtures), where ESPN places an add,
-and the lineup write itself (still `unverified` in the connector; the Saturday test swap is
-the proof). Push needs Firebase (`google-services.json` as an EAS file variable, FCM V1 key).
+**Deployed (Nov 9 2026, 09:33 UTC):** all eight Edge Functions at the Nov 7 code (`check` v10,
+`decide` v9, `connection-setup` v7, `espn-connect` v7, `read` v7, `swap` v6, `delete-account`
+v4, `leagues` v2), each read back with `get_edge_function` and diffed byte for byte against
+the local build; cron's first calls to the new `check` returned 200. Android build `6dfa62bb`
+(commit `c426c04`: `eas.json` without the empty Google client id, which EAS refuses) carries
+the Nov 7 app. An iPhone build was tried the same day and failed at credentials: the Expo
+project has no Apple signing credentials, which need an Apple Developer Program membership
+and an interactive `eas credentials` (or expo.dev → Credentials) first. **Unverified against
+ESPN:** the free-agent read and the FREEAGENT add/drop (hand-built fixtures), where ESPN
+places an add, and the lineup write itself (still `unverified` in the connector; the Saturday
+test swap is the proof). Push needs Firebase (`google-services.json` as an EAS file variable,
+FCM V1 key).
 
 **Google sign-in (Oct 26): built, not set up, not yet built into an APK.** The code passes the
 checks above; nothing has signed in with Google yet. It needs the owner's Google Cloud and
