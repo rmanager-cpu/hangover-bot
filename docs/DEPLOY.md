@@ -165,6 +165,15 @@ Deno, send it with `deploy_edge_function`, then read it back with `get_edge_func
 result that large is saved to a file, and diffing that file with the local one proves the
 deployed copy is exact. `check` (78 KB) and `decide` (52 KB) went this way and matched.
 
+**As done on Nov 9 (all eight, the same way), three things learned.** The permission
+classifier refuses `deploy_edge_function` from a subagent as a production deploy, so the
+deploys go from the main session, where the prompt reaches the owner. The tool decodes
+`\uXXXX` escapes inside file content: `check` sent with its four non-ASCII characters
+escaped arrived with the literal characters, byte for byte the original esbuild output, so
+send the compiled file as it is and verify against that. `get_edge_function` results over
+about 50 KB are saved by the harness to `tool-results/*.txt`, and smaller ones are in the
+session transcript; both are exact, so the diff needs no retyping.
+
 **As done on Oct 4:** the 24-file bundles below are about 140 KB each, too large to send inline
 in one `deploy_edge_function` call. `npm run functions:compile` turns each bundle into one
 JS file (`supabase/.bundle-min/<fn>/index.js`, 20 to 50 KB, same code without comments) with
@@ -381,7 +390,12 @@ build_logs    the same id, when it fails
 The Android preview profile makes an APK with an install link that opens on the phone
 (allow the browser to install apps when Android asks). iOS (`profile: production`) needs
 the Apple developer account, an APNs key and an App Store Connect API key first; see
-`apps/mobile/README.md`. Android push is optional for Sunday (everything also lands in
+`apps/mobile/README.md`. A `preview` iOS build was tried on Nov 9 and failed in the
+credentials step (`EAS CLI couldn't find any credentials suitable for internal
+distribution`): the project has no Apple credentials, and `build_run` is non-interactive,
+so they must be made first with `eas credentials` on a laptop or on expo.dev, which needs
+the Apple Developer Program and, for internal distribution, the iPhone registered with
+Apple. Android push is optional for Sunday (everything also lands in
 Activity): a Firebase `google-services.json` as the EAS file variable
 `GOOGLE_SERVICES_JSON`, plus an FCM V1 key under the project's credentials on expo.dev.
 
